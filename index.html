@@ -1,48 +1,62 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="dark" lang="da">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-    <title>Bio-Scout | Pro AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <title>Bio-Scout | NatureTrails Edition</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "#111417",
+              "surface": "#1d2024",
+              "primary-container": "#00e5ff",
+              "on-surface": "#e1e2e8",
+              "primary": "#c3f5ff",
+            },
+            borderRadius: {"DEFAULT": "0px", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111417; color: #e1e2e8; margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
-        .glass-panel { background: rgba(50, 53, 57, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .primary-gradient { background: linear-gradient(135deg, #9cf0ff 0%, #00e5ff 100%); }
-        .scanner-line { height: 2px; background: #00e5ff; position: absolute; width: 100%; animation: scan 2s linear infinite; box-shadow: 0 0 20px #00e5ff; z-index: 100; }
+        .glass-panel {
+            background: rgba(50, 53, 57, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(195, 245, 255, 0.1);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #9cf0ff 0%, #00e5ff 100%);
+        }
+        .scanner-line {
+            height: 2px;
+            background: #00e5ff;
+            position: absolute;
+            width: 100%;
+            animation: scan 2s linear infinite;
+            box-shadow: 0 0 20px #00e5ff;
+        }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+        body { min-height: 100dvh; overflow-x: hidden; }
     </style>
 </head>
 
-<body class="p-0 m-0">
+<body class="bg-background text-on-surface font-body">
 
-<header class="fixed top-0 w-full z-[50] bg-[#111417] px-6 h-16 flex justify-between items-center border-b border-white/5">
-    <h1 class="font-black uppercase tracking-tighter text-xl text-[#00e5ff]">Bio-Scout</h1>
-    <div id="xp-display" class="font-bold text-xs">0 XP</div>
-</header>
-
-<main class="pt-24 px-4 overflow-y-auto h-full pb-40">
-    <section class="glass-panel p-6 mb-6">
-        <p class="text-[10px] font-bold text-[#00e5ff] uppercase tracking-widest">System Status</p>
-        <h2 class="text-3xl font-black italic">READY</h2>
-    </section>
-
-    <div id="result-box" class="hidden glass-panel p-6 border-l-4 border-[#00e5ff] mb-6">
-        <h3 id="ai-response" class="text-2xl font-black uppercase">...</h3>
-        <p id="ai-details" class="text-sm opacity-70 mt-2 italic"></p>
+<header class="fixed top-0 w-full z-50 bg-[#111417]/60 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-6 h-16">
+    <div class="flex items-center gap-4">
+        <span class="material-symbols-outlined text-[#00e5ff]">menu_open</span>
+        <h1 class="font-black uppercase tracking-widest text-[1.2rem] text-[#c3f5ff]">NATURETRAILS</h1>
     </div>
-
-    <div id="collection-list" class="space-y-3"></div>
-</main>
-
-<button id="camera-btn" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] w-24 h-24 primary-gradient flex items-center justify-center shadow-2xl active:scale-90 transition-all border-8 border-[#111417]">
-    <span class="material-symbols-outlined font-black text-5xl text-[#111417]">photo_camera</span>
-</button>
-
-<div id="scanner" class="hidden fixed inset-0 bg-black z-[10000] flex flex-col">
-    <video id="video" class="w-full h-full object-cover" autoplay playsinline></video>
-    <div class="scanner-line"></div>
-    <div class="absolute inset-0 p-8 flex flex-col justify-between pointer-events-none">
-        <div class="flex justify-between items-start pointer-
+    <div id="xp-badge" class="px-3 py-1 bg-surface border border-primary/20 text-[10px] font-black text-primary">
+        LVL 01 SCOUT
+    </div>
+</
