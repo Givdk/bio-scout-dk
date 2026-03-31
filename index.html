@@ -13,6 +13,13 @@
         .primary-gradient { background: linear-gradient(135deg, #9cf0ff 0%, #00e5ff 100%); }
         .scanner-line { height: 2px; background: #00e5ff; position: absolute; width: 100%; animation: scan 2s linear infinite; box-shadow: 0 0 20px #00e5ff; z-index: 100; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+
+        /* FIX: replaced invalid animate-in/fade-in with a real keyframe animation */
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .entry-animate { animation: fadeSlideIn 0.35s ease both; }
     </style>
 </head>
 <body class="pb-48">
@@ -92,39 +99,54 @@
 <script>
     const API_KEY = "AIzaSyDs0lCbNiSRRIBv2T06vNQTGgJUpCfsHCI";
     
-    const cameraBtn = document.getElementById('camera-btn');
-    const scanner = document.getElementById('scanner');
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const captureBtn = document.getElementById('capture-btn');
-    const closeBtn = document.getElementById('close-btn');
-    const resultBox = document.getElementById('result-box');
-    const aiResponse = document.getElementById('ai-response');
-    const aiDetails = document.getElementById('ai-details');
-    const xpDisplay = document.getElementById('xp-display');
+    const cameraBtn    = document.getElementById('camera-btn');
+    const scanner      = document.getElementById('scanner');
+    const video        = document.getElementById('video');
+    const canvas       = document.getElementById('canvas');
+    const captureBtn   = document.getElementById('capture-btn');
+    const closeBtn     = document.getElementById('close-btn');
+    const resultBox    = document.getElementById('result-box');
+    const aiResponse   = document.getElementById('ai-response');
+    const aiDetails    = document.getElementById('ai-details');
+    const xpDisplay    = document.getElementById('xp-display');
     const countDisplay = document.getElementById('count-display');
-    const xpBar = document.getElementById('xp-bar');
+    const xpBar        = document.getElementById('xp-bar');
     const collectionList = document.getElementById('collection-list');
 
     let xp = parseInt(localStorage.getItem('scoutXP')) || 0;
 
+    // FIX: also handles empty-list state so stale DOM entries don't persist
     function updateUI() {
         const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
-        xpDisplay.innerText = xp + " XP";
+        xpDisplay.innerText  = xp + " XP";
         countDisplay.innerText = finds.length;
         xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
         
+        collectionList.innerHTML = "";
         if (finds.length > 0) {
-            collectionList.innerHTML = "";
             finds.slice().reverse().forEach(f => {
                 const item = document.createElement('div');
-                item.className = "glass-panel p-4 flex justify-between items-center border-l-2 border-[#00e5ff] mb-3 animate-in fade-in";
-                item.innerHTML = `<div><p class="text-[9px] font-bold text-[#00e5ff] uppercase tracking-widest">${f.date}</p><p class="text-lg font-black uppercase text-white tracking-tighter leading-none mt-1">${f.name}</p></div><span class="material-symbols-outlined text-[#00e5ff]">verified</span>`;
+                // FIX: replaced invalid Tailwind animate-in/fade-in with real CSS class
+                item.className = "glass-panel p-4 flex justify-between items-center border-l-2 border-[#00e5ff] mb-3 entry-animate";
+                item.innerHTML = `
+                    <div>
+                        <p class="text-[9px] font-bold text-[#00e5ff] uppercase tracking-widest">${f.date}</p>
+                        <p class="text-lg font-black uppercase text-white tracking-tighter leading-none mt-1">${f.name}</p>
+                    </div>
+                    <span class="material-symbols-outlined text-[#00e5ff]">verified</span>`;
                 collectionList.appendChild(item);
             });
         }
     }
     updateUI();
+
+    // FIX: helper to cleanly stop the camera stream
+    function stopStream() {
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(t => t.stop());
+            video.srcObject = null;
+        }
+    }
 
     cameraBtn.onclick = async () => {
         scanner.classList.remove('hidden');
@@ -132,72 +154,95 @@
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
         } catch (e) {
-            alert("Camera access denied. Check Safari permissions.");
+            alert("Camera access denied. Check your browser permissions.");
             scanner.classList.add('hidden');
         }
     };
 
     closeBtn.onclick = () => {
-        if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+        stopStream();
         scanner.classList.add('hidden');
     };
 
     captureBtn.onclick = async () => {
+        // FIX: guard against firing before the video has real dimensions
+        if (!video.videoWidth || !video.videoHeight) {
+            alert("Camera isn't ready yet — please wait a moment.");
+            return;
+        }
+
         captureBtn.disabled = true;
-        canvas.width = 720;
-        canvas.height = video.videoHeight * (720 / video.videoWidth);
+
+        // FIX: safe canvas sizing (no divide-by-zero risk)
+        const scale = 720 / video.videoWidth;
+        canvas.width  = 720;
+        canvas.height = Math.round(video.videoHeight * scale);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         const base64 = canvas.toDataURL("image/jpeg", 0.6).split(',')[1];
-        
-        closeBtn.click();
+
+        // Close scanner before showing result
+        stopStream();
+        scanner.classList.add('hidden');
+
         resultBox.classList.remove('hidden');
         aiResponse.innerText = "CONNECTING...";
-        aiDetails.innerText = "Transmitting image data to AI core...";
+        aiDetails.innerText  = "Transmitting image data to AI core...";
 
         try {
-            // FIX: Using gemini-1.5-flash-latest which is the most compatible name for the v1beta endpoint
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [
-                            { text: "Identify the species in this image. Strict Format: Line 1: NAME (ALL CAPS). Line 2: One short descriptive sentence in English." },
-                            { inline_data: { mime_type: "image/jpeg", data: base64 } }
-                        ]
-                    }]
-                })
-            });
+            const res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: "Identify the species in this image. Strict Format: Line 1: NAME (ALL CAPS). Line 2: One short descriptive sentence in English." },
+                                { inline_data: { mime_type: "image/jpeg", data: base64 } }
+                            ]
+                        }]
+                    })
+                }
+            );
 
             const data = await res.json();
-            
+
             if (data.error) {
                 aiResponse.innerText = "API ERROR " + data.error.code;
-                aiDetails.innerText = data.error.message;
+                aiDetails.innerText  = data.error.message;
                 return;
             }
 
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "UNKNOWN";
-            const lines = rawText.split("\n").filter(l => l.trim());
-            const name = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
-            const detail = (lines.slice(1).join(" ") || "Species logged successfully.").replace(/[*#]/g, '').trim();
-            
+            const lines   = rawText.split("\n").filter(l => l.trim());
+            const name    = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
+            const detail  = (lines.slice(1).join(" ") || "Species logged successfully.").replace(/[*#]/g, '').trim();
+
             aiResponse.innerText = name;
-            aiDetails.innerText = detail;
+            aiDetails.innerText  = detail;
 
             if (name.length > 2 && name !== "UNKNOWN") {
                 xp += 100;
                 localStorage.setItem("scoutXP", xp);
+
                 const finds = JSON.parse(localStorage.getItem("scoutFinds")) || [];
-                finds.push({ name, date: new Date().toLocaleDateString('en-US') });
-                localStorage.setItem("scoutFinds", JSON.stringify(finds));
+
+                // FIX: prevent duplicate entries for the same species on the same day
+                const today = new Date().toLocaleDateString('en-US');
+                const alreadyLogged = finds.some(f => f.name === name && f.date === today);
+                if (!alreadyLogged) {
+                    finds.push({ name, date: today });
+                    localStorage.setItem("scoutFinds", JSON.stringify(finds));
+                }
+
                 updateUI();
             }
 
         } catch (e) {
             aiResponse.innerText = "NETWORK ERROR";
-            aiDetails.innerText = "Connection failed. Please try again.";
+            aiDetails.innerText  = "Connection failed. Please try again.";
         } finally {
+            // FIX: always re-enable button, even if an error is thrown before the return
             captureBtn.disabled = false;
         }
     };
