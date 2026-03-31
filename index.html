@@ -69,86 +69,83 @@
     </div>
 
     <script>
-        // DIN API NØGLE
-        const API_KEY = "AIzaSyBEkiYyE2J5nAt1ZkZe0BJPLnqzcFVhLd8";
-        
-        const cameraBtn = document.getElementById('camera-btn');
-        const scanner = document.getElementById('scanner');
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const captureBtn = document.getElementById('capture-btn');
-        const closeBtn = document.getElementById('close-btn');
-        const resultBox = document.getElementById('result-box');
-        const aiResponse = document.getElementById('ai-response');
-        const aiDetails = document.getElementById('ai-details');
-        const statusText = document.getElementById('status-text');
+    const API_KEY = "AIzaSyBEkiYyE2J5nAt1ZkZe0BJPLnqzcFVhLd8";
+    
+    const cameraBtn = document.getElementById('camera-btn');
+    const scanner = document.getElementById('scanner');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const closeBtn = document.getElementById('close-btn');
+    const resultBox = document.getElementById('result-box');
+    const aiResponse = document.getElementById('ai-response');
+    const aiDetails = document.getElementById('ai-details');
+    const statusText = document.getElementById('status-text');
 
-        // ÅBN KAMERA
-        cameraBtn.onclick = async () => {
-            scanner.classList.remove('hidden');
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                video.srcObject = stream;
-            } catch (err) {
-                alert("Giv venligst adgang til kameraet for at bruge scanneren.");
+    cameraBtn.onclick = async () => {
+        scanner.classList.remove('hidden');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            video.srcObject = stream;
+        } catch (err) {
+            alert("Kamera-fejl: Tjek om du bruger HTTPS og har givet tilladelse.");
+        }
+    };
+
+    closeBtn.onclick = () => {
+        if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+        scanner.classList.add('hidden');
+    };
+
+    captureBtn.onclick = async () => {
+        statusText.innerText = "📸 Fryser billede...";
+        captureBtn.disabled = true;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+        closeBtn.click();
+        resultBox.classList.remove('hidden');
+        aiResponse.innerText = "🤖 AI Analyserer...";
+        statusText.innerText = "Sender til Google AI...";
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: "Du er en dansk biolog. Identificer planten eller dyret på billedet. Svar på dansk: Navn først, så kort info." },
+                            { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+                        ]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error.message || "API Fejl");
             }
-        };
 
-        // LUK KAMERA
-        closeBtn.onclick = () => {
-            if(video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
-            }
-            scanner.classList.add('hidden');
-        };
+            const data = await response.json();
+            const resultText = data.candidates[0].content.parts[0].text;
+            
+            aiResponse.innerText = resultText.split('\n')[0].replace(/\*/g, '');
+            aiDetails.innerText = resultText.split('\n').slice(1).join(' ');
+            statusText.innerText = "Analyse færdig!";
 
-        // TAG BILLEDE OG KØR AI ANALYSE
-        captureBtn.onclick = async () => {
-            statusText.innerText = "Behandler data...";
-            captureBtn.disabled = true;
-
-            // Tegn billede til canvas
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
-
-            // Luk visuel scanner
-            closeBtn.click();
-            resultBox.classList.remove('hidden');
-            aiResponse.innerText = "🤖 AI Analyserer...";
-            aiDetails.innerText = "Vent et øjeblik mens vi identificerer arten...";
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: "Du er en dansk naturekspert. Hvilken plante eller hvilket dyr er dette? Svar på dansk. Start med navnet, og giv derefter en lynhurtig beskrivelse (max 1 sætning)." },
-                                { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                            ]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                const resultText = data.candidates[0].content.parts[0].text;
-                
-                // Opdel svar i Overskrift og Detaljer
-                const parts = resultText.split('\n');
-                aiResponse.innerText = parts[0].replace('**', '').replace('**', '');
-                aiDetails.innerText = parts.slice(1).join(' ') || "Ingen yderligere detaljer fundet.";
-                statusText.innerText = "Scanning færdig!";
-            } catch (err) {
-                aiResponse.innerText = "Kunne ikke læse billedet";
-                aiDetails.innerText = "Prøv igen med bedre lys eller tjek din internetforbindelse.";
-                console.error(err);
-            } finally {
-                captureBtn.disabled = false;
-            }
-        };
-    </script>
+        } catch (err) {
+            aiResponse.innerText = "⚠️ Scanning fejlede";
+            aiDetails.innerText = "Fejl: " + err.message;
+            statusText.innerText = "Systemfejl.";
+            console.error("DEBUG:", err);
+        } finally {
+            captureBtn.disabled = false;
+        }
+    };
+</script>
 </body>
 </html>
