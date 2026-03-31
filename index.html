@@ -1,82 +1,103 @@
 <!DOCTYPE html>
-<html lang="da">
+<html class="dark" lang="da">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bio-Scout | Stitch Edition</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <title>Bio-Scout | Pro Edition</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "#111417",
+              "surface": "#1d2024",
+              "primary-container": "#00e5ff",
+              "on-surface": "#e1e2e8",
+              "card": "rgba(50, 53, 57, 0.4)"
+            },
+            borderRadius: {"DEFAULT": "0px"}
+          },
+        },
+      }
+    </script>
+
     <style>
-        :root {
-            --neon: #00E5FF;
-            --dark: #0A0C10;
-            --card: rgba(255, 255, 255, 0.04);
-        }
-        body { 
-            background-color: var(--dark); 
-            color: white; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            letter-spacing: -0.02em;
-        }
-        /* Lovelable.dev inspireret glas-effekt */
-        .bento-card {
-            background: var(--card);
+        body { font-family: 'Inter', sans-serif; letter-spacing: -0.01em; }
+        .glass-panel {
+            background: rgba(50, 53, 57, 0.4);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 28px;
-            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        /* Stitch AI Pulse */
-        .ai-glow {
-            box-shadow: 0 0 40px rgba(0, 229, 255, 0.25);
-            border: 2px solid var(--neon);
-        }
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .primary-gradient { background: linear-gradient(135deg, #9cf0ff 0%, #00e5ff 100%); }
+        .pulse-red { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+        .scanner-line { height: 2px; background: #00e5ff; position: absolute; width: 100%; animation: scan 2s linear infinite; box-shadow: 0 0 20px #00e5ff; }
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
     </style>
 </head>
-<body class="p-6 pb-40">
 
-    <header class="flex justify-between items-center mb-10">
-        <div>
-            <div class="flex items-center gap-2">
-                <div class="w-3 h-3 rounded-full bg-[#00E5FF] animate-pulse"></div>
-                <span class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold">Stitch AI Engine</span>
-            </div>
-            <h1 class="text-3xl font-extrabold tracking-tighter mt-1">BIO-SCOUT</h1>
-        </div>
-        <div class="w-12 h-12 bento-card flex items-center justify-center text-xl border-white/20">🌿</div>
-    </header>
+<body class="bg-background text-on-surface pb-32">
 
-    <div class="grid grid-cols-2 gap-4 mb-6">
-        <div class="bento-card p-5 col-span-2 relative overflow-hidden" id="main-status">
-            <p class="text-[10px] uppercase tracking-widest text-[#00E5FF] font-bold mb-1">Current Task</p>
-            <h3 class="text-lg font-bold">Find Forårets Tegn</h3>
-            <p class="text-xs text-gray-400 mt-1">Scan din første plante for at låse op for badges.</p>
+<header class="fixed top-0 w-full z-50 bg-background/60 backdrop-blur-xl px-6 h-16 flex justify-between items-center border-b border-white/5">
+    <div class="flex items-center gap-2">
+        <div class="w-2 h-2 bg-primary-container rounded-full pulse-red"></div>
+        <h1 class="font-black uppercase tracking-tighter text-xl text-primary-container">Bio-Scout</h1>
+    </div>
+    <div id="lvl-badge" class="px-3 py-1 bg-surface border border-white/10 text-[10px] font-black">LVL 01</div>
+</header>
+
+<main class="pt-20 px-4 max-w-lg mx-auto space-y-6">
+
+    <div class="grid grid-cols-4 gap-2">
+        <div class="glass-panel p-3 flex flex-col items-center gap-1 border-b-2 border-primary-container">
+            <span class="material-symbols-outlined text-sm">forest</span>
+            <span class="text-[8px] font-bold uppercase">Skov</span>
         </div>
-        
-        <div class="bento-card p-5">
-            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Scans</p>
-            <p class="text-2xl font-black mt-1" id="scan-count">0</p>
+        <div class="glass-panel p-3 flex flex-col items-center gap-1 opacity-50">
+            <span class="material-symbols-outlined text-sm">waves</span>
+            <span class="text-[8px] font-bold uppercase">Sø</span>
         </div>
-        <div class="bento-card p-5">
-            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Rank</p>
-            <p class="text-2xl font-black mt-1 text-[#00E5FF]">Novice</p>
+        <div class="glass-panel p-3 flex flex-col items-center gap-1 opacity-50">
+            <span class="material-symbols-outlined text-sm">landscape</span>
+            <span class="text-[8px] font-bold uppercase">Eng</span>
+        </div>
+        <div class="glass-panel p-3 flex flex-col items-center gap-1 opacity-50">
+            <span class="material-symbols-outlined text-sm">potted_plant</span>
+            <span class="text-[8px] font-bold uppercase">Have</span>
         </div>
     </div>
 
-    <section id="result-box" class="hidden mb-6 animate-in slide-in-from-bottom-4 duration-500">
-        <div class="bento-card p-6 ai-glow bg-[#00E5FF]/5">
-            <div class="flex justify-between items-start mb-4">
-                <p id="ai-response" class="text-xl font-bold leading-tight">Analyserer...</p>
-                <span class="bg-[#00E5FF] text-black text-[10px] font-black px-2 py-1 rounded-full uppercase">Match 98%</span>
+    <section class="glass-panel p-5 relative overflow-hidden">
+        <div class="flex justify-between items-end mb-4">
+            <div>
+                <p class="text-[10px] font-bold text-primary-container uppercase tracking-widest mb-1">Total Erfaring</p>
+                <h2 id="xp-display" class="text-3xl font-black italic">0 XP</h2>
             </div>
-            <p id="ai-details" class="text-sm text-gray-400 leading-relaxed font-medium"></p>
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Fundne Arter</p>
+                <h2 id="count-display" class="text-xl font-black">0</h2>
+            </div>
+        </div>
+        <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+            <div id="xp-progress" class="h-full bg-primary-container transition-all duration-1000" style="width: 5%"></div>
         </div>
     </section>
 
-    <h2 class="text-[10px] uppercase tracking-[0.3em] text-gray-500 mb-4 font-black
+    <section id="result-box" class="hidden animate-in slide-in-from-top-4 duration-500">
+        <div class="glass-panel p-6 border-l-4 border-primary-container bg-primary-container/5">
+            <span class="text-[9px] font-black uppercase text-primary-container tracking-widest">AI Analyse Komplet</span>
+            <h3 id="ai-response" class="text-2xl font-black uppercase text-white mt-1">Søger...</h3>
+            <p id="ai-details" class="text-sm text-on-surface/70 mt-2 font-medium italic"></p>
+        </div>
+    </section>
+
+    <div>
+        <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-4">Seneste Fund</h3>
+        <div id="collection-list" class="space-y-3">
+            </div>
+    </div>
