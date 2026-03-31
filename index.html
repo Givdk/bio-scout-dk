@@ -3,180 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bio-Scout DK | Pro AI</title>
+    <title>Bio-Scout | Stitch Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #1A1D21; color: #F0F0F0; font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .neon-blue { color: #00E5FF; }
-        .bg-neon { background-color: #00E5FF; }
-        .neon-glow { box-shadow: 0 0 25px rgba(0, 229, 255, 0.4); }
-        @keyframes scan-line { 0% { top: 0%; } 100% { top: 100%; } }
-        .scanner-line { height: 2px; background: #00E5FF; position: absolute; width: 100%; animation: scan-line 2s linear infinite; box-shadow: 0 0 15px #00E5FF; z-index: 10; }
+        :root {
+            --neon: #00E5FF;
+            --dark: #0A0C10;
+            --card: rgba(255, 255, 255, 0.04);
+        }
+        body { 
+            background-color: var(--dark); 
+            color: white; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.02em;
+        }
+        /* Lovelable.dev inspireret glas-effekt */
+        .bento-card {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            transition: all 0.3s ease;
+        }
+        /* Stitch AI Pulse */
+        .ai-glow {
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.25);
+            border: 2px solid var(--neon);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body class="p-4 pb-40">
+<body class="p-6 pb-40">
 
-    <header class="flex justify-between items-center mb-6 pt-4">
+    <header class="flex justify-between items-center mb-10">
         <div>
-            <h1 class="text-2xl font-black tracking-tighter text-white uppercase leading-none">Bio-Scout <span class="neon-blue font-black">AI</span></h1>
-            <div class="flex items-center mt-2">
-                <span class="text-[10px] font-bold text-[#00E5FF] mr-2 text-center uppercase tracking-widest">System Aktivt</span>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-[#00E5FF] animate-pulse"></div>
+                <span class="text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold">Stitch AI Engine</span>
             </div>
+            <h1 class="text-3xl font-extrabold tracking-tighter mt-1">BIO-SCOUT</h1>
         </div>
-        <div class="w-12 h-12 rounded-full border border-gray-700 flex items-center justify-center bg-gray-800 shadow-xl">👤</div>
+        <div class="w-12 h-12 bento-card flex items-center justify-center text-xl border-white/20">🌿</div>
     </header>
 
-    <section class="mb-6">
-        <div class="glass p-4 rounded-3xl border-l-4 border-[#00E5FF]">
-            <p class="text-[10px] uppercase tracking-widest text-[#00E5FF] font-bold mb-1">Status</p>
-            <p class="text-white text-xs font-medium" id="status-text">Klar til scanning...</p>
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bento-card p-5 col-span-2 relative overflow-hidden" id="main-status">
+            <p class="text-[10px] uppercase tracking-widest text-[#00E5FF] font-bold mb-1">Current Task</p>
+            <h3 class="text-lg font-bold">Find Forårets Tegn</h3>
+            <p class="text-xs text-gray-400 mt-1">Scan din første plante for at låse op for badges.</p>
         </div>
-    </section>
-
-    <section id="result-box" class="hidden mb-6 transition-all animate-in fade-in duration-500">
-        <div class="glass p-6 rounded-3xl border border-[#00E5FF]/30 bg-[#00E5FF]/5 relative">
-            <p id="ai-response" class="text-xl font-bold text-white mb-2 leading-tight">Analyserer...</p>
-            <p id="ai-details" class="text-sm text-gray-400 italic font-light"></p>
-        </div>
-    </section>
-
-    <section id="collection-sec">
-        <h2 class="text-[10px] uppercase tracking-[0.3em] text-gray-500 mb-4 font-black">Seneste Scanninger</h2>
-        <div id="collection-list" class="grid grid-cols-1 gap-3 text-center py-4">
-            <p class="text-[10px] text-gray-600 uppercase tracking-widest">Ingen data registreret endnu</p>
-        </div>
-    </section>
-
-    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass rounded-[40px] py-4 px-10 flex justify-between items-center z-50 border border-white/10 shadow-2xl">
-        <button onclick="location.reload()" class="text-gray-500">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
-        </button>
         
-        <button id="camera-btn" class="bg-neon p-5 rounded-3xl neon-glow -mt-16 transform active:scale-90 transition-all border-[6px] border-[#1A1D21]">
-            <svg width="32" height="32" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"></path>
-                <circle cx="12" cy="13" r="4"></circle>
-            </svg>
-        </button>
-
-        <button onclick="alert('Kort-funktion er under udvikling')" class="text-gray-500">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        </button>
-    </nav>
-
-    <div id="scanner" class="hidden fixed inset-0 bg-black z-[100] flex flex-col overflow-hidden">
-        <video id="video" class="w-full h-full object-cover" autoplay playsinline></video>
-        <div class="scanner-line"></div>
-        <button id="close-btn" class="absolute top-10 right-6 text-white text-5xl font-light">&times;</button>
-        <div class="absolute bottom-12 w-full flex justify-center">
-            <button id="capture-btn" class="w-20 h-20 rounded-full border-4 border-white bg-white/10 backdrop-blur-md shadow-2xl active:scale-95 transition-all"></button>
+        <div class="bento-card p-5">
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Scans</p>
+            <p class="text-2xl font-black mt-1" id="scan-count">0</p>
         </div>
-        <canvas id="canvas" class="hidden"></canvas>
+        <div class="bento-card p-5">
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Rank</p>
+            <p class="text-2xl font-black mt-1 text-[#00E5FF]">Novice</p>
+        </div>
     </div>
 
-    <script>
-        // NY KEY AKTIVERET
-        const API_KEY = "AIzaSyBWhyIp_g6xRYy5qyRXG0cVobGxxUU_64w";
-        
-        const cameraBtn = document.getElementById('camera-btn');
-        const scanner = document.getElementById('scanner');
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const captureBtn = document.getElementById('capture-btn');
-        const closeBtn = document.getElementById('close-btn');
-        const resultBox = document.getElementById('result-box');
-        const aiResponse = document.getElementById('ai-response');
-        const aiDetails = document.getElementById('ai-details');
-        const statusText = document.getElementById('status-text');
-        const collectionList = document.getElementById('collection-list');
+    <section id="result-box" class="hidden mb-6 animate-in slide-in-from-bottom-4 duration-500">
+        <div class="bento-card p-6 ai-glow bg-[#00E5FF]/5">
+            <div class="flex justify-between items-start mb-4">
+                <p id="ai-response" class="text-xl font-bold leading-tight">Analyserer...</p>
+                <span class="bg-[#00E5FF] text-black text-[10px] font-black px-2 py-1 rounded-full uppercase">Match 98%</span>
+            </div>
+            <p id="ai-details" class="text-sm text-gray-400 leading-relaxed font-medium"></p>
+        </div>
+    </section>
 
-        function loadCollection() {
-            const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
-            if (finds.length > 0) collectionList.innerHTML = "";
-            finds.slice().reverse().forEach(f => {
-                const item = document.createElement('div');
-                item.className = "glass p-4 rounded-2xl border border-white/5 flex justify-between items-center mb-2";
-                item.innerHTML = `<div><p class="font-bold text-sm text-white">${f.name}</p><p class="text-[10px] text-gray-500 uppercase font-bold">${f.date}</p></div><div class="text-[#00E5FF] text-[10px] font-black tracking-widest italic">FUNDET</div>`;
-                collectionList.appendChild(item);
-            });
-        }
-
-        loadCollection();
-
-        cameraBtn.onclick = async () => {
-            scanner.classList.remove('hidden');
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
-                });
-                video.srcObject = stream;
-            } catch (err) { alert("Fejl ved adgang til kamera."); }
-        };
-
-        closeBtn.onclick = () => {
-            if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-            scanner.classList.add('hidden');
-        };
-
-        captureBtn.onclick = async () => {
-            statusText.innerText = "📸 Behandler billede...";
-            captureBtn.disabled = true;
-
-            // Optimér størrelse for hurtig overførsel
-            const width = 800;
-            const height = video.videoHeight * (width / video.videoWidth);
-            canvas.width = width;
-            canvas.height = height;
-            canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-            const base64Image = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
-
-            closeBtn.click();
-            resultBox.classList.remove('hidden');
-            aiResponse.innerText = "🤖 AI Analyserer...";
-            statusText.innerText = "Søger i database...";
-
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: "Du er en dansk natur-ekspert. Identificer planten eller dyret på billedet. Svar kort på dansk: Navn først, derefter 1 kort info-sætning." },
-                                { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                            ]
-                        }]
-                    })
-                });
-
-                const data = await res.json();
-                
-                if (data.error) throw new Error(data.error.message);
-
-                const result = data.candidates[0].content.parts[0].text;
-                const lines = result.split('\n');
-                const artNavn = lines[0].replace(/\*/g, '').trim();
-
-                aiResponse.innerText = artNavn;
-                aiDetails.innerText = lines.slice(1).join(' ') || "Almindelig art i Danmark.";
-                statusText.innerText = "Scanning fuldført!";
-
-                // Gem fundet
-                const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
-                finds.push({ name: artNavn, date: new Date().toLocaleDateString('da-DK') });
-                localStorage.setItem('scoutFinds', JSON.stringify(finds));
-                loadCollection();
-
-            } catch (err) {
-                aiResponse.innerText = "⚠️ Prøv igen";
-                aiDetails.innerText = "Fejl: " + err.message;
-                statusText.innerText = "System klar.";
-            } finally {
-                captureBtn.disabled = false;
-            }
-        };
-    </script>
-</body>
-</html>
+    <h2 class="text-[10px] uppercase tracking-[0.3em] text-gray-500 mb-4 font-black
