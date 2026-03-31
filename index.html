@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bio-Scout DK | Pro Edition</title>
+    <title>Bio-Scout DK | Pro AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -20,41 +20,37 @@
 
     <header class="flex justify-between items-center mb-6 pt-4">
         <div>
-            <h1 class="text-2xl font-black tracking-tighter text-white uppercase leading-none">Bio-Scout <span class="neon-blue font-black">PRO</span></h1>
+            <h1 class="text-2xl font-black tracking-tighter text-white uppercase leading-none">Bio-Scout <span class="neon-blue font-black">AI</span></h1>
             <div class="flex items-center mt-2">
-                <span class="text-[10px] font-bold text-[#00E5FF] mr-2">LVL <span id="lvl-display">1</span></span>
-                <div class="w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                    <div id="xp-bar" class="h-full bg-neon transition-all duration-500" style="width: 0%"></div>
-                </div>
+                <span class="text-[10px] font-bold text-[#00E5FF] mr-2 text-center uppercase tracking-widest">System Aktivt</span>
             </div>
         </div>
-        <div id="total-xp" class="text-[10px] font-mono text-gray-500">0 XP</div>
+        <div class="w-12 h-12 rounded-full border border-gray-700 flex items-center justify-center bg-gray-800 shadow-xl">👤</div>
     </header>
 
     <section class="mb-6">
         <div class="glass p-4 rounded-3xl border-l-4 border-[#00E5FF]">
-            <p class="text-[10px] uppercase tracking-widest text-[#00E5FF] font-bold mb-1">System Status</p>
-            <p class="text-white text-xs font-medium" id="status-text">Klar til mission i felten...</p>
+            <p class="text-[10px] uppercase tracking-widest text-[#00E5FF] font-bold mb-1">Status</p>
+            <p class="text-white text-xs font-medium" id="status-text">Klar til scanning...</p>
         </div>
     </section>
 
-    <section id="result-box" class="hidden mb-6 scale-95 transition-all">
+    <section id="result-box" class="hidden mb-6 transition-all animate-in fade-in duration-500">
         <div class="glass p-6 rounded-3xl border border-[#00E5FF]/30 bg-[#00E5FF]/5 relative">
-            <span class="absolute top-4 right-4 text-[10px] font-bold text-[#00E5FF]">+100 XP</span>
-            <p id="ai-response" class="text-lg font-bold text-white mb-2 leading-tight">Analyserer...</p>
+            <p id="ai-response" class="text-xl font-bold text-white mb-2 leading-tight">Analyserer...</p>
             <p id="ai-details" class="text-sm text-gray-400 italic font-light"></p>
         </div>
     </section>
 
     <section id="collection-sec">
-        <h2 class="text-[10px] uppercase tracking-[0.3em] text-gray-500 mb-4 font-black">Din Logbog</h2>
-        <div id="collection-list" class="grid grid-cols-1 gap-3">
-            <p class="text-xs text-gray-600 italic">Ingen fund endnu. Start din første mission!</p>
+        <h2 class="text-[10px] uppercase tracking-[0.3em] text-gray-500 mb-4 font-black">Seneste Scanninger</h2>
+        <div id="collection-list" class="grid grid-cols-1 gap-3 text-center py-4">
+            <p class="text-[10px] text-gray-600 uppercase tracking-widest">Ingen data registreret endnu</p>
         </div>
     </section>
 
     <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass rounded-[40px] py-4 px-10 flex justify-between items-center z-50 border border-white/10 shadow-2xl">
-        <button onclick="window.location.reload()" class="text-gray-500">
+        <button onclick="location.reload()" class="text-gray-500">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
         </button>
         
@@ -65,7 +61,7 @@
             </svg>
         </button>
 
-        <button onclick="alert('Kort-funktion kommer snart!')" class="text-gray-500">
+        <button onclick="alert('Kort-funktion er under udvikling')" class="text-gray-500">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         </button>
     </nav>
@@ -81,9 +77,9 @@
     </div>
 
     <script>
-        const API_KEY = "AIzaSyBEkiYyE2J5nAt1ZkZe0BJPLnqzcFVhLd8";
+        // NY KEY AKTIVERET
+        const API_KEY = "AIzaSyBWhyIp_g6xRYy5qyRXG0cVobGxxUU_64w";
         
-        // Elementer
         const cameraBtn = document.getElementById('camera-btn');
         const scanner = document.getElementById('scanner');
         const video = document.getElementById('video');
@@ -95,21 +91,6 @@
         const aiDetails = document.getElementById('ai-details');
         const statusText = document.getElementById('status-text');
         const collectionList = document.getElementById('collection-list');
-        const xpBar = document.getElementById('xp-bar');
-        const lvlDisplay = document.getElementById('lvl-display');
-        const totalXpDisplay = document.getElementById('total-xp');
-
-        // Stats Logic
-        let xp = parseInt(localStorage.getItem('scoutXP')) || 0;
-        
-        function updateStats() {
-            const level = Math.floor(xp / 500) + 1;
-            const progress = ((xp % 500) / 500) * 100;
-            lvlDisplay.innerText = level;
-            xpBar.style.width = progress + "%";
-            totalXpDisplay.innerText = xp + " XP";
-            localStorage.setItem('scoutXP', xp);
-        }
 
         function loadCollection() {
             const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
@@ -117,25 +98,21 @@
             finds.slice().reverse().forEach(f => {
                 const item = document.createElement('div');
                 item.className = "glass p-4 rounded-2xl border border-white/5 flex justify-between items-center mb-2";
-                item.innerHTML = `<div><p class="font-bold text-sm text-white">${f.name}</p><p class="text-[10px] text-gray-500 uppercase font-bold">${f.date}</p></div><div class="text-[#00E5FF] text-[10px] font-black tracking-widest">REGISTRERET</div>`;
+                item.innerHTML = `<div><p class="font-bold text-sm text-white">${f.name}</p><p class="text-[10px] text-gray-500 uppercase font-bold">${f.date}</p></div><div class="text-[#00E5FF] text-[10px] font-black tracking-widest italic">FUNDET</div>`;
                 collectionList.appendChild(item);
             });
         }
 
-        // Init stats
-        updateStats();
         loadCollection();
 
         cameraBtn.onclick = async () => {
             scanner.classList.remove('hidden');
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment', width: 1280 } 
+                    video: { facingMode: 'environment' } 
                 });
                 video.srcObject = stream;
-            } catch (err) {
-                alert("Giv adgang til kameraet.");
-            }
+            } catch (err) { alert("Fejl ved adgang til kamera."); }
         };
 
         closeBtn.onclick = () => {
@@ -144,19 +121,21 @@
         };
 
         captureBtn.onclick = async () => {
-            statusText.innerText = "📸 Behandler data...";
+            statusText.innerText = "📸 Behandler billede...";
             captureBtn.disabled = true;
 
-            await new Promise(r => setTimeout(r, 500));
-            canvas.width = 800;
-            canvas.height = (video.videoHeight / video.videoWidth) * 800;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            const base64Image = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+            // Optimér størrelse for hurtig overførsel
+            const width = 800;
+            const height = video.videoHeight * (width / video.videoWidth);
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+            const base64Image = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
 
             closeBtn.click();
             resultBox.classList.remove('hidden');
             aiResponse.innerText = "🤖 AI Analyserer...";
-            statusText.innerText = "Identificerer art...";
+            statusText.innerText = "Søger i database...";
 
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
@@ -165,7 +144,7 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "Du er en dansk biolog. Identificer planten/dyret. Svar kort: Navn (fed), 1 sætning om fundstedet." },
+                                { text: "Du er en dansk natur-ekspert. Identificer planten eller dyret på billedet. Svar kort på dansk: Navn først, derefter 1 kort info-sætning." },
                                 { inline_data: { mime_type: "image/jpeg", data: base64Image } }
                             ]
                         }]
@@ -173,25 +152,27 @@
                 });
 
                 const data = await res.json();
-                const text = data.candidates[0].content.parts[0].text;
-                const lines = text.split('\n');
-                const name = lines[0].replace(/\*/g, '').trim();
+                
+                if (data.error) throw new Error(data.error.message);
 
-                aiResponse.innerHTML = `<span class="text-[#00E5FF] font-black">${name}</span>`;
-                aiDetails.innerText = lines.slice(1).join(' ') || "Almindelig i Danmark.";
-                statusText.innerText = "Fund registreret!";
+                const result = data.candidates[0].content.parts[0].text;
+                const lines = result.split('\n');
+                const artNavn = lines[0].replace(/\*/g, '').trim();
 
-                // Gem Fund & Giv XP
-                xp += 100;
-                updateStats();
+                aiResponse.innerText = artNavn;
+                aiDetails.innerText = lines.slice(1).join(' ') || "Almindelig art i Danmark.";
+                statusText.innerText = "Scanning fuldført!";
+
+                // Gem fundet
                 const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
-                finds.push({ name: name, date: new Date().toLocaleDateString('da-DK') });
+                finds.push({ name: artNavn, date: new Date().toLocaleDateString('da-DK') });
                 localStorage.setItem('scoutFinds', JSON.stringify(finds));
                 loadCollection();
 
             } catch (err) {
                 aiResponse.innerText = "⚠️ Prøv igen";
-                statusText.innerText = "Scanning fejlede.";
+                aiDetails.innerText = "Fejl: " + err.message;
+                statusText.innerText = "System klar.";
             } finally {
                 captureBtn.disabled = false;
             }
