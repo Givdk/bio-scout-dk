@@ -100,22 +100,29 @@
     };
 
     captureBtn.onclick = async () => {
-        statusText.innerText = "📸 Optager...";
+        statusText.innerText = "📸 Stiller skarpt...";
         captureBtn.disabled = true;
 
-        // Vi sætter en fast størrelse for at undgå at billedet bliver for tungt
-        const width = 640;
+        // Giv kameraet 500ms til at autofokusere færdig
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Vi bruger en højere opløsning til AI'en (HD)
+        const width = 1280;
         const height = (video.videoHeight / video.videoWidth) * width;
         canvas.width = width;
         canvas.height = height;
         
-        canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-        const base64Image = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+        const ctx = canvas.getContext('2d');
+        // Tegn billedet
+        ctx.drawImage(video, 0, 0, width, height);
+        
+        // Gør billedet en lille smule skarpere digitalt
+        const base64Image = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
 
         closeBtn.click();
         resultBox.classList.remove('hidden');
-        aiResponse.innerText = "🤖 AI tænker...";
-        statusText.innerText = "Analyserer natur-data...";
+        aiResponse.innerText = "🤖 AI Analyserer...";
+        statusText.innerText = "Identificerer art...";
 
         try {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
@@ -124,12 +131,34 @@
                 body: JSON.stringify({
                     contents: [{
                         parts: [
-                            { text: "Du er en dansk naturekspert. Hvad er dette? Svar meget kort på dansk: Navn (i fed), og 1 sætning om hvor den findes." },
+                            { text: "Du er en dansk biolog. Identificer planten eller dyret på dette billede. Svar kun med navnet på dansk først, og derefter én kort sætning om hvor i Danmark den typisk findes. Hvis du er i tvivl, så giv dit bedste gæt." },
                             { inline_data: { mime_type: "image/jpeg", data: base64Image } }
                         ]
                     }]
                 })
             });
+
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0]) {
+                const text = data.candidates[0].content.parts[0].text;
+                // Formatering: Gør første linje fed
+                const lines = text.split('\n');
+                aiResponse.innerHTML = `<span class="text-[#00E5FF]">${lines[0].replace(/\*/g, '')}</span>`;
+                aiDetails.innerText = lines.slice(1).join(' ') || "Almindelig i den danske natur.";
+                statusText.innerText = "Scanning fuldført!";
+            } else {
+                throw new Error("Billedet var for utydeligt.");
+            }
+
+        } catch (err) {
+            aiResponse.innerText = "⚠️ Prøv igen";
+            aiDetails.innerText = "AI'en kunne ikke se motivet. Prøv at gå tættere på eller tænd lyset.";
+            statusText.innerText = "Klar til nyt forsøg.";
+        } finally {
+            captureBtn.disabled = false;
+        }
+    };
 
             const data = await response.json();
             
