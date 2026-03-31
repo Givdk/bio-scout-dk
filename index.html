@@ -121,7 +121,9 @@
 </div>
 
 <script>
+    // DIN NYE NØGLE
     const API_KEY = "AIzaSyBWhyIp_g6xRYy5qyRXG0cVobGxxUU_64w";
+    
     const cameraBtn = document.getElementById('camera-btn');
     const scanner = document.getElementById('scanner');
     const video = document.getElementById('video');
@@ -144,7 +146,7 @@
         if (finds.length > 0) collectionList.innerHTML = "";
         finds.slice().reverse().forEach(f => {
             const item = document.createElement('div');
-            item.className = "glass-panel p-4 flex justify-between items-center border-l-2 border-primary-container";
+            item.className = "glass-panel p-4 flex justify-between items-center border-l-2 border-primary-container mb-2";
             item.innerHTML = `<div><p class="text-[10px] font-bold text-primary-container uppercase">${f.date}</p><p class="text-md font-black uppercase text-white">${f.name}</p></div><span class="material-symbols-outlined text-primary-container">verified</span>`;
             collectionList.appendChild(item);
         });
@@ -155,9 +157,11 @@
     cameraBtn.onclick = async () => {
         scanner.classList.remove('hidden');
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment', width: { ideal: 1280 } } 
+            });
             video.srcObject = stream;
-        } catch (e) { alert("Kamera-fejl!"); }
+        } catch (e) { alert("Kamera-adgang nægtet. Tjek indstillinger."); }
     };
 
     closeBtn.onclick = () => {
@@ -167,13 +171,19 @@
 
     captureBtn.onclick = async () => {
         captureBtn.disabled = true;
-        canvas.width = 800;
-        canvas.getContext('2d').drawImage(video, 0, 0, 800, 600);
-        const base64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-        closeBtn.click();
         
+        // Optimering af billede før upload
+        canvas.width = 720; 
+        canvas.height = video.videoHeight * (720 / video.videoWidth);
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Konverter til base64 (0.6 kvalitet sparer data og undgår fejl)
+        const base64 = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
+        
+        closeBtn.click();
         resultBox.classList.remove('hidden');
-        aiResponse.innerText = "ANALYSERER...";
+        aiResponse.innerText = "FORBINDER...";
+        aiDetails.innerText = "Stitch AI uploader til server...";
 
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
@@ -182,18 +192,26 @@
                 body: JSON.stringify({
                     contents: [{
                         parts: [
-                            { text: "Hvad er dette? Svar på dansk: Navn (STORE BOGSTAVER) og 1 kort sætning." },
+                            { text: "Identificer denne danske art. Svar kort: Navn (STORE BOGSTAVER) og 1 kort info-sætning." },
                             { inline_data: { mime_type: "image/jpeg", data: base64 } }
                         ]
                     }]
                 })
             });
+
             const data = await res.json();
+
+            if (data.error) {
+                aiResponse.innerText = "API FEJL";
+                aiDetails.innerText = data.error.message;
+                return;
+            }
+
             const text = data.candidates[0].content.parts[0].text;
             const name = text.split('\n')[0].replace(/\*/g, '').trim();
 
             aiResponse.innerText = name;
-            aiDetails.innerText = text.split('\n').slice(1).join(' ');
+            aiDetails.innerText = text.split('\n').slice(1).join(' ') || "Art bekræftet.";
 
             xp += 100;
             localStorage.setItem('scoutXP', xp);
@@ -201,9 +219,15 @@
             finds.push({ name: name, date: new Date().toLocaleDateString('da-DK') });
             localStorage.setItem('scoutFinds', JSON.stringify(finds));
             updateStats();
-        } catch (e) { aiResponse.innerText = "FEJL"; }
-        finally { captureBtn.disabled = false; }
+
+        } catch (e) { 
+            aiResponse.innerText = "NETVÆRKSFEJL";
+            aiDetails.innerText = "Tjek dit internet eller prøv igen.";
+        } finally { 
+            captureBtn.disabled = false; 
+        }
     };
+</script>
 </script>
 </body>
 </html>
