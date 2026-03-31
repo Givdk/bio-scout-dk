@@ -3,122 +3,46 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-    <title>Bio-Scout | Pro AI Edition</title>
+    <title>Bio-Scout | Pro AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111417; color: #e1e2e8; margin: 0; overflow-x: hidden; }
-        .glass-panel { background: rgba(50, 53, 57, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        body { font-family: 'Inter', sans-serif; background-color: #111417; color: #e1e2e8; margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        .glass-panel { background: rgba(50, 53, 57, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .primary-gradient { background: linear-gradient(135deg, #9cf0ff 0%, #00e5ff 100%); }
         .scanner-line { height: 2px; background: #00e5ff; position: absolute; width: 100%; animation: scan 2s linear infinite; box-shadow: 0 0 20px #00e5ff; z-index: 100; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
     </style>
 </head>
 
-<body class="pb-64">
+<body class="p-0 m-0">
 
-<header class="fixed top-0 w-full z-[50] bg-[#111417]/90 backdrop-blur-xl px-6 h-16 flex justify-between items-center border-b border-white/5">
-    <div class="flex items-center gap-2">
-        <div class="w-2 h-2 bg-[#00e5ff] rounded-full animate-pulse"></div>
-        <h1 class="font-black uppercase tracking-tighter text-xl text-[#00e5ff]">Bio-Scout</h1>
-    </div>
-    <div class="px-3 py-1 bg-[#1d2024] border border-white/10 text-[10px] font-black uppercase">Lv. 01 Scout</div>
+<header class="fixed top-0 w-full z-[50] bg-[#111417] px-6 h-16 flex justify-between items-center border-b border-white/5">
+    <h1 class="font-black uppercase tracking-tighter text-xl text-[#00e5ff]">Bio-Scout</h1>
+    <div id="xp-display" class="font-bold text-xs">0 XP</div>
 </header>
 
-<main class="pt-24 px-4 max-w-lg mx-auto space-y-6">
-    <section class="glass-panel p-5">
-        <div class="flex justify-between items-end mb-4">
-            <div>
-                <p class="text-[10px] font-bold text-[#00e5ff] uppercase tracking-widest mb-1">Experience</p>
-                <h2 id="xp-display" class="text-3xl font-black italic text-white tracking-tighter">0 XP</h2>
-            </div>
-            <div class="text-right">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Found</p>
-                <h2 id="count-display" class="text-xl font-black text-white">0</h2>
-            </div>
-        </div>
-        <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-            <div id="xp-bar" class="h-full bg-[#00e5ff] transition-all duration-700" style="width: 5%"></div>
-        </div>
+<main class="pt-24 px-4 overflow-y-auto h-full pb-40">
+    <section class="glass-panel p-6 mb-6">
+        <p class="text-[10px] font-bold text-[#00e5ff] uppercase tracking-widest">System Status</p>
+        <h2 class="text-3xl font-black italic">READY</h2>
     </section>
 
-    <section id="result-box" class="hidden">
-        <div class="glass-panel p-6 border-l-4 border-[#00e5ff] bg-[#00e5ff]/5 relative overflow-hidden">
-            <h3 id="ai-response" class="text-2xl font-black uppercase text-white tracking-tight leading-none">ANALYZING...</h3>
-            <p id="ai-details" class="text-sm text-gray-400 mt-3 font-medium italic leading-relaxed"></p>
-        </div>
-    </section>
-
-    <div>
-        <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-4 px-1">Field Logbook</h3>
-        <div id="collection-list" class="space-y-3"></div>
+    <div id="result-box" class="hidden glass-panel p-6 border-l-4 border-[#00e5ff] mb-6">
+        <h3 id="ai-response" class="text-2xl font-black uppercase">...</h3>
+        <p id="ai-details" class="text-sm opacity-70 mt-2 italic"></p>
     </div>
+
+    <div id="collection-list" class="space-y-3"></div>
 </main>
 
-<button id="camera-btn" style="display: flex !important;" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-[9999] w-20 h-20 primary-gradient items-center justify-center shadow-[0_0_60px_rgba(0,229,255,0.6)] active:scale-90 transition-all border-8 border-[#111417] rounded-none">
-    <span class="material-symbols-outlined font-black text-4xl text-[#111417]">photo_camera</span>
+<button id="camera-btn" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] w-24 h-24 primary-gradient flex items-center justify-center shadow-2xl active:scale-90 transition-all border-8 border-[#111417]">
+    <span class="material-symbols-outlined font-black text-5xl text-[#111417]">photo_camera</span>
 </button>
 
-<div id="scanner" class="hidden fixed inset-0 bg-[#111417] z-[10000] flex flex-col overflow-hidden">
+<div id="scanner" class="hidden fixed inset-0 bg-black z-[10000] flex flex-col">
     <video id="video" class="w-full h-full object-cover" autoplay playsinline></video>
     <div class="scanner-line"></div>
     <div class="absolute inset-0 p-8 flex flex-col justify-between pointer-events-none">
-        <div class="flex justify-between items-start">
-            <div class="glass-panel px-4 py-2 border-l-2 border-[#00e5ff]">
-                <p class="text-[10px] font-black uppercase text-[#00e5ff]">Bio-Link active</p>
-            </div>
-            <button id="close-btn" class="pointer-events-auto text-white text-4xl">✕</button>
-        </div>
-        <div class="flex justify-center mb-10">
-            <button id="capture-btn" class="pointer-events-auto w-24 h-24 border-8 border-white rounded-full bg-white/20 backdrop-blur-xl active:scale-95 transition-all"></button>
-        </div>
-    </div>
-    <canvas id="canvas" class="hidden"></canvas>
-</div>
-
-<script>
-// INSERT YOUR NEW KEY HERE
-const API_KEY = "AIzaSyDs0lCbNiSRRIBv2T06vNQTGgJUpCfsHCI";
-
-const cameraBtn = document.getElementById('camera-btn');
-const scanner = document.getElementById('scanner');
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const captureBtn = document.getElementById('capture-btn');
-const closeBtn = document.getElementById('close-btn');
-const resultBox = document.getElementById('result-box');
-const aiResponse = document.getElementById('ai-response');
-const aiDetails = document.getElementById('ai-details');
-const xpDisplay = document.getElementById('xp-display');
-const countDisplay = document.getElementById('count-display');
-const collectionList = document.getElementById('collection-list');
-const xpBar = document.getElementById('xp-bar');
-
-let xp = parseInt(localStorage.getItem('scoutXP')) || 0;
-
-function updateStats() {
-    const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
-    xpDisplay.innerText = xp + " XP";
-    countDisplay.innerText = finds.length;
-    xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
-    
-    if (finds.length > 0) {
-        collectionList.innerHTML = "";
-        finds.slice().reverse().forEach(f => {
-            const item = document.createElement('div');
-            item.className = "glass-panel p-4 flex justify-between items-center border-l-2 border-[#00e5ff] mb-2";
-            item.innerHTML = `<div><p class="text-[9px] font-bold text-[#00e5ff] uppercase tracking-widest">${f.date}</p><p class="text-md font-black uppercase text-white">${f.name}</p></div><span class="material-symbols-outlined text-[#00e5ff]">verified</span>`;
-            collectionList.appendChild(item);
-        });
-    }
-}
-updateStats();
-
-cameraBtn.onclick = async () => {
-    scanner.classList.remove('hidden');
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment", width: { ideal: 1280 } } 
-        });
-        video
+        <div class="flex justify-between items-start pointer-
