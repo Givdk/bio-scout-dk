@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-    <title>Bio-Scout | Tactical HUD</title>
+    <title>Bio-Scout | Multi-Lang HUD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -13,10 +13,10 @@
         theme: {
           extend: {
             colors: {
-              "background": "#111417", // The Void
+              "background": "#111417",
               "surface-low": "#0b0e12",
               "surface-high": "#272a2e",
-              "primary-cyan": "#00e5ff", // Neon Ice
+              "primary-cyan": "#00e5ff",
               "on-surface": "#e1e2e8",
             },
             fontFamily: { "sans": ["Inter"] },
@@ -27,39 +27,19 @@
     </script>
 
     <style>
-        /* Stitch AI Core Styles */
         body { background-color: #111417; letter-spacing: -0.01em; }
         h1, h2, h3, h4 { letter-spacing: -0.02em; text-transform: uppercase; font-style: italic; }
-        
-        .glass-panel { 
-            background: rgba(39, 42, 46, 0.4); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px); 
-        }
-
-        /* Ingen linjer - kun tonal dybde */
         .tonal-card { background-color: #272a2e; border: none; }
-        
-        /* Mission Success Pulse */
         @keyframes missionGlow {
             0% { box-shadow: 0 0 5px #00e5ff; }
             50% { box-shadow: 0 0 25px #00e5ff; }
             100% { box-shadow: 0 0 5px #00e5ff; }
         }
         .mission-success { animation: missionGlow 1.5s infinite; border: 2px solid #00e5ff !important; }
-
-        .scanner-line { 
-            height: 2px; 
-            background: #00e5ff; 
-            position: absolute; 
-            width: 100%; 
-            animation: scan 2s linear infinite; 
-            box-shadow: 0 0 15px #00e5ff;
-        }
+        .scanner-line { height: 2px; background: #00e5ff; position: absolute; width: 100%; animation: scan 2s linear infinite; box-shadow: 0 0 15px #00e5ff; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
-        
-        /* Fjern alle afrundede hjørner */
         * { border-radius: 0px !important; }
+        .lang-btn-active { background-color: #00e5ff; color: #111417; }
     </style>
 </head>
 <body class="text-on-surface min-h-screen pb-32">
@@ -69,15 +49,20 @@
             <span class="material-symbols-outlined text-primary-cyan text-xl">rebase_edit</span>
             <span class="font-black text-xs tracking-[0.2em]">BIO-SCOUT // PRO</span>
         </div>
-        <div class="bg-primary-cyan/10 px-2 py-1">
-            <span id="rank-tag" class="text-[9px] font-black text-primary-cyan">RANK #142</span>
+        <div class="flex items-center gap-3">
+            <div class="flex border border-white/10 text-[9px] font-black">
+                <button id="btn-da" class="px-2 py-1 lang-btn-active">DA</button>
+                <button id="btn-en" class="px-2 py-1 text-white/40 hover:text-primary-cyan">EN</button>
+            </div>
+            <div class="bg-primary-cyan/10 px-2 py-1">
+                <span class="text-[9px] font-black text-primary-cyan uppercase">Rank #142</span>
+            </div>
         </div>
     </header>
 
     <main class="pt-24 px-6 max-w-md mx-auto space-y-8">
-        
         <section class="bg-surface-high p-6 shadow-2xl">
-            <p class="text-[10px] font-bold text-primary-cyan tracking-[0.2em] mb-1">BIO-POINTS</p>
+            <p id="label-points" class="text-[10px] font-bold text-primary-cyan tracking-[0.2em] mb-1 uppercase">Bio-Points</p>
             <h2 id="xp-display" class="text-6xl font-black italic tracking-tighter leading-none">0</h2>
             <div class="mt-4 h-1 bg-white/5 w-full">
                 <div id="xp-bar" class="h-full bg-primary-cyan transition-all duration-700" style="width: 5%"></div>
@@ -86,13 +71,13 @@
 
         <section class="space-y-3">
             <div class="flex justify-between items-end px-1">
-                <h3 class="text-[10px] font-black text-gray-500 tracking-[0.3em]">Active Objective</h3>
+                <h3 id="label-objective" class="text-[10px] font-black text-gray-500 tracking-[0.3em] uppercase">Aktivt Mål</h3>
                 <span class="text-[9px] font-bold text-primary-cyan">NT-718</span>
             </div>
             <div id="mission-card" class="bg-surface-high p-5 relative overflow-hidden">
                 <div class="relative z-10">
-                    <h4 class="text-lg font-black leading-tight mb-1">Botanical Recovery</h4>
-                    <p class="text-xs text-on-surface/60 italic">Find og scan en blomstrende Anemone.</p>
+                    <h4 id="mission-title" class="text-lg font-black leading-tight mb-1 uppercase">Botanical Recovery</h4>
+                    <p id="mission-desc" class="text-xs text-on-surface/60 italic">Find og scan en blomstrende Anemone.</p>
                 </div>
                 <div class="absolute bottom-0 left-0 h-1 bg-primary-cyan/20 w-full">
                     <div id="mission-progress" class="h-full bg-primary-cyan transition-all duration-1000" style="width: 0%"></div>
@@ -102,16 +87,15 @@
 
         <section id="result-box" class="hidden">
             <div id="result-panel" class="bg-surface-high p-6 relative transition-all">
-                <p class="text-[9px] font-black text-primary-cyan tracking-[0.2em] mb-2 uppercase italic">Data Link Established</p>
+                <p id="label-analysis" class="text-[9px] font-black text-primary-cyan tracking-[0.2em] mb-2 uppercase italic">Data Link Established</p>
                 <h3 id="ai-response" class="text-3xl font-black leading-none mb-3 uppercase">Scanning...</h3>
                 <p id="ai-details" class="text-sm italic opacity-70 leading-relaxed border-t border-white/10 pt-4"></p>
             </div>
         </section>
 
         <section class="space-y-3">
-            <h3 class="text-[10px] font-black text-gray-500 tracking-[0.3em] px-1">Field Logbook</h3>
-            <div id="collection-list" class="space-y-2">
-                </div>
+            <h3 id="label-logbook" class="text-[10px] font-black text-gray-500 tracking-[0.3em] px-1 uppercase">Feltlogbog</h3>
+            <div id="collection-list" class="space-y-2"></div>
         </section>
     </main>
 
@@ -124,7 +108,7 @@
         <div class="scanner-line"></div>
         <div class="absolute inset-0 p-8 flex flex-col justify-between items-center pointer-events-none">
             <div class="w-full flex justify-between items-start pointer-events-auto">
-                <div class="bg-surface-high px-3 py-1 font-black text-[10px] text-primary-cyan">SYSTEM_SCAN_ACTIVE</div>
+                <div id="label-scanner" class="bg-surface-high px-3 py-1 font-black text-[10px] text-primary-cyan uppercase">System_Scan_Active</div>
                 <button id="close-btn" class="text-white text-3xl font-light">✕</button>
             </div>
             <button id="capture-btn" class="w-24 h-24 border-4 border-primary-cyan bg-primary-cyan/10 pointer-events-auto active:bg-primary-cyan/40 mb-12"></button>
@@ -133,9 +117,45 @@
     </div>
 
 <script>
-    // Din nye, fungerende nøgle og logik fra bio-scout-pro (1).html
-    const API_KEY = "AIzaSyBJRjfVJ22Q-Uddry3E9pQglmkfLfFRiRc";
+    const API_KEY = "AIzaSyBtFSrIgzicXNKN-FYMUAzc3--zrkQmzNc";
     const MISSION_ID = "NT-718: Botanical (Anemone)";
+
+    // Sprog-data
+    const langData = {
+        da: {
+            points: "Bio-Points", objective: "Aktivt Mål", missionTitle: "Botanical Recovery",
+            missionDesc: "Find og scan en blomstrende Anemone.", logbook: "Feltlogbog",
+            analysis: "Data Link Established", scanner: "System_Scan_Active", linking: "LINKER...",
+            prompt: "Identificer arten. Bestem om den matcher: ${MISSION_ID}. Svar på DANSK. Format: Linje 1: NAVN. Linje 2: JA/NEJ. Linje 3: 1 kort sætning."
+        },
+        en: {
+            points: "Bio-Points", objective: "Active Objective", missionTitle: "Botanical Recovery",
+            missionDesc: "Identify a blooming Anemone flower.", logbook: "Field Logbook",
+            analysis: "Data Link Established", scanner: "System_Scan_Active", linking: "LINKING...",
+            prompt: "Identify species. Determine if matches: ${MISSION_ID}. Answer in ENGLISH. Format: Line 1: NAME. Line 2: YES/NO. Line 3: 1 short sentence."
+        }
+    };
+
+    let currentLang = localStorage.getItem('scoutLang') || 'da';
+    let xp = parseInt(localStorage.getItem('scoutXP')) || 0;
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem('scoutLang', lang);
+        const d = langData[lang];
+        
+        document.getElementById('label-points').innerText = d.points;
+        document.getElementById('label-objective').innerText = d.objective;
+        document.getElementById('mission-title').innerText = d.missionTitle;
+        document.getElementById('mission-desc').innerText = d.missionDesc;
+        document.getElementById('label-logbook').innerText = d.logbook;
+        document.getElementById('label-analysis').innerText = d.analysis;
+        document.getElementById('label-scanner').innerText = d.scanner;
+
+        document.getElementById('btn-da').className = lang === 'da' ? "px-2 py-1 lang-btn-active" : "px-2 py-1 text-white/40 hover:text-primary-cyan";
+        document.getElementById('btn-en').className = lang === 'en' ? "px-2 py-1 lang-btn-active" : "px-2 py-1 text-white/40 hover:text-primary-cyan";
+        updateUI();
+    }
 
     const cameraBtn = document.getElementById('camera-btn');
     const scanner = document.getElementById('scanner');
@@ -152,19 +172,13 @@
     const missionProgress = document.getElementById('mission-progress');
     const collectionList = document.getElementById('collection-list');
 
-    let xp = parseInt(localStorage.getItem('scoutXP')) || 0;
-
     function updateUI() {
         const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
         xpDisplay.innerText = xp;
         xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
-
         const missionDone = localStorage.getItem('missionNT718') === 'complete';
         missionProgress.style.width = missionDone ? "100%" : "20%";
-
-        collectionList.innerHTML = finds.length === 0 ? 
-            `<p class="text-[10px] text-gray-600 uppercase italic px-1">Logbook empty.</p>` : "";
-        
+        collectionList.innerHTML = finds.length === 0 ? `<p class="text-[10px] text-gray-600 uppercase italic px-1">Logbook empty.</p>` : "";
         finds.slice().reverse().forEach(f => {
             const item = document.createElement('div');
             item.className = "bg-surface-high p-4 flex justify-between items-center";
@@ -184,6 +198,8 @@
     };
 
     closeBtn.onclick = () => { stopStream(); scanner.classList.add('hidden'); };
+    document.getElementById('btn-da').onclick = () => setLanguage('da');
+    document.getElementById('btn-en').onclick = () => setLanguage('en');
 
     captureBtn.onclick = async () => {
         if (!video.videoWidth) return;
@@ -198,26 +214,24 @@
         scanner.classList.add('hidden');
         resultBox.classList.remove('hidden');
         resultPanel.classList.remove('mission-success');
-        aiResponse.innerText = "LINKING...";
-        aiDetails.innerText = "Analyzing species against Mission objective...";
+        aiResponse.innerText = langData[currentLang].linking;
+        aiDetails.innerText = "...";
 
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-lite:generateContent?key=${API_KEY}`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: `Identify species. Determine if matches: ${MISSION_ID}. Format: Line 1: NAME. Line 2: YES/NO. Line 3: 1 short sentence.` }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
+                body: JSON.stringify({ contents: [{ parts: [{ text: langData[currentLang].prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
             });
             const data = await res.json();
-            if (data.error) { aiResponse.innerText = "ERR " + data.error.code; return; }
-
             const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
             const lines = text.split("\n").filter(l => l.trim());
             const name = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
-            const isMatch = (lines[1] || "").toUpperCase().includes("YES");
+            const isMatch = (lines[1] || "").toUpperCase().includes("YES") || (lines[1] || "").toUpperCase().includes("JA");
             const detail = lines.slice(2).join(" ").replace(/[*#]/g, '').trim();
 
             const isValid = name.length > 2 && name !== "UNKNOWN";
             if (isMatch) {
-                aiResponse.innerText = "OBJECTIVE MET";
+                aiResponse.innerText = currentLang === 'da' ? "MISSION FULDFØRT" : "MISSION MET";
                 aiDetails.innerText = `${name}: ${detail}`;
                 resultPanel.classList.add('mission-success');
                 localStorage.setItem('missionNT718', 'complete');
@@ -229,7 +243,7 @@
             }
 
             if (isValid) {
-                const today = new Date().toLocaleDateString('da-DK');
+                const today = new Date().toLocaleDateString(currentLang === 'da' ? 'da-DK' : 'en-US');
                 const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
                 if (!finds.some(f => f.name === name && f.date === today)) {
                     finds.push({ name, date: today });
@@ -242,7 +256,7 @@
         finally { captureBtn.disabled = false; }
     };
 
-    updateUI();
+    setLanguage(currentLang);
 </script>
 </body>
 </html>
