@@ -92,10 +92,31 @@
             </div>
         </section>
 
-        <!-- Habitat Grid -->
+        <!-- Habitat Grid + Kort toggle -->
         <section class="reveal">
-            <p id="label-habitats" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3"></p>
-            <div class="grid grid-cols-2 gap-2" id="habitat-grid"></div>
+            <div class="flex justify-between items-center mb-3">
+                <p id="label-habitats" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]"></p>
+                <div class="flex border border-white/10 text-[9px] font-black">
+                    <button id="tab-grid" class="px-3 py-1 lang-btn-active" onclick="showTab('grid')">
+                        <span class="material-symbols-outlined text-[14px] align-middle">grid_view</span>
+                    </button>
+                    <button id="tab-map" class="px-3 py-1 text-white/40" onclick="showTab('map')">
+                        <span class="material-symbols-outlined text-[14px] align-middle">map</span>
+                    </button>
+                </div>
+            </div>
+            <div id="habitat-grid" class="grid grid-cols-2 gap-2"></div>
+            <div id="habitat-map" class="hidden w-full h-64 bg-surface-high relative overflow-hidden">
+                <iframe
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=8.0,54.5,15.5,57.8&layer=mapnik"
+                    class="w-full h-full border-0"
+                    title="Naturomrader i Danmark"
+                    loading="lazy">
+                </iframe>
+                <div class="absolute bottom-0 left-0 right-0 bg-background/80 px-3 py-2">
+                    <p id="map-hint" class="text-[9px] text-gray-500 uppercase italic"></p>
+                </div>
+            </div>
         </section>
 
         <!-- Trending -->
@@ -167,6 +188,7 @@
             animals:  "Dyr i Danmark",
             cta:      "Start Scanner",
             noFinds:  "Ingen fund endnu — start scanneren!",
+            mapHint:  "Tryk på kortet for at zoome ind på naturområder.",
             navHome:  "Hjem",
             navScan:  "Scanner",
             navMap:   "Kort",
@@ -208,6 +230,7 @@
             animals:  "Animals in Denmark",
             cta:      "Start Scanner",
             noFinds:  "No finds yet — start scanning!",
+            mapHint:  "Tap the map to explore nature areas.",
             navHome:  "Home",
             navScan:  "Scanner",
             navMap:   "Map",
@@ -250,9 +273,27 @@
         renderAll();
     }
 
+    function showTab(tab) {
+        const grid = document.getElementById('habitat-grid');
+        const map  = document.getElementById('habitat-map');
+        const tGrid = document.getElementById('tab-grid');
+        const tMap  = document.getElementById('tab-map');
+        if (tab === 'grid') {
+            grid.classList.remove('hidden');
+            map.classList.add('hidden');
+            tGrid.className = "px-3 py-1 lang-btn-active";
+            tMap.className  = "px-3 py-1 text-white/40";
+        } else {
+            grid.classList.add('hidden');
+            map.classList.remove('hidden');
+            tGrid.className = "px-3 py-1 text-white/40";
+            tMap.className  = "px-3 py-1 lang-btn-active";
+        }
+    }
+
     function goScanner(habitat) {
         if (habitat) localStorage.setItem('activeHabitat', habitat);
-        window.location.href = 'bio-scout-multilang.html';
+        window.location.href = 'scanner.html';
     }
 
     // ─── RENDER ──────────────────────────────────────────────────
@@ -277,6 +318,7 @@
         document.getElementById('nav-scanner').innerText   = u.navScan;
         document.getElementById('nav-map').innerText       = u.navMap;
         document.getElementById('nav-profile').innerText   = u.navProf;
+        if (document.getElementById('map-hint')) document.getElementById('map-hint').innerText = u.mapHint || '';
 
         // Stats
         document.getElementById('stat-xp').innerText       = xp;
