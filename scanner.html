@@ -55,7 +55,8 @@
         </div>
     </header>
 
-    <main class="pt-24 px-6 max-md mx-auto space-y-8">
+    <main class="pt-24 px-6 max-w-md mx-auto space-y-8">
+
         <section class="bg-surface-high p-6 shadow-2xl">
             <p id="label-points" class="text-[10px] font-bold text-primary-cyan tracking-[0.2em] mb-1 uppercase">Bio-Points</p>
             <h2 id="xp-display" class="text-6xl font-black italic tracking-tighter leading-none">0</h2>
@@ -92,6 +93,7 @@
             <h3 id="label-logbook" class="text-[10px] font-black text-gray-500 tracking-[0.3em] px-1 uppercase">Feltlogbog</h3>
             <div id="collection-list" class="space-y-2"></div>
         </section>
+
     </main>
 
     <button id="camera-btn" class="fixed bottom-8 left-1/2 -translate-x-1/2 w-20 h-20 bg-primary-cyan flex items-center justify-center shadow-[0_0_40px_rgba(0,229,255,0.3)] active:scale-95 transition-transform z-50">
@@ -112,8 +114,11 @@
     </div>
 
 <script>
-    const API_KEY = "AIzaSyBtFSrIgzicXNKN-FYMUAzc3--zrkQmzNc";
+    // ⚠️ Indsæt din API-nøgle her — push ALDRIG denne fil til et offentligt repo
+    const API_KEY = "DIN_API_NØGLE_HER";
 
+    // ─── MISSIONER ───────────────────────────────────────────────
+    // Tilføj flere missioner her — de låses op automatisk én ad gangen
     const MISSIONS = [
         {
             id: "NT-718",
@@ -126,76 +131,104 @@
             xp: 500,
             da: { title: "Skovens Vogter", desc: "Find og scan en Skovmærke plante.", target: "Skovmærke" },
             en: { title: "Forest Guardian", desc: "Find and scan a Sweet Woodruff plant.", target: "Sweet Woodruff" },
-        }
+        },
+        {
+            id: "NT-720",
+            xp: 750,
+            da: { title: "Fugleøje", desc: "Scan en mejse — blåmejse eller musvit.", target: "Mejse" },
+            en: { title: "Bird's Eye", desc: "Scan a tit bird — blue tit or great tit.", target: "Tit" },
+        },
+        {
+            id: "NT-721",
+            xp: 750,
+            da: { title: "Svampejagt", desc: "Find og scan en vild svamp i naturen.", target: "Svamp" },
+            en: { title: "Fungal Hunt", desc: "Find and scan a wild mushroom in nature.", target: "Mushroom" },
+        },
+        {
+            id: "NT-722",
+            xp: 1000,
+            da: { title: "Insektdetektiv", desc: "Scan en sommerfugl af enhver art.", target: "Sommerfugl" },
+            en: { title: "Insect Detective", desc: "Scan a butterfly of any species.", target: "Butterfly" },
+        },
     ];
 
+    // ─── UI-TEKSTER ──────────────────────────────────────────────
     const UI = {
         da: {
             points: "Bio-Points", objective: "Aktivt Mål", logbook: "Feltlogbog",
             analysis: "Data Link Established", scanner: "System_Scan_Active",
             linking: "LINKER...", missionMet: "MISSION FULDFØRT",
             logbookEmpty: "Logbog tom.", allDone: "Alle missioner fuldført!",
-            prompt: (target, id) => `Identificer arten på billedet. Bestem om det er en ${target} (Mission ${id}). Svar KUN på DANSK.\nFormat:\nLinje 1: ARTSNAVNET (KUN STORE BOGSTAVER).\nLinje 2: JA eller NEJ.\nLinje 3: Én kort sætning om arten.`
+            prompt: (target, id) =>
+                `Identificer arten på billedet. Bestem om det er en ${target} (Mission ${id}). Svar KUN på DANSK.\nFormat:\nLinje 1: ARTSNAVNET (KUN STORE BOGSTAVER).\nLinje 2: JA eller NEJ.\nLinje 3: Én kort sætning om arten.`
         },
         en: {
             points: "Bio-Points", objective: "Active Objective", logbook: "Field Logbook",
             analysis: "Data Link Established", scanner: "System_Scan_Active",
             linking: "LINKING...", missionMet: "MISSION COMPLETE",
             logbookEmpty: "Logbook empty.", allDone: "All missions complete!",
-            prompt: (target, id) => `Identify the species in the image. Determine if it is a ${target} (Mission ${id}). Answer ONLY in ENGLISH.\nFormat:\nLinje 1: SPECIES NAME (ALL CAPS).\nLinje 2: YES or NO.\nLinje 3: One short sentence about the species.`
+            prompt: (target, id) =>
+                `Identify the species in the image. Determine if it is a ${target} (Mission ${id}). Answer ONLY in ENGLISH.\nFormat:\nLine 1: SPECIES NAME (ALL CAPS).\nLine 2: YES or NO.\nLine 3: One short sentence about the species.`
         }
     };
 
+    // ─── STATE ───────────────────────────────────────────────────
     let currentLang = localStorage.getItem('scoutLang') || 'da';
     let xp = parseInt(localStorage.getItem('scoutXP')) || 0;
 
-    function getCompletedMissions() { return JSON.parse(localStorage.getItem('completedMissions')) || []; }
+    function getCompletedMissions() {
+        return JSON.parse(localStorage.getItem('completedMissions')) || [];
+    }
+
     function getCurrentMission() {
         const done = getCompletedMissions();
         return MISSIONS.find(m => !done.includes(m.id)) || null;
     }
 
-    const cameraBtn = document.getElementById('camera-btn');
-    const scanner = document.getElementById('scanner');
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const captureBtn = document.getElementById('capture-btn');
-    const closeBtn = document.getElementById('close-btn');
-    const resultBox = document.getElementById('result-box');
-    const resultPanel = document.getElementById('result-panel');
-    const aiResponse = document.getElementById('ai-response');
-    const aiDetails = document.getElementById('ai-details');
-    const xpDisplay = document.getElementById('xp-display');
-    const xpBar = document.getElementById('xp-bar');
+    // ─── DOM ─────────────────────────────────────────────────────
+    const cameraBtn       = document.getElementById('camera-btn');
+    const scanner         = document.getElementById('scanner');
+    const video           = document.getElementById('video');
+    const canvas          = document.getElementById('canvas');
+    const captureBtn      = document.getElementById('capture-btn');
+    const closeBtn        = document.getElementById('close-btn');
+    const resultBox       = document.getElementById('result-box');
+    const resultPanel     = document.getElementById('result-panel');
+    const aiResponse      = document.getElementById('ai-response');
+    const aiDetails       = document.getElementById('ai-details');
+    const xpDisplay       = document.getElementById('xp-display');
+    const xpBar           = document.getElementById('xp-bar');
     const missionProgress = document.getElementById('mission-progress');
-    const collectionList = document.getElementById('collection-list');
+    const collectionList  = document.getElementById('collection-list');
 
+    // ─── UPDATE UI ───────────────────────────────────────────────
     function updateUI() {
         const ui = UI[currentLang];
         const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
         const mission = getCurrentMission();
 
-        document.getElementById('label-points').innerText = ui.points;
+        document.getElementById('label-points').innerText    = ui.points;
         document.getElementById('label-objective').innerText = ui.objective;
-        document.getElementById('label-logbook').innerText = ui.logbook;
-        document.getElementById('label-analysis').innerText = ui.analysis;
-        document.getElementById('label-scanner').innerText = ui.scanner;
+        document.getElementById('label-logbook').innerText   = ui.logbook;
+        document.getElementById('label-analysis').innerText  = ui.analysis;
+        document.getElementById('label-scanner').innerText   = ui.scanner;
 
         xpDisplay.innerText = xp;
         xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
 
         if (mission) {
             document.getElementById('mission-id-tag').innerText = mission.id;
-            document.getElementById('mission-title').innerText = mission[currentLang].title;
-            document.getElementById('mission-desc').innerText = mission[currentLang].desc;
+            document.getElementById('mission-title').innerText  = mission[currentLang].title;
+            document.getElementById('mission-desc').innerText   = mission[currentLang].desc;
             missionProgress.style.width = "20%";
         } else {
             document.getElementById('mission-id-tag').innerText = "—";
-            document.getElementById('mission-title').innerText = ui.allDone;
-            document.getElementById('mission-desc').innerText = "";
+            document.getElementById('mission-title').innerText  = ui.allDone;
+            document.getElementById('mission-desc').innerText   = "";
             missionProgress.style.width = "100%";
         }
 
+        // Logbog — bruger innerText for at undgå XSS fra AI-svar
         collectionList.innerHTML = "";
         if (finds.length === 0) {
             const empty = document.createElement('p');
@@ -206,7 +239,23 @@
             finds.slice().reverse().forEach(f => {
                 const item = document.createElement('div');
                 item.className = "bg-surface-high p-4 flex justify-between items-center";
-                item.innerHTML = `<div><p class="text-[9px] font-bold text-primary-cyan">${f.displayDate || f.date}</p><p class="text-lg font-black uppercase text-white leading-none mt-1 italic">${f.name}</p></div><span class="material-symbols-outlined text-primary-cyan text-sm">verified</span>`;
+
+                const left = document.createElement('div');
+                const dateEl = document.createElement('p');
+                dateEl.className = "text-[9px] font-bold text-primary-cyan";
+                dateEl.innerText = f.displayDate || f.date;
+                const nameEl = document.createElement('p');
+                nameEl.className = "text-lg font-black uppercase text-white leading-none mt-1 italic";
+                nameEl.innerText = f.name;
+                left.appendChild(dateEl);
+                left.appendChild(nameEl);
+
+                const icon = document.createElement('span');
+                icon.className = "material-symbols-outlined text-primary-cyan text-sm";
+                icon.innerText = "verified";
+
+                item.appendChild(left);
+                item.appendChild(icon);
                 collectionList.appendChild(item);
             });
         }
@@ -215,33 +264,57 @@
     function setLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('scoutLang', lang);
-        document.getElementById('btn-da').className = lang === 'da' ? "px-2 py-1 lang-btn-active" : "px-2 py-1 text-white/40 hover:text-primary-cyan";
-        document.getElementById('btn-en').className = lang === 'en' ? "px-2 py-1 lang-btn-active" : "px-2 py-1 text-white/40 hover:text-primary-cyan";
+        document.getElementById('btn-da').className = lang === 'da'
+            ? "px-2 py-1 lang-btn-active"
+            : "px-2 py-1 text-white/40 hover:text-primary-cyan";
+        document.getElementById('btn-en').className = lang === 'en'
+            ? "px-2 py-1 lang-btn-active"
+            : "px-2 py-1 text-white/40 hover:text-primary-cyan";
         updateUI();
     }
 
-    function stopStream() { if (video.srcObject) { video.srcObject.getTracks().forEach(t => t.stop()); video.srcObject = null; } }
+    function stopStream() {
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(t => t.stop());
+            video.srcObject = null;
+        }
+    }
 
+    // ─── KAMERA ──────────────────────────────────────────────────
     cameraBtn.onclick = async () => {
         scanner.classList.remove('hidden');
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
-        } catch (e) { scanner.classList.add('hidden'); }
+        } catch (e) {
+            alert(currentLang === 'da'
+                ? "Kameraadgang nægtet. Tjek dine browserindstillinger."
+                : "Camera access denied. Check your browser settings.");
+            scanner.classList.add('hidden');
+        }
     };
 
     closeBtn.onclick = () => { stopStream(); scanner.classList.add('hidden'); };
     document.getElementById('btn-da').onclick = () => setLanguage('da');
     document.getElementById('btn-en').onclick = () => setLanguage('en');
 
+    // ─── CAPTURE & AI ─────────────────────────────────────────────
     captureBtn.onclick = async () => {
-        if (!video.videoWidth) return;
+        if (!video.videoWidth || !video.videoHeight) {
+            alert(currentLang === 'da' ? "Kameraet er ikke klar endnu." : "Camera not ready yet.");
+            return;
+        }
+
         const mission = getCurrentMission();
-        if (!mission) { stopStream(); scanner.classList.add('hidden'); return; }
+        if (!mission) {
+            stopStream();
+            scanner.classList.add('hidden');
+            return;
+        }
 
         captureBtn.disabled = true;
         const scale = 720 / video.videoWidth;
-        canvas.width = 720;
+        canvas.width  = 720;
         canvas.height = Math.round(video.videoHeight * scale);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         const base64 = canvas.toDataURL("image/jpeg", 0.6).split(',')[1];
@@ -250,27 +323,51 @@
         scanner.classList.add('hidden');
         resultBox.classList.remove('hidden');
         resultPanel.classList.remove('mission-success');
+        resultPanel.classList.remove('unlock-animate');
         aiResponse.innerText = UI[currentLang].linking;
-        aiDetails.innerText = "...";
+        aiDetails.innerText  = "...";
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: UI[currentLang].prompt(mission[currentLang].target, mission.id) }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
-            });
+            const ui     = UI[currentLang];
+            const target = mission[currentLang].target;
+
+            const res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: ui.prompt(target, mission.id) },
+                                { inline_data: { mime_type: "image/jpeg", data: base64 } }
+                            ]
+                        }]
+                    })
+                }
+            );
+
             const data = await res.json();
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-            const lines = text.split("\n").filter(l => l.trim());
-            const name = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
+
+            if (data.error) {
+                aiResponse.innerText = "API ERROR " + data.error.code;
+                aiDetails.innerText  = data.error.message;
+                return;
+            }
+
+            const text      = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            const lines     = text.split("\n").filter(l => l.trim());
+            const name      = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
             const matchLine = (lines[1] || "").toUpperCase();
-            const isMatch = matchLine.includes("YES") || matchLine.includes("JA");
-            const detail = lines.slice(2).join(" ").replace(/[*#]/g, '').trim();
-            const isValid = name.length > 2 && name !== "UNKNOWN";
+            const isMatch   = matchLine.includes("YES") || matchLine.includes("JA");
+            const detail    = lines.slice(2).join(" ").replace(/[*#]/g, '').trim();
+            const isValid   = name.length > 2 && name !== "UNKNOWN";
 
             if (isMatch) {
                 aiResponse.innerText = UI[currentLang].missionMet;
-                aiDetails.innerText = `${name}: ${detail}`;
+                aiDetails.innerText  = `${name}: ${detail}`;
                 resultPanel.classList.add('mission-success');
+
                 const done = getCompletedMissions();
                 if (!done.includes(mission.id)) {
                     done.push(mission.id);
@@ -278,11 +375,20 @@
                     if (isValid) xp += mission.xp;
                     localStorage.setItem('scoutXP', xp);
                 }
-                setTimeout(() => { updateUI(); }, 2000);
+
+                // Næste mission vises med animation efter 2 sekunder
+                setTimeout(() => {
+                    document.getElementById('mission-card').classList.add('unlock-animate');
+                    updateUI();
+                }, 2000);
+
             } else {
                 aiResponse.innerText = name;
-                aiDetails.innerText = detail;
-                if (isValid) { xp += 100; localStorage.setItem('scoutXP', xp); }
+                aiDetails.innerText  = detail;
+                if (isValid) {
+                    xp += 100;
+                    localStorage.setItem('scoutXP', xp);
+                }
             }
 
             if (isValid) {
@@ -295,8 +401,15 @@
                 }
                 updateUI();
             }
-        } catch (e) { aiResponse.innerText = "LINK_LOST"; }
-        finally { captureBtn.disabled = false; }
+
+        } catch (e) {
+            aiResponse.innerText = "LINK_LOST";
+            aiDetails.innerText  = currentLang === 'da'
+                ? "Forbindelsen fejlede. Prøv igen."
+                : "Connection failed. Please try again.";
+        } finally {
+            captureBtn.disabled = false;
+        }
     };
 
     setLanguage(currentLang);
