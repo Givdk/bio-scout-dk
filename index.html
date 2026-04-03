@@ -9,22 +9,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script>
       tailwind.config = {
-        theme: { extend: { colors: { "background": "#111417", "surface-high": "#272a2e", "primary-cyan": "#00e5ff", "on-surface": "#e1e2e8" }, fontFamily: { "sans": ["Inter"] }, borderRadius: { "none": "0px" } } }
+        theme: {
+          extend: {
+            colors: {
+              "background": "#111417",
+              "surface-high": "#272a2e",
+              "primary-cyan": "#00e5ff",
+              "on-surface": "#e1e2e8",
+            },
+            fontFamily: { "sans": ["Inter"] },
+            borderRadius: { "none": "0px" },
+          },
+        },
       }
     </script>
     <style>
         body { background-color: #111417; letter-spacing: -0.01em; }
         h1,h2,h3,h4 { letter-spacing: -0.02em; font-style: italic; text-transform: uppercase; }
         * { border-radius: 0px !important; }
-        .habitat-tile { position: relative; overflow: hidden; cursor: pointer; background-color: #272a2e; }
+        .habitat-tile { position: relative; overflow: hidden; cursor: pointer; background-color: #272a2e; transition: transform 0.15s ease; }
+        .habitat-tile:active { transform: scale(0.97); }
         .habitat-tile .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%); }
         .live-dot { width:6px; height:6px; background:#00e5ff; animation: pulse 1.5s infinite; flex-shrink:0; }
         @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-        .reveal { opacity: 0; transform: translateY(16px); transition: all 0.5s ease; }
+        .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body class="text-on-surface min-h-screen pb-28">
+
     <header class="fixed top-0 w-full z-50 bg-[#111417]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center border-b border-white/5">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary-cyan text-xl">rebase_edit</span>
@@ -36,9 +49,32 @@
         </div>
     </header>
 
-    <main class="pt-24 px-4 max-w-lg mx-auto space-y-8">
+    <main class="pt-24 px-4 max-w-lg mx-auto space-y-8 pb-4">
+
         <section class="reveal">
-            <h1 class="text-4xl font-black leading-none text-white italic mb-6">Find.<br/>Scan.<br/>Log.</h1>
+            <p class="text-[10px] font-black text-primary-cyan uppercase tracking-[0.3em] mb-1">Sæson: Forår 2026</p>
+            <h1 class="text-4xl font-black uppercase italic leading-none text-white">Find.<br/>Scan.<br/>Log.</h1>
+            <p class="text-xs text-on-surface/50 mt-3 italic">Udforsk dansk natur — ét scan ad gangen.</p>
+        </section>
+
+        <section class="reveal">
+            <div class="grid grid-cols-3 gap-2">
+                <div class="bg-surface-high p-4">
+                    <p class="text-[9px] font-bold text-primary-cyan uppercase mb-1">XP</p>
+                    <p id="stat-xp" class="text-2xl font-black italic text-white leading-none">0</p>
+                </div>
+                <div class="bg-surface-high p-4">
+                    <p class="text-[9px] font-bold text-primary-cyan uppercase mb-1">Fund</p>
+                    <p id="stat-finds" class="text-2xl font-black italic text-white leading-none">0</p>
+                </div>
+                <div class="bg-surface-high p-4">
+                    <p class="text-[9px] font-bold text-primary-cyan uppercase mb-1">Mål</p>
+                    <p id="stat-missions" class="text-2xl font-black italic text-white leading-none">0</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="reveal">
             <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3">Naturområder</p>
             <div class="grid grid-cols-2 gap-2" id="habitat-grid">
                 </div>
@@ -51,11 +87,12 @@
         </section>
 
         <section class="reveal pb-4">
-            <button onclick="window.location.href='scanner.html'" class="w-full bg-primary-cyan py-5 flex items-center justify-center gap-3 active:scale-95 shadow-[0_0_40px_rgba(0,229,255,0.2)]">
+            <button onclick="window.location.href='scanner.html'" class="w-full bg-primary-cyan py-5 flex items-center justify-center gap-3 active:scale-95 transition-transform shadow-[0_0_40px_rgba(0,229,255,0.2)]">
                 <span class="material-symbols-outlined text-background text-2xl">center_focus_strong</span>
                 <span class="font-black uppercase text-background tracking-[0.15em] text-sm">Start Scanner</span>
             </button>
         </section>
+
     </main>
 
 <script>
@@ -70,39 +107,50 @@
         { name: "Rødræv", habitat: "Skov / Eng", status: "Almindelig" },
         { name: "Grævling", habitat: "Skov", status: "Almindelig" },
         { name: "Kronhjort", habitat: "Skov", status: "Almindelig" },
-        { name: "Isfugl", habitat: "Å / Kyst", status: "Sjælden" }
+        { name: "Isfugl", habitat: "Å / Kyst", status: "Sjælden" },
+        { name: "Marsvin", habitat: "Kyst", status: "Sårbar" }
     ];
 
     function render() {
+        // Opdater Stats
+        document.getElementById('stat-xp').innerText = localStorage.getItem('scoutXP') || 0;
+        document.getElementById('stat-finds').innerText = (JSON.parse(localStorage.getItem('scoutFinds')) || []).length;
+        document.getElementById('stat-missions').innerText = (JSON.parse(localStorage.getItem('completedMissions')) || []).length;
+
+        // Render Habitater
         const grid = document.getElementById('habitat-grid');
+        grid.innerHTML = "";
         habitats.forEach(h => {
             grid.innerHTML += `
                 <div class="habitat-tile h-36" onclick="window.location.href='scanner.html'">
                     <div class="overlay"></div>
-                    <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 text-5xl">${h.icon}</span>
+                    <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 text-5xl text-white">${h.icon}</span>
                     <div class="absolute bottom-0 left-0 p-3">
                         <p class="text-lg font-black uppercase text-white italic leading-none">${h.label}</p>
-                        <p class="text-[9px] text-white/50 mt-0.5">${h.count}</p>
+                        <p class="text-[9px] text-white/50 mt-0.5 tracking-widest uppercase font-bold">${h.count}</p>
                     </div>
                 </div>`;
         });
 
+        // Render Dyr
         const list = document.getElementById('animals-list');
+        list.innerHTML = "";
         animals.forEach(a => {
             list.innerHTML += `
-                <div class="bg-surface-high p-4 flex justify-between items-center">
+                <div class="bg-surface-high p-4 flex justify-between items-center shadow-lg">
                     <div>
                         <p class="text-sm font-black uppercase text-white italic leading-none">${a.name}</p>
-                        <p class="text-[9px] text-gray-500 uppercase mt-1">${a.habitat}</p>
+                        <p class="text-[9px] text-gray-500 uppercase mt-1 font-bold">${a.habitat}</p>
                     </div>
-                    <p class="text-[9px] font-black uppercase text-gray-600">${a.status}</p>
+                    <p class="text-[9px] font-black uppercase text-gray-600 border border-white/5 px-2 py-1">${a.status}</p>
                 </div>`;
         });
     }
 
+    // Scroll reveal logik
     const observer = new IntersectionObserver(entries => {
         entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    });
+    }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
     render();
