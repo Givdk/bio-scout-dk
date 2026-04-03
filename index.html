@@ -9,229 +9,103 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script>
       tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              "background": "#111417",
-              "surface-high": "#272a2e",
-              "primary-cyan": "#00e5ff",
-              "on-surface": "#e1e2e8",
-            },
-            fontFamily: { "sans": ["Inter"] },
-            borderRadius: { "none": "0px" },
-          },
-        },
+        theme: { extend: { colors: { "background": "#111417", "surface-high": "#272a2e", "primary-cyan": "#00e5ff", "on-surface": "#e1e2e8" }, fontFamily: { "sans": ["Inter"] }, borderRadius: { "none": "0px" } } }
       }
     </script>
     <style>
         body { background-color: #111417; letter-spacing: -0.01em; }
-        h1,h2,h3,h4 { letter-spacing: -0.02em; font-style: italic; }
+        h1,h2,h3,h4 { letter-spacing: -0.02em; font-style: italic; text-transform: uppercase; }
         * { border-radius: 0px !important; }
-        .habitat-tile { position: relative; overflow: hidden; cursor: pointer; background-color: #272a2e; transition: transform 0.15s ease; }
-        .habitat-tile:active { transform: scale(0.97); }
+        .habitat-tile { position: relative; overflow: hidden; cursor: pointer; background-color: #272a2e; }
         .habitat-tile .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%); }
-        .habitat-tile .tile-icon { font-size: 2rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%); opacity: 0.15; }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
         .live-dot { width:6px; height:6px; background:#00e5ff; animation: pulse 1.5s infinite; flex-shrink:0; }
-        .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .reveal { opacity: 0; transform: translateY(16px); transition: all 0.5s ease; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
-        .nav-active { color: #00e5ff; }
-        .nav-inactive { color: rgba(255,255,255,0.25); }
-        .lang-btn-active { background-color: #00e5ff; color: #111417; }
     </style>
 </head>
 <body class="text-on-surface min-h-screen pb-28">
-
     <header class="fixed top-0 w-full z-50 bg-[#111417]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center border-b border-white/5">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary-cyan text-xl">rebase_edit</span>
             <span class="font-black text-xs tracking-[0.2em] uppercase">BIO-SCOUT // PRO</span>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="flex border border-white/10 text-[9px] font-black">
-                <button id="btn-da" class="px-2 py-1 lang-btn-active" onclick="setLang('da')">DA</button>
-                <button id="btn-en" class="px-2 py-1 text-white/40" onclick="setLang('en')">EN</button>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="live-dot"></div>
-                <span class="text-[9px] font-black text-primary-cyan uppercase tracking-widest">Live</span>
-            </div>
+        <div class="flex items-center gap-2">
+            <div class="live-dot"></div>
+            <span class="text-[9px] font-black text-primary-cyan uppercase tracking-widest">System Active</span>
         </div>
     </header>
 
-    <main class="pt-24 px-4 max-w-lg mx-auto space-y-8 pb-4">
+    <main class="pt-24 px-4 max-w-lg mx-auto space-y-8">
         <section class="reveal">
-            <p id="hero-season" class="text-[10px] font-black text-primary-cyan uppercase tracking-[0.3em] mb-1"></p>
-            <h1 class="text-4xl font-black uppercase italic leading-none text-white">Find.<br/>Scan.<br/>Log.</h1>
-            <p id="hero-sub" class="text-xs text-on-surface/50 mt-3 italic"></p>
-        </section>
-
-        <section class="reveal">
-            <p id="label-status" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3"></p>
-            <div class="grid grid-cols-3 gap-2">
-                <div class="bg-surface-high p-4">
-                    <p class="text-[9px] font-bold text-primary-cyan uppercase tracking-widest mb-1">XP</p>
-                    <p id="stat-xp" class="text-2xl font-black italic text-white leading-none">0</p>
+            <h1 class="text-4xl font-black leading-none text-white italic mb-6">Find.<br/>Scan.<br/>Log.</h1>
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3">Naturområder</p>
+            <div class="grid grid-cols-2 gap-2" id="habitat-grid">
                 </div>
-                <div class="bg-surface-high p-4">
-                    <p id="label-finds" class="text-[9px] font-bold text-primary-cyan uppercase tracking-widest mb-1"></p>
-                    <p id="stat-finds" class="text-2xl font-black italic text-white leading-none">0</p>
+        </section>
+
+        <section class="reveal">
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3">Dyr i Danmark</p>
+            <div class="space-y-2" id="animals-list">
                 </div>
-                <div class="bg-surface-high p-4">
-                    <p id="label-missions" class="text-[9px] font-bold text-primary-cyan uppercase tracking-widest mb-1"></p>
-                    <p id="stat-missions" class="text-2xl font-black italic text-white leading-none">0</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="reveal">
-            <p id="label-habitats" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3"></p>
-            <div class="grid grid-cols-2 gap-2" id="habitat-grid"></div>
-        </section>
-
-        <section class="reveal">
-            <p id="label-trending" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3"></p>
-            <div class="space-y-2" id="trending-list"></div>
-        </section>
-
-        <section class="reveal">
-            <div class="flex justify-between items-end mb-3">
-                <p id="label-recent" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]"></p>
-            </div>
-            <div id="recent-finds" class="space-y-2"></div>
-        </section>
-
-        <section class="reveal">
-            <p id="label-animals" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3"></p>
-            <div class="space-y-2" id="animals-list"></div>
         </section>
 
         <section class="reveal pb-4">
-            <button onclick="goScanner()" class="w-full bg-primary-cyan py-5 flex items-center justify-center gap-3 active:scale-95 transition-transform shadow-[0_0_40px_rgba(0,229,255,0.2)]">
+            <button onclick="window.location.href='scanner.html'" class="w-full bg-primary-cyan py-5 flex items-center justify-center gap-3 active:scale-95 shadow-[0_0_40px_rgba(0,229,255,0.2)]">
                 <span class="material-symbols-outlined text-background text-2xl">center_focus_strong</span>
-                <span id="cta-label" class="font-black uppercase text-background tracking-[0.15em] text-sm"></span>
+                <span class="font-black uppercase text-background tracking-[0.15em] text-sm">Start Scanner</span>
             </button>
         </section>
     </main>
 
-    <nav class="fixed bottom-0 w-full bg-[#111417]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center px-6 py-4 z-50">
-        <div class="nav-active flex flex-col items-center gap-1">
-            <span class="material-symbols-outlined text-xl">home</span>
-            <span id="nav-home" class="text-[8px] font-black uppercase"></span>
-        </div>
-        <button onclick="goScanner()" class="nav-inactive flex flex-col items-center gap-1">
-            <span class="material-symbols-outlined text-xl">center_focus_strong</span>
-            <span id="nav-scanner" class="text-[8px] font-black uppercase"></span>
-        </button>
-    </nav>
-
 <script>
-    const UI = {
-        da: {
-            season: "Sæson: Forår 2026",
-            heroSub: "Udforsk dansk natur — ét scan ad gangen.",
-            status: "Din Status", finds: "Fund", missions: "Missioner",
-            habitats: "Naturområder", trending: "Trending i Danmark",
-            recent: "Seneste Fund", animals: "Dyr i Danmark", cta: "Start Scanner",
-            navHome: "Hjem", navScan: "Scanner",
-            habitats_data: [
-                { key: "Skov", label: "Skov", count: "48 arter", icon: "forest" },
-                { key: "Kyst", label: "Kyst", count: "31 arter", icon: "water" },
-                { key: "Eng", label: "Eng", count: "27 arter", icon: "grass" },
-                { key: "Mose", label: "Mose", count: "19 arter", icon: "blur_on" },
-            ],
-            trending_data: [{ name: "Blåmejse", count: "247 fund" }, { name: "Anemone", count: "189 fund" }],
-            animals_data: [{ name: "Rødræv", habitat: "Skov", status: "Almindelig" }],
-            rare: ["Sjælden", "Sårbar"],
-        },
-        en: {
-            season: "Season: Spring 2026",
-            heroSub: "Explore Danish nature — one scan at a time.",
-            status: "Your Status", finds: "Finds", missions: "Missions",
-            habitats: "Natural Habitats", trending: "Trending in Denmark",
-            recent: "Recent Finds", animals: "Animals in Denmark", cta: "Start Scanner",
-            navHome: "Home", navScan: "Scanner",
-            habitats_data: [
-                { key: "Forest", label: "Forest", count: "48 species", icon: "forest" },
-                { key: "Coast", label: "Coast", count: "31 species", icon: "water" },
-                { key: "Meadow", label: "Meadow", count: "27 species", icon: "grass" },
-                { key: "Bog", label: "Bog", count: "19 species", icon: "blur_on" },
-            ],
-            trending_data: [{ name: "Blue Tit", count: "247 finds" }, { name: "Anemone", count: "189 finds" }],
-            animals_data: [{ name: "Red Fox", habitat: "Forest", status: "Common" }],
-            rare: ["Rare", "Vulnerable"],
-        }
-    };
+    const habitats = [
+        { label: "Skov", count: "48 arter", icon: "forest" },
+        { label: "Kyst", count: "31 arter", icon: "water" },
+        { label: "Eng",  count: "27 arter", icon: "grass" },
+        { label: "Mose", count: "19 arter", icon: "blur_on" }
+    ];
 
-    let lang = localStorage.getItem('scoutLang') || 'da';
+    const animals = [
+        { name: "Rødræv", habitat: "Skov / Eng", status: "Almindelig" },
+        { name: "Grævling", habitat: "Skov", status: "Almindelig" },
+        { name: "Kronhjort", habitat: "Skov", status: "Almindelig" },
+        { name: "Isfugl", habitat: "Å / Kyst", status: "Sjælden" }
+    ];
 
-    function setLang(l) {
-        lang = l;
-        localStorage.setItem('scoutLang', l);
-        renderAll();
-    }
-
-    function goScanner() {
-        window.location.href = 'scanner.html';
-    }
-
-    function renderAll() {
-        const u = UI[lang];
-        const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
-        const completed = JSON.parse(localStorage.getItem('completedMissions')) || [];
-        const xp = parseInt(localStorage.getItem('scoutXP')) || 0;
-
-        document.getElementById('hero-season').innerText = u.season;
-        document.getElementById('hero-sub').innerText = u.heroSub;
-        document.getElementById('label-status').innerText = u.status;
-        document.getElementById('label-finds').innerText = u.finds;
-        document.getElementById('label-missions').innerText = u.missions;
-        document.getElementById('label-habitats').innerText = u.habitats;
-        document.getElementById('label-trending').innerText = u.trending;
-        document.getElementById('label-recent').innerText = u.recent;
-        document.getElementById('label-animals').innerText = u.animals;
-        document.getElementById('cta-label').innerText = u.cta;
-        document.getElementById('nav-home').innerText = u.navHome;
-        document.getElementById('nav-scanner').innerText = u.navScan;
-
-        document.getElementById('stat-xp').innerText = xp;
-        document.getElementById('stat-finds').innerText = finds.length;
-        document.getElementById('stat-missions').innerText = completed.length;
-
-        // Habitat grid
+    function render() {
         const grid = document.getElementById('habitat-grid');
-        grid.innerHTML = "";
-        u.habitats_data.forEach(h => {
-            const tile = document.createElement('div');
-            tile.className = "habitat-tile h-36";
-            tile.onclick = () => goScanner();
-            tile.innerHTML = `
-                <div class="overlay"></div>
-                <span class="tile-icon material-symbols-outlined">${h.icon}</span>
-                <div class="absolute bottom-0 left-0 p-3">
-                    <p class="text-lg font-black uppercase text-white italic leading-none">${h.label}</p>
-                    <p class="text-[9px] text-white/50 mt-0.5">${h.count}</p>
+        habitats.forEach(h => {
+            grid.innerHTML += `
+                <div class="habitat-tile h-36" onclick="window.location.href='scanner.html'">
+                    <div class="overlay"></div>
+                    <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 text-5xl">${h.icon}</span>
+                    <div class="absolute bottom-0 left-0 p-3">
+                        <p class="text-lg font-black uppercase text-white italic leading-none">${h.label}</p>
+                        <p class="text-[9px] text-white/50 mt-0.5">${h.count}</p>
+                    </div>
                 </div>`;
-            grid.appendChild(tile);
         });
 
-        // Recent finds
-        const recentEl = document.getElementById('recent-finds');
-        recentEl.innerHTML = finds.length === 0 ? `<div class="bg-surface-high p-4 text-[10px] text-gray-600 uppercase italic">Ingen fund endnu</div>` : "";
-        finds.slice().reverse().slice(0, 3).forEach(f => {
-            const item = document.createElement('div');
-            item.className = "bg-surface-high p-4 flex justify-between items-center";
-            item.innerHTML = `<div><p class="text-[9px] font-bold text-primary-cyan uppercase">${f.displayDate || f.date}</p><p class="text-base font-black uppercase text-white italic mt-1">${f.name}</p></div><span class="material-symbols-outlined text-primary-cyan text-sm">verified</span>`;
-            recentEl.appendChild(item);
+        const list = document.getElementById('animals-list');
+        animals.forEach(a => {
+            list.innerHTML += `
+                <div class="bg-surface-high p-4 flex justify-between items-center">
+                    <div>
+                        <p class="text-sm font-black uppercase text-white italic leading-none">${a.name}</p>
+                        <p class="text-[9px] text-gray-500 uppercase mt-1">${a.habitat}</p>
+                    </div>
+                    <p class="text-[9px] font-black uppercase text-gray-600">${a.status}</p>
+                </div>`;
         });
     }
 
     const observer = new IntersectionObserver(entries => {
         entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1 });
+    });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    renderAll();
+    render();
 </script>
 </body>
 </html>
