@@ -115,7 +115,7 @@
 
 <script>
     // ⚠️ Indsæt din API-nøgle her — push ALDRIG denne fil til et offentligt repo
-    const API_KEY = "DIN_API_NØGLE_HER";
+    const API_KEY = "AIzaSyBtFSrIgzicXNKN-FYMUAzc3--zrkQmzNc";
 
     // ─── MISSIONER ───────────────────────────────────────────────
     // Tilføj flere missioner her — de låses op automatisk én ad gangen
