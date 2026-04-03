@@ -117,7 +117,7 @@
     </div>
 
 <script>
-    const API_KEY = "AIzaSyAfoVUX4STwfKlplDyMT6tfx1xq8THMVNE";
+    const API_KEY = "AIzaSyBJ6Q36Q48KaVbn4ad5QpG6XIj1rn3FOy4";
     const MISSION_ID = "NT-718: Botanical (Anemone)";
 
     const langData = {
@@ -169,30 +169,7 @@
     const missionProgress = document.getElementById('mission-progress');
     const collectionList = document.getElementById('collection-list');
 
-    function updateUI() {
-        const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
-        xpDisplay.innerText = xp;
-        xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
 
-        const missionDone = localStorage.getItem('missionNT718') === 'complete';
-        missionProgress.style.width = missionDone ? "100%" : "20%";
-
-        collectionList.innerHTML = finds.length === 0
-            ? `<p class="text-[10px] text-gray-600 uppercase italic px-1">${langData[currentLang].logbookEmpty}</p>`
-            : "";
-
-        finds.slice().reverse().forEach(f => {
-            const item = document.createElement('div');
-            item.className = "bg-surface-high p-4 flex justify-between items-center";
-            item.innerHTML = `
-                <div>
-                    <p class="text-[9px] font-bold text-primary-cyan">${f.date}</p>
-                    <p class="text-lg font-black uppercase text-white leading-none mt-1 italic">${f.name}</p>
-                </div>
-                <span class="material-symbols-outlined text-primary-cyan text-sm">verified</span>`;
-            collectionList.appendChild(item);
-        });
-    }
 
     function setLanguage(lang) {
         currentLang = lang;
@@ -335,8 +312,6 @@
         }
     };
 
-    // Vis gemt displayDate i logbogen i stedet for ISO-dato
-    const _origUpdate = updateUI;
     function updateUI() {
         const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
         xpDisplay.innerText = xp;
