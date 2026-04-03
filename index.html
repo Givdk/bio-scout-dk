@@ -247,7 +247,8 @@
         renderAll();
     }
 function goScanner(habitat) {
-    window.location.href = 'scanner.html'; //
+    if (habitat) localStorage.setItem('activeHabitat', habitat);
+    window.location.href = 'scanner.html'; 
 }
     }
 
