@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    
     <script>
       tailwind.config = {
         theme: {
@@ -25,21 +24,17 @@
         },
       }
     </script>
-
     <style>
         body { background-color: #111417; letter-spacing: -0.01em; }
         h1, h2, h3, h4 { letter-spacing: -0.02em; text-transform: uppercase; font-style: italic; }
-        .tonal-card { background-color: #272a2e; border: none; }
-        @keyframes missionGlow {
-            0% { box-shadow: 0 0 5px #00e5ff; }
-            50% { box-shadow: 0 0 25px #00e5ff; }
-            100% { box-shadow: 0 0 5px #00e5ff; }
-        }
+        @keyframes missionGlow { 0% { box-shadow: 0 0 5px #00e5ff; } 50% { box-shadow: 0 0 25px #00e5ff; } 100% { box-shadow: 0 0 5px #00e5ff; } }
         .mission-success { animation: missionGlow 1.5s infinite; border: 2px solid #00e5ff !important; }
         .scanner-line { height: 2px; background: #00e5ff; position: absolute; width: 100%; animation: scan 2s linear infinite; box-shadow: 0 0 15px #00e5ff; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
         * { border-radius: 0px !important; }
         .lang-btn-active { background-color: #00e5ff; color: #111417; }
+        @keyframes unlockPop { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+        .unlock-animate { animation: unlockPop 0.4s ease both; }
     </style>
 </head>
 <body class="text-on-surface min-h-screen pb-32">
@@ -61,23 +56,24 @@
     </header>
 
     <main class="pt-24 px-6 max-w-md mx-auto space-y-8">
+
         <section class="bg-surface-high p-6 shadow-2xl">
             <p id="label-points" class="text-[10px] font-bold text-primary-cyan tracking-[0.2em] mb-1 uppercase">Bio-Points</p>
             <h2 id="xp-display" class="text-6xl font-black italic tracking-tighter leading-none">0</h2>
             <div class="mt-4 h-1 bg-white/5 w-full">
-                <div id="xp-bar" class="h-full bg-primary-cyan transition-all duration-700" style="width: 5%"></div>
+                <div id="xp-bar" class="h-full bg-primary-cyan transition-all duration-700" style="width: 0%"></div>
             </div>
         </section>
 
         <section class="space-y-3">
             <div class="flex justify-between items-end px-1">
                 <h3 id="label-objective" class="text-[10px] font-black text-gray-500 tracking-[0.3em] uppercase">Aktivt Mål</h3>
-                <span class="text-[9px] font-bold text-primary-cyan">NT-718</span>
+                <span id="mission-id-tag" class="text-[9px] font-bold text-primary-cyan"></span>
             </div>
             <div id="mission-card" class="bg-surface-high p-5 relative overflow-hidden">
                 <div class="relative z-10">
-                    <h4 id="mission-title" class="text-lg font-black leading-tight mb-1 uppercase">Botanical Recovery</h4>
-                    <p id="mission-desc" class="text-xs text-on-surface/60 italic">Find og scan en blomstrende Anemone.</p>
+                    <h4 id="mission-title" class="text-lg font-black leading-tight mb-1 uppercase"></h4>
+                    <p id="mission-desc" class="text-xs text-on-surface/60 italic"></p>
                 </div>
                 <div class="absolute bottom-0 left-0 h-1 bg-primary-cyan/20 w-full">
                     <div id="mission-progress" class="h-full bg-primary-cyan transition-all duration-1000" style="width: 0%"></div>
@@ -88,7 +84,7 @@
         <section id="result-box" class="hidden">
             <div id="result-panel" class="bg-surface-high p-6 relative transition-all">
                 <p id="label-analysis" class="text-[9px] font-black text-primary-cyan tracking-[0.2em] mb-2 uppercase italic">Data Link Established</p>
-                <h3 id="ai-response" class="text-3xl font-black leading-none mb-3 uppercase">Scanning...</h3>
+                <h3 id="ai-response" class="text-3xl font-black leading-none mb-3 uppercase"></h3>
                 <p id="ai-details" class="text-sm italic opacity-70 leading-relaxed border-t border-white/10 pt-4"></p>
             </div>
         </section>
@@ -97,6 +93,7 @@
             <h3 id="label-logbook" class="text-[10px] font-black text-gray-500 tracking-[0.3em] px-1 uppercase">Feltlogbog</h3>
             <div id="collection-list" class="space-y-2"></div>
         </section>
+
     </main>
 
     <button id="camera-btn" class="fixed bottom-8 left-1/2 -translate-x-1/2 w-20 h-20 bg-primary-cyan flex items-center justify-center shadow-[0_0_40px_rgba(0,229,255,0.3)] active:scale-95 transition-transform z-50">
@@ -117,71 +114,156 @@
     </div>
 
 <script>
-    const API_KEY = "AIzaSyCmfjA0TOxjOmheo-B6JnJbh8nKMmEZ1wg";
-    const MISSION_ID = "NT-718: Botanical (Anemone)";
+    // ⚠️ Indsæt din API-nøgle her — push ALDRIG denne fil til et offentligt repo
+    const API_KEY = "DIN_API_NØGLE_HER";
 
-    const langData = {
+    // ─── MISSIONER ───────────────────────────────────────────────
+    // Tilføj flere missioner her — de låses op automatisk én ad gangen
+    const MISSIONS = [
+        {
+            id: "NT-718",
+            xp: 500,
+            da: { title: "Botanical Recovery", desc: "Find og scan en blomstrende Anemone.", target: "Anemone" },
+            en: { title: "Botanical Recovery", desc: "Find and scan a blooming Anemone flower.", target: "Anemone" },
+        },
+        {
+            id: "NT-719",
+            xp: 500,
+            da: { title: "Skovens Vogter", desc: "Find og scan en Skovmærke plante.", target: "Skovmærke" },
+            en: { title: "Forest Guardian", desc: "Find and scan a Sweet Woodruff plant.", target: "Sweet Woodruff" },
+        },
+        {
+            id: "NT-720",
+            xp: 750,
+            da: { title: "Fugleøje", desc: "Scan en mejse — blåmejse eller musvit.", target: "Mejse" },
+            en: { title: "Bird's Eye", desc: "Scan a tit bird — blue tit or great tit.", target: "Tit" },
+        },
+        {
+            id: "NT-721",
+            xp: 750,
+            da: { title: "Svampejagt", desc: "Find og scan en vild svamp i naturen.", target: "Svamp" },
+            en: { title: "Fungal Hunt", desc: "Find and scan a wild mushroom in nature.", target: "Mushroom" },
+        },
+        {
+            id: "NT-722",
+            xp: 1000,
+            da: { title: "Insektdetektiv", desc: "Scan en sommerfugl af enhver art.", target: "Sommerfugl" },
+            en: { title: "Insect Detective", desc: "Scan a butterfly of any species.", target: "Butterfly" },
+        },
+    ];
+
+    // ─── UI-TEKSTER ──────────────────────────────────────────────
+    const UI = {
         da: {
-            points: "Bio-Points",
-            objective: "Aktivt Mål",
-            missionTitle: "Botanical Recovery",
-            missionDesc: "Find og scan en blomstrende Anemone.",
-            logbook: "Feltlogbog",
-            analysis: "Data Link Established",
-            scanner: "System_Scan_Active",
-            linking: "LINKER...",
-            missionMet: "MISSION FULDFØRT",
-            logbookEmpty: "Logbog tom.",
-            // FIX: prompt er nu en funktion så MISSION_ID interpoleres korrekt
-            prompt: (id) => `Identificer arten. Bestem om den matcher: ${id}. Svar på DANSK. Format: Linje 1: NAVN (KUN STORE BOGSTAVER). Linje 2: JA/NEJ. Linje 3: 1 kort sætning.`
+            points: "Bio-Points", objective: "Aktivt Mål", logbook: "Feltlogbog",
+            analysis: "Data Link Established", scanner: "System_Scan_Active",
+            linking: "LINKER...", missionMet: "MISSION FULDFØRT",
+            logbookEmpty: "Logbog tom.", allDone: "Alle missioner fuldført!",
+            prompt: (target, id) =>
+                `Identificer arten på billedet. Bestem om det er en ${target} (Mission ${id}). Svar KUN på DANSK.\nFormat:\nLinje 1: ARTSNAVNET (KUN STORE BOGSTAVER).\nLinje 2: JA eller NEJ.\nLinje 3: Én kort sætning om arten.`
         },
         en: {
-            points: "Bio-Points",
-            objective: "Active Objective",
-            missionTitle: "Botanical Recovery",
-            missionDesc: "Identify a blooming Anemone flower.",
-            logbook: "Field Logbook",
-            analysis: "Data Link Established",
-            scanner: "System_Scan_Active",
-            linking: "LINKING...",
-            missionMet: "MISSION MET",
-            logbookEmpty: "Logbook empty.",
-            // FIX: prompt er nu en funktion så MISSION_ID interpoleres korrekt
-            prompt: (id) => `Identify species. Determine if it matches: ${id}. Answer in ENGLISH. Format: Line 1: NAME (ALL CAPS). Line 2: YES/NO. Line 3: 1 short sentence.`
+            points: "Bio-Points", objective: "Active Objective", logbook: "Field Logbook",
+            analysis: "Data Link Established", scanner: "System_Scan_Active",
+            linking: "LINKING...", missionMet: "MISSION COMPLETE",
+            logbookEmpty: "Logbook empty.", allDone: "All missions complete!",
+            prompt: (target, id) =>
+                `Identify the species in the image. Determine if it is a ${target} (Mission ${id}). Answer ONLY in ENGLISH.\nFormat:\nLine 1: SPECIES NAME (ALL CAPS).\nLine 2: YES or NO.\nLine 3: One short sentence about the species.`
         }
     };
 
+    // ─── STATE ───────────────────────────────────────────────────
     let currentLang = localStorage.getItem('scoutLang') || 'da';
     let xp = parseInt(localStorage.getItem('scoutXP')) || 0;
 
-    const cameraBtn      = document.getElementById('camera-btn');
-    const scanner        = document.getElementById('scanner');
-    const video          = document.getElementById('video');
-    const canvas         = document.getElementById('canvas');
-    const captureBtn     = document.getElementById('capture-btn');
-    const closeBtn       = document.getElementById('close-btn');
-    const resultBox      = document.getElementById('result-box');
-    const resultPanel    = document.getElementById('result-panel');
-    const aiResponse     = document.getElementById('ai-response');
-    const aiDetails      = document.getElementById('ai-details');
-    const xpDisplay      = document.getElementById('xp-display');
-    const xpBar          = document.getElementById('xp-bar');
+    function getCompletedMissions() {
+        return JSON.parse(localStorage.getItem('completedMissions')) || [];
+    }
+
+    function getCurrentMission() {
+        const done = getCompletedMissions();
+        return MISSIONS.find(m => !done.includes(m.id)) || null;
+    }
+
+    // ─── DOM ─────────────────────────────────────────────────────
+    const cameraBtn       = document.getElementById('camera-btn');
+    const scanner         = document.getElementById('scanner');
+    const video           = document.getElementById('video');
+    const canvas          = document.getElementById('canvas');
+    const captureBtn      = document.getElementById('capture-btn');
+    const closeBtn        = document.getElementById('close-btn');
+    const resultBox       = document.getElementById('result-box');
+    const resultPanel     = document.getElementById('result-panel');
+    const aiResponse      = document.getElementById('ai-response');
+    const aiDetails       = document.getElementById('ai-details');
+    const xpDisplay       = document.getElementById('xp-display');
+    const xpBar           = document.getElementById('xp-bar');
     const missionProgress = document.getElementById('mission-progress');
-    const collectionList = document.getElementById('collection-list');
+    const collectionList  = document.getElementById('collection-list');
 
+    // ─── UPDATE UI ───────────────────────────────────────────────
+    function updateUI() {
+        const ui = UI[currentLang];
+        const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
+        const mission = getCurrentMission();
 
+        document.getElementById('label-points').innerText    = ui.points;
+        document.getElementById('label-objective').innerText = ui.objective;
+        document.getElementById('label-logbook').innerText   = ui.logbook;
+        document.getElementById('label-analysis').innerText  = ui.analysis;
+        document.getElementById('label-scanner').innerText   = ui.scanner;
+
+        xpDisplay.innerText = xp;
+        xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
+
+        if (mission) {
+            document.getElementById('mission-id-tag').innerText = mission.id;
+            document.getElementById('mission-title').innerText  = mission[currentLang].title;
+            document.getElementById('mission-desc').innerText   = mission[currentLang].desc;
+            missionProgress.style.width = "20%";
+        } else {
+            document.getElementById('mission-id-tag').innerText = "—";
+            document.getElementById('mission-title').innerText  = ui.allDone;
+            document.getElementById('mission-desc').innerText   = "";
+            missionProgress.style.width = "100%";
+        }
+
+        // Logbog — bruger innerText for at undgå XSS fra AI-svar
+        collectionList.innerHTML = "";
+        if (finds.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = "text-[10px] text-gray-600 uppercase italic px-1";
+            empty.innerText = ui.logbookEmpty;
+            collectionList.appendChild(empty);
+        } else {
+            finds.slice().reverse().forEach(f => {
+                const item = document.createElement('div');
+                item.className = "bg-surface-high p-4 flex justify-between items-center";
+
+                const left = document.createElement('div');
+                const dateEl = document.createElement('p');
+                dateEl.className = "text-[9px] font-bold text-primary-cyan";
+                dateEl.innerText = f.displayDate || f.date;
+                const nameEl = document.createElement('p');
+                nameEl.className = "text-lg font-black uppercase text-white leading-none mt-1 italic";
+                nameEl.innerText = f.name;
+                left.appendChild(dateEl);
+                left.appendChild(nameEl);
+
+                const icon = document.createElement('span');
+                icon.className = "material-symbols-outlined text-primary-cyan text-sm";
+                icon.innerText = "verified";
+
+                item.appendChild(left);
+                item.appendChild(icon);
+                collectionList.appendChild(item);
+            });
+        }
+    }
 
     function setLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('scoutLang', lang);
-        const d = langData[lang];
-        document.getElementById('label-points').innerText   = d.points;
-        document.getElementById('label-objective').innerText = d.objective;
-        document.getElementById('mission-title').innerText  = d.missionTitle;
-        document.getElementById('mission-desc').innerText   = d.missionDesc;
-        document.getElementById('label-logbook').innerText  = d.logbook;
-        document.getElementById('label-analysis').innerText = d.analysis;
-        document.getElementById('label-scanner').innerText  = d.scanner;
         document.getElementById('btn-da').className = lang === 'da'
             ? "px-2 py-1 lang-btn-active"
             : "px-2 py-1 text-white/40 hover:text-primary-cyan";
@@ -198,13 +280,16 @@
         }
     }
 
+    // ─── KAMERA ──────────────────────────────────────────────────
     cameraBtn.onclick = async () => {
         scanner.classList.remove('hidden');
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
         } catch (e) {
-            alert("Access Denied.");
+            alert(currentLang === 'da'
+                ? "Kameraadgang nægtet. Tjek dine browserindstillinger."
+                : "Camera access denied. Check your browser settings.");
             scanner.classList.add('hidden');
         }
     };
@@ -213,10 +298,17 @@
     document.getElementById('btn-da').onclick = () => setLanguage('da');
     document.getElementById('btn-en').onclick = () => setLanguage('en');
 
+    // ─── CAPTURE & AI ─────────────────────────────────────────────
     captureBtn.onclick = async () => {
-        // FIX: tjek både videoWidth og videoHeight
         if (!video.videoWidth || !video.videoHeight) {
             alert(currentLang === 'da' ? "Kameraet er ikke klar endnu." : "Camera not ready yet.");
+            return;
+        }
+
+        const mission = getCurrentMission();
+        if (!mission) {
+            stopStream();
+            scanner.classList.add('hidden');
             return;
         }
 
@@ -231,11 +323,14 @@
         scanner.classList.add('hidden');
         resultBox.classList.remove('hidden');
         resultPanel.classList.remove('mission-success');
-        aiResponse.innerText = langData[currentLang].linking;
+        resultPanel.classList.remove('unlock-animate');
+        aiResponse.innerText = UI[currentLang].linking;
         aiDetails.innerText  = "...";
 
         try {
-            // FIX: rettet model til gemini-2.5-flash-lite (1.5 er lukket ned)
+            const ui     = UI[currentLang];
+            const target = mission[currentLang].target;
+
             const res = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`,
                 {
@@ -244,8 +339,7 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                // FIX: prompt kaldes nu som funktion så MISSION_ID faktisk indsættes
-                                { text: langData[currentLang].prompt(MISSION_ID) },
+                                { text: ui.prompt(target, mission.id) },
                                 { inline_data: { mime_type: "image/jpeg", data: base64 } }
                             ]
                         }]
@@ -255,86 +349,68 @@
 
             const data = await res.json();
 
-            // FIX: API-fejl vises nu korrekt i stedet for at crashe stille
             if (data.error) {
                 aiResponse.innerText = "API ERROR " + data.error.code;
                 aiDetails.innerText  = data.error.message;
                 return;
             }
 
-            const text    = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-            const lines   = text.split("\n").filter(l => l.trim());
-            const name    = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
+            const text      = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            const lines     = text.split("\n").filter(l => l.trim());
+            const name      = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
             const matchLine = (lines[1] || "").toUpperCase();
-            const isMatch = matchLine.includes("YES") || matchLine.includes("JA");
-            const detail  = lines.slice(2).join(" ").replace(/[*#]/g, '').trim();
-            const isValid = name.length > 2 && name !== "UNKNOWN";
+            const isMatch   = matchLine.includes("YES") || matchLine.includes("JA");
+            const detail    = lines.slice(2).join(" ").replace(/[*#]/g, '').trim();
+            const isValid   = name.length > 2 && name !== "UNKNOWN";
 
-            // FIX: mission XP gives kun point én gang
-            const alreadyComplete = localStorage.getItem('missionNT718') === 'complete';
-
-            if (isMatch && !alreadyComplete) {
-                aiResponse.innerText = langData[currentLang].missionMet;
+            if (isMatch) {
+                aiResponse.innerText = UI[currentLang].missionMet;
                 aiDetails.innerText  = `${name}: ${detail}`;
                 resultPanel.classList.add('mission-success');
-                localStorage.setItem('missionNT718', 'complete');
-                if (isValid) xp += 500;
-            } else if (isMatch && alreadyComplete) {
-                // Mission allerede fuldført — vis resultat uden ekstra XP
-                aiResponse.innerText = langData[currentLang].missionMet;
-                aiDetails.innerText  = `${name}: ${detail}`;
-                resultPanel.classList.add('mission-success');
+
+                const done = getCompletedMissions();
+                if (!done.includes(mission.id)) {
+                    done.push(mission.id);
+                    localStorage.setItem('completedMissions', JSON.stringify(done));
+                    if (isValid) xp += mission.xp;
+                    localStorage.setItem('scoutXP', xp);
+                }
+
+                // Næste mission vises med animation efter 2 sekunder
+                setTimeout(() => {
+                    document.getElementById('mission-card').classList.add('unlock-animate');
+                    updateUI();
+                }, 2000);
+
             } else {
                 aiResponse.innerText = name;
                 aiDetails.innerText  = detail;
-                if (isValid) xp += 100;
+                if (isValid) {
+                    xp += 100;
+                    localStorage.setItem('scoutXP', xp);
+                }
             }
 
             if (isValid) {
-                // FIX: dato gemt i fast format (ISO) uanset sprog — forhindrer dobbelt-logning
                 const today = new Date().toISOString().slice(0, 10);
                 const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
                 if (!finds.some(f => f.name === name && f.date === today)) {
-                    // Vis dato i brugerens sprog, gem i ISO
                     const displayDate = new Date().toLocaleDateString(currentLang === 'da' ? 'da-DK' : 'en-US');
                     finds.push({ name, date: today, displayDate });
                     localStorage.setItem('scoutFinds', JSON.stringify(finds));
                 }
-                localStorage.setItem('scoutXP', xp);
                 updateUI();
             }
 
         } catch (e) {
             aiResponse.innerText = "LINK_LOST";
-            aiDetails.innerText  = currentLang === 'da' ? "Forbindelsen fejlede. Prøv igen." : "Connection failed. Please try again.";
+            aiDetails.innerText  = currentLang === 'da'
+                ? "Forbindelsen fejlede. Prøv igen."
+                : "Connection failed. Please try again.";
         } finally {
             captureBtn.disabled = false;
         }
     };
-
-    function updateUI() {
-        const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
-        xpDisplay.innerText = xp;
-        xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
-        const missionDone = localStorage.getItem('missionNT718') === 'complete';
-        missionProgress.style.width = missionDone ? "100%" : "20%";
-        collectionList.innerHTML = finds.length === 0
-            ? `<p class="text-[10px] text-gray-600 uppercase italic px-1">${langData[currentLang].logbookEmpty}</p>`
-            : "";
-        finds.slice().reverse().forEach(f => {
-            const item = document.createElement('div');
-            item.className = "bg-surface-high p-4 flex justify-between items-center";
-            // Vis displayDate hvis den findes, ellers dato-streng (bagudkompatibel med gamle poster)
-            const shownDate = f.displayDate || f.date;
-            item.innerHTML = `
-                <div>
-                    <p class="text-[9px] font-bold text-primary-cyan">${shownDate}</p>
-                    <p class="text-lg font-black uppercase text-white leading-none mt-1 italic">${f.name}</p>
-                </div>
-                <span class="material-symbols-outlined text-primary-cyan text-sm">verified</span>`;
-            collectionList.appendChild(item);
-        });
-    }
 
     setLanguage(currentLang);
 </script>
