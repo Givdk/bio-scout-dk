@@ -117,58 +117,56 @@
     </div>
 
 <script>
-    const API_KEY = "AIzaSyBtFSrIgzicXNKN-FYMUAzc3--zrkQmzNc";
+    // ⚠️ Indsæt din API-nøgle her — del den ALDRIG offentligt eller push til GitHub
+    const API_KEY = "AIzaSyCkqtOVi96PQwuBgRFAJsCGvK6GDntkyEM";
     const MISSION_ID = "NT-718: Botanical (Anemone)";
 
-    // Sprog-data
     const langData = {
         da: {
-            points: "Bio-Points", objective: "Aktivt Mål", missionTitle: "Botanical Recovery",
-            missionDesc: "Find og scan en blomstrende Anemone.", logbook: "Feltlogbog",
-            analysis: "Data Link Established", scanner: "System_Scan_Active", linking: "LINKER...",
-            prompt: "Identificer arten. Bestem om den matcher: ${MISSION_ID}. Svar på DANSK. Format: Linje 1: NAVN. Linje 2: JA/NEJ. Linje 3: 1 kort sætning."
+            points: "Bio-Points",
+            objective: "Aktivt Mål",
+            missionTitle: "Botanical Recovery",
+            missionDesc: "Find og scan en blomstrende Anemone.",
+            logbook: "Feltlogbog",
+            analysis: "Data Link Established",
+            scanner: "System_Scan_Active",
+            linking: "LINKER...",
+            missionMet: "MISSION FULDFØRT",
+            logbookEmpty: "Logbog tom.",
+            // FIX: prompt er nu en funktion så MISSION_ID interpoleres korrekt
+            prompt: (id) => `Identificer arten. Bestem om den matcher: ${id}. Svar på DANSK. Format: Linje 1: NAVN (KUN STORE BOGSTAVER). Linje 2: JA/NEJ. Linje 3: 1 kort sætning.`
         },
         en: {
-            points: "Bio-Points", objective: "Active Objective", missionTitle: "Botanical Recovery",
-            missionDesc: "Identify a blooming Anemone flower.", logbook: "Field Logbook",
-            analysis: "Data Link Established", scanner: "System_Scan_Active", linking: "LINKING...",
-            prompt: "Identify species. Determine if matches: ${MISSION_ID}. Answer in ENGLISH. Format: Line 1: NAME. Line 2: YES/NO. Line 3: 1 short sentence."
+            points: "Bio-Points",
+            objective: "Active Objective",
+            missionTitle: "Botanical Recovery",
+            missionDesc: "Identify a blooming Anemone flower.",
+            logbook: "Field Logbook",
+            analysis: "Data Link Established",
+            scanner: "System_Scan_Active",
+            linking: "LINKING...",
+            missionMet: "MISSION MET",
+            logbookEmpty: "Logbook empty.",
+            // FIX: prompt er nu en funktion så MISSION_ID interpoleres korrekt
+            prompt: (id) => `Identify species. Determine if it matches: ${id}. Answer in ENGLISH. Format: Line 1: NAME (ALL CAPS). Line 2: YES/NO. Line 3: 1 short sentence.`
         }
     };
 
     let currentLang = localStorage.getItem('scoutLang') || 'da';
     let xp = parseInt(localStorage.getItem('scoutXP')) || 0;
 
-    function setLanguage(lang) {
-        currentLang = lang;
-        localStorage.setItem('scoutLang', lang);
-        const d = langData[lang];
-        
-        document.getElementById('label-points').innerText = d.points;
-        document.getElementById('label-objective').innerText = d.objective;
-        document.getElementById('mission-title').innerText = d.missionTitle;
-        document.getElementById('mission-desc').innerText = d.missionDesc;
-        document.getElementById('label-logbook').innerText = d.logbook;
-        document.getElementById('label-analysis').innerText = d.analysis;
-        document.getElementById('label-scanner').innerText = d.scanner;
-
-        document.getElementById('btn-da').className = lang === 'da' ? "px-2 py-1 lang-btn-active" : "px-2 py-1 text-white/40 hover:text-primary-cyan";
-        document.getElementById('btn-en').className = lang === 'en' ? "px-2 py-1 lang-btn-active" : "px-2 py-1 text-white/40 hover:text-primary-cyan";
-        updateUI();
-    }
-
-    const cameraBtn = document.getElementById('camera-btn');
-    const scanner = document.getElementById('scanner');
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const captureBtn = document.getElementById('capture-btn');
-    const closeBtn = document.getElementById('close-btn');
-    const resultBox = document.getElementById('result-box');
-    const resultPanel = document.getElementById('result-panel');
-    const aiResponse = document.getElementById('ai-response');
-    const aiDetails = document.getElementById('ai-details');
-    const xpDisplay = document.getElementById('xp-display');
-    const xpBar = document.getElementById('xp-bar');
+    const cameraBtn      = document.getElementById('camera-btn');
+    const scanner        = document.getElementById('scanner');
+    const video          = document.getElementById('video');
+    const canvas         = document.getElementById('canvas');
+    const captureBtn     = document.getElementById('capture-btn');
+    const closeBtn       = document.getElementById('close-btn');
+    const resultBox      = document.getElementById('result-box');
+    const resultPanel    = document.getElementById('result-panel');
+    const aiResponse     = document.getElementById('ai-response');
+    const aiDetails      = document.getElementById('ai-details');
+    const xpDisplay      = document.getElementById('xp-display');
+    const xpBar          = document.getElementById('xp-bar');
     const missionProgress = document.getElementById('mission-progress');
     const collectionList = document.getElementById('collection-list');
 
@@ -176,25 +174,63 @@
         const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
         xpDisplay.innerText = xp;
         xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
+
         const missionDone = localStorage.getItem('missionNT718') === 'complete';
         missionProgress.style.width = missionDone ? "100%" : "20%";
-        collectionList.innerHTML = finds.length === 0 ? `<p class="text-[10px] text-gray-600 uppercase italic px-1">Logbook empty.</p>` : "";
+
+        collectionList.innerHTML = finds.length === 0
+            ? `<p class="text-[10px] text-gray-600 uppercase italic px-1">${langData[currentLang].logbookEmpty}</p>`
+            : "";
+
         finds.slice().reverse().forEach(f => {
             const item = document.createElement('div');
             item.className = "bg-surface-high p-4 flex justify-between items-center";
-            item.innerHTML = `<div><p class="text-[9px] font-bold text-primary-cyan">${f.date}</p><p class="text-lg font-black uppercase text-white leading-none mt-1 italic">${f.name}</p></div><span class="material-symbols-outlined text-primary-cyan text-sm">verified</span>`;
+            item.innerHTML = `
+                <div>
+                    <p class="text-[9px] font-bold text-primary-cyan">${f.date}</p>
+                    <p class="text-lg font-black uppercase text-white leading-none mt-1 italic">${f.name}</p>
+                </div>
+                <span class="material-symbols-outlined text-primary-cyan text-sm">verified</span>`;
             collectionList.appendChild(item);
         });
     }
 
-    function stopStream() { if (video.srcObject) { video.srcObject.getTracks().forEach(t => t.stop()); video.srcObject = null; } }
+    function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem('scoutLang', lang);
+        const d = langData[lang];
+        document.getElementById('label-points').innerText   = d.points;
+        document.getElementById('label-objective').innerText = d.objective;
+        document.getElementById('mission-title').innerText  = d.missionTitle;
+        document.getElementById('mission-desc').innerText   = d.missionDesc;
+        document.getElementById('label-logbook').innerText  = d.logbook;
+        document.getElementById('label-analysis').innerText = d.analysis;
+        document.getElementById('label-scanner').innerText  = d.scanner;
+        document.getElementById('btn-da').className = lang === 'da'
+            ? "px-2 py-1 lang-btn-active"
+            : "px-2 py-1 text-white/40 hover:text-primary-cyan";
+        document.getElementById('btn-en').className = lang === 'en'
+            ? "px-2 py-1 lang-btn-active"
+            : "px-2 py-1 text-white/40 hover:text-primary-cyan";
+        updateUI();
+    }
+
+    function stopStream() {
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(t => t.stop());
+            video.srcObject = null;
+        }
+    }
 
     cameraBtn.onclick = async () => {
         scanner.classList.remove('hidden');
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
-        } catch (e) { alert("Access Denied."); scanner.classList.add('hidden'); }
+        } catch (e) {
+            alert("Access Denied.");
+            scanner.classList.add('hidden');
+        }
     };
 
     closeBtn.onclick = () => { stopStream(); scanner.classList.add('hidden'); };
@@ -202,59 +238,129 @@
     document.getElementById('btn-en').onclick = () => setLanguage('en');
 
     captureBtn.onclick = async () => {
-        if (!video.videoWidth) return;
+        // FIX: tjek både videoWidth og videoHeight
+        if (!video.videoWidth || !video.videoHeight) {
+            alert(currentLang === 'da' ? "Kameraet er ikke klar endnu." : "Camera not ready yet.");
+            return;
+        }
+
         captureBtn.disabled = true;
         const scale = 720 / video.videoWidth;
-        canvas.width = 720;
+        canvas.width  = 720;
         canvas.height = Math.round(video.videoHeight * scale);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         const base64 = canvas.toDataURL("image/jpeg", 0.6).split(',')[1];
-        
+
         stopStream();
         scanner.classList.add('hidden');
         resultBox.classList.remove('hidden');
         resultPanel.classList.remove('mission-success');
         aiResponse.innerText = langData[currentLang].linking;
-        aiDetails.innerText = "...";
+        aiDetails.innerText  = "...";
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-lite:generateContent?key=${API_KEY}`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: langData[currentLang].prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
-            });
-            const data = await res.json();
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-            const lines = text.split("\n").filter(l => l.trim());
-            const name = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
-            const isMatch = (lines[1] || "").toUpperCase().includes("YES") || (lines[1] || "").toUpperCase().includes("JA");
-            const detail = lines.slice(2).join(" ").replace(/[*#]/g, '').trim();
+            // FIX: rettet model til gemini-2.5-flash-lite (1.5 er lukket ned)
+            const res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                // FIX: prompt kaldes nu som funktion så MISSION_ID faktisk indsættes
+                                { text: langData[currentLang].prompt(MISSION_ID) },
+                                { inline_data: { mime_type: "image/jpeg", data: base64 } }
+                            ]
+                        }]
+                    })
+                }
+            );
 
+            const data = await res.json();
+
+            // FIX: API-fejl vises nu korrekt i stedet for at crashe stille
+            if (data.error) {
+                aiResponse.innerText = "API ERROR " + data.error.code;
+                aiDetails.innerText  = data.error.message;
+                return;
+            }
+
+            const text    = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            const lines   = text.split("\n").filter(l => l.trim());
+            const name    = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
+            const matchLine = (lines[1] || "").toUpperCase();
+            const isMatch = matchLine.includes("YES") || matchLine.includes("JA");
+            const detail  = lines.slice(2).join(" ").replace(/[*#]/g, '').trim();
             const isValid = name.length > 2 && name !== "UNKNOWN";
-            if (isMatch) {
-                aiResponse.innerText = currentLang === 'da' ? "MISSION FULDFØRT" : "MISSION MET";
-                aiDetails.innerText = `${name}: ${detail}`;
+
+            // FIX: mission XP gives kun point én gang
+            const alreadyComplete = localStorage.getItem('missionNT718') === 'complete';
+
+            if (isMatch && !alreadyComplete) {
+                aiResponse.innerText = langData[currentLang].missionMet;
+                aiDetails.innerText  = `${name}: ${detail}`;
                 resultPanel.classList.add('mission-success');
                 localStorage.setItem('missionNT718', 'complete');
                 if (isValid) xp += 500;
+            } else if (isMatch && alreadyComplete) {
+                // Mission allerede fuldført — vis resultat uden ekstra XP
+                aiResponse.innerText = langData[currentLang].missionMet;
+                aiDetails.innerText  = `${name}: ${detail}`;
+                resultPanel.classList.add('mission-success');
             } else {
                 aiResponse.innerText = name;
-                aiDetails.innerText = detail;
+                aiDetails.innerText  = detail;
                 if (isValid) xp += 100;
             }
 
             if (isValid) {
-                const today = new Date().toLocaleDateString(currentLang === 'da' ? 'da-DK' : 'en-US');
+                // FIX: dato gemt i fast format (ISO) uanset sprog — forhindrer dobbelt-logning
+                const today = new Date().toISOString().slice(0, 10);
                 const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
                 if (!finds.some(f => f.name === name && f.date === today)) {
-                    finds.push({ name, date: today });
+                    // Vis dato i brugerens sprog, gem i ISO
+                    const displayDate = new Date().toLocaleDateString(currentLang === 'da' ? 'da-DK' : 'en-US');
+                    finds.push({ name, date: today, displayDate });
                     localStorage.setItem('scoutFinds', JSON.stringify(finds));
                 }
                 localStorage.setItem('scoutXP', xp);
                 updateUI();
             }
-        } catch (e) { aiResponse.innerText = "LINK_LOST"; }
-        finally { captureBtn.disabled = false; }
+
+        } catch (e) {
+            aiResponse.innerText = "LINK_LOST";
+            aiDetails.innerText  = currentLang === 'da' ? "Forbindelsen fejlede. Prøv igen." : "Connection failed. Please try again.";
+        } finally {
+            captureBtn.disabled = false;
+        }
     };
+
+    // Vis gemt displayDate i logbogen i stedet for ISO-dato
+    const _origUpdate = updateUI;
+    function updateUI() {
+        const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
+        xpDisplay.innerText = xp;
+        xpBar.style.width = Math.min((xp % 1000) / 10, 100) + "%";
+        const missionDone = localStorage.getItem('missionNT718') === 'complete';
+        missionProgress.style.width = missionDone ? "100%" : "20%";
+        collectionList.innerHTML = finds.length === 0
+            ? `<p class="text-[10px] text-gray-600 uppercase italic px-1">${langData[currentLang].logbookEmpty}</p>`
+            : "";
+        finds.slice().reverse().forEach(f => {
+            const item = document.createElement('div');
+            item.className = "bg-surface-high p-4 flex justify-between items-center";
+            // Vis displayDate hvis den findes, ellers dato-streng (bagudkompatibel med gamle poster)
+            const shownDate = f.displayDate || f.date;
+            item.innerHTML = `
+                <div>
+                    <p class="text-[9px] font-bold text-primary-cyan">${shownDate}</p>
+                    <p class="text-lg font-black uppercase text-white leading-none mt-1 italic">${f.name}</p>
+                </div>
+                <span class="material-symbols-outlined text-primary-cyan text-sm">verified</span>`;
+            collectionList.appendChild(item);
+        });
+    }
 
     setLanguage(currentLang);
 </script>
