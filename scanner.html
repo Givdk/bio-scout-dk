@@ -160,7 +160,7 @@
             linking: "LINKER...", missionMet: "MISSION FULDFØRT",
             logbookEmpty: "Logbog tom.", allDone: "Alle missioner fuldført!",
             prompt: (target, id) =>
-                `Identificer arten på billedet. Bestem om det er en ${target} (Mission ${id}). Svar KUN på DANSK.\nFormat:\nLinje 1: ARTSNAVNET (KUN STORE BOGSTAVER).\nLinje 2: JA eller NEJ.\nLinje 3: Én kort sætning om arten.`
+                `Identificer arten på billedet. Bestem om det er en ${target} (Mission ${id}). Svar KUN på DANSK.\nFormat:\nLinje 1: ARTSNAVNET (KUN STORE BOGSTAVER).\nLinje 2: JA eller NEJ.\nLinje 3: Én kort sætning om arten.\nLinje 4: KATEGORI (skriv præcis ét af disse ord: PLANTE FUGL SVAMP INSEKT DYR ANDEN)`
         },
         en: {
             points: "Bio-Points", objective: "Active Objective", logbook: "Field Logbook",
@@ -168,7 +168,7 @@
             linking: "LINKING...", missionMet: "MISSION COMPLETE",
             logbookEmpty: "Logbook empty.", allDone: "All missions complete!",
             prompt: (target, id) =>
-                `Identify the species in the image. Determine if it is a ${target} (Mission ${id}). Answer ONLY in ENGLISH.\nFormat:\nLine 1: SPECIES NAME (ALL CAPS).\nLine 2: YES or NO.\nLine 3: One short sentence about the species.`
+                `Identify the species in the image. Determine if it is a ${target} (Mission ${id}). Answer ONLY in ENGLISH.\nFormat:\nLine 1: SPECIES NAME (ALL CAPS).\nLine 2: YES or NO.\nLine 3: One short sentence about the species.\nLine 4: CATEGORY (write exactly one of these words: PLANT BIRD FUNGUS INSECT ANIMAL OTHER)`
         }
     };
 
@@ -360,7 +360,12 @@
             const name      = (lines[0] || "UNKNOWN").replace(/[*#]/g, '').trim().toUpperCase();
             const matchLine = (lines[1] || "").toUpperCase();
             const isMatch   = matchLine.includes("YES") || matchLine.includes("JA");
-            const detail    = lines.slice(2).join(" ").replace(/[*#]/g, '').trim();
+            const detail    = (lines[2] || "").replace(/[*#]/g, '').trim();
+            const rawCat    = (lines[3] || "").replace(/[*#]/g, '').trim().toUpperCase();
+            // Normaliser kategori til dansk uanset sprog
+            const catMap    = { PLANT:"PLANTE", BIRD:"FUGL", FUNGUS:"SVAMP", INSECT:"INSEKT", ANIMAL:"DYR", OTHER:"ANDEN",
+                                PLANTE:"PLANTE", FUGL:"FUGL", SVAMP:"SVAMP", INSEKT:"INSEKT", DYR:"DYR", ANDEN:"ANDEN" };
+            const category  = catMap[rawCat] || "ANDEN";
             const isValid   = name.length > 2 && name !== "UNKNOWN";
 
             if (isMatch) {
@@ -396,9 +401,13 @@
                 const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
                 if (!finds.some(f => f.name === name && f.date === today)) {
                     const displayDate = new Date().toLocaleDateString(currentLang === 'da' ? 'da-DK' : 'en-US');
-                    finds.push({ name, date: today, displayDate });
+                    finds.push({ name, date: today, displayDate, category });
                     localStorage.setItem('scoutFinds', JSON.stringify(finds));
                 }
+                // Opdater streak
+                updateStreak(today);
+                // Tjek badges
+                checkBadges(finds, category);
                 updateUI();
             }
 
@@ -411,6 +420,64 @@
             captureBtn.disabled = false;
         }
     };
+
+
+    // ─── STREAK ──────────────────────────────────────────────────
+    function updateStreak(today) {
+        const last   = localStorage.getItem('lastScanDate');
+        let streak   = parseInt(localStorage.getItem('scanStreak')) || 0;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yStr = yesterday.toISOString().slice(0, 10);
+
+        if (last === today) {
+            // Allerede scannet i dag — ingen ændring
+        } else if (last === yStr) {
+            streak += 1; // Fortsætter streak
+        } else {
+            streak = 1; // Ny streak
+        }
+        localStorage.setItem('scanStreak', streak);
+        localStorage.setItem('lastScanDate', today);
+    }
+
+    // ─── BADGES ──────────────────────────────────────────────────
+    const BADGE_DEFS = [
+        { id: "first_scan",   da: "Første Fund",     en: "First Find",      icon: "stars",          check: (finds) => finds.length >= 1 },
+        { id: "first_plant",  da: "Botaniker",        en: "Botanist",        icon: "local_florist",  check: (finds) => finds.some(f => f.category === "PLANTE") },
+        { id: "first_bird",   da: "Fuglekigger",      en: "Bird Watcher",    icon: "raven",          check: (finds) => finds.some(f => f.category === "FUGL") },
+        { id: "first_fungus", da: "Svampejæger",      en: "Fungi Hunter",    icon: "psychiatry",     check: (finds) => finds.some(f => f.category === "SVAMP") },
+        { id: "first_insect", da: "Insektdetektiv",   en: "Insect Detective",icon: "bug_report",     check: (finds) => finds.some(f => f.category === "INSEKT") },
+        { id: "five_finds",   da: "5 Fund",           en: "5 Finds",         icon: "workspace_premium", check: (finds) => finds.length >= 5 },
+        { id: "ten_finds",    da: "10 Fund",          en: "10 Finds",        icon: "military_tech",  check: (finds) => finds.length >= 10 },
+        { id: "streak_3",     da: "3 Dages Streak",   en: "3 Day Streak",    icon: "local_fire_department", check: () => (parseInt(localStorage.getItem("scanStreak")) || 0) >= 3 },
+        { id: "streak_7",     da: "7 Dages Streak",   en: "7 Day Streak",    icon: "whatshot",       check: () => (parseInt(localStorage.getItem("scanStreak")) || 0) >= 7 },
+        { id: "mission_done", da: "Mission Fuldført", en: "Mission Complete", icon: "verified_user", check: () => (JSON.parse(localStorage.getItem("completedMissions")) || []).length >= 1 },
+    ];
+
+    function checkBadges(finds, newCategory) {
+        const earned = JSON.parse(localStorage.getItem('earnedBadges')) || [];
+        let newlyEarned = [];
+        BADGE_DEFS.forEach(b => {
+            if (!earned.includes(b.id) && b.check(finds, newCategory)) {
+                earned.push(b.id);
+                newlyEarned.push(b);
+            }
+        });
+        if (newlyEarned.length > 0) {
+            localStorage.setItem('earnedBadges', JSON.stringify(earned));
+            // Vis badge notifikation
+            showBadgeToast(newlyEarned[0]);
+        }
+    }
+
+    function showBadgeToast(badge) {
+        const toast = document.createElement('div');
+        toast.style.cssText = "position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;background:#00e5ff;color:#111417;padding:10px 20px;font-weight:900;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;box-shadow:0 0 30px rgba(0,229,255,0.5);transition:opacity 0.5s ease;";
+        toast.innerText = "🏅 " + (currentLang === 'da' ? badge.da : badge.en) + " — Ulåst!";
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 500); }, 3000);
+    }
 
     setLanguage(currentLang);
 </script>
