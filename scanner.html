@@ -114,8 +114,7 @@
     </div>
 
 <script>
-    // ⚠️ Indsæt din API-nøgle her — push ALDRIG denne fil til et offentligt repo
-    const API_KEY = "AIzaSyAHWXqgnD8MdpY7JXnXh5MXmGa9I-Po-sM";
+    // API-nøglen lever sikkert på Vercel — ingen nøgle i denne fil
 
     // ─── MISSIONER ───────────────────────────────────────────────
     // Tilføj flere missioner her — de låses op automatisk én ad gangen
@@ -331,21 +330,14 @@
             const ui     = UI[currentLang];
             const target = mission[currentLang].target;
 
-            const res = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: ui.prompt(target, mission.id) },
-                                { inline_data: { mime_type: "image/jpeg", data: base64 } }
-                            ]
-                        }]
-                    })
-                }
-            );
+            const res = await fetch("/api/scan", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prompt: ui.prompt(target, mission.id),
+                    base64: base64
+                })
+            });
 
             const data = await res.json();
 
