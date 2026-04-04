@@ -76,7 +76,7 @@
         <!-- Stats -->
         <section class="reveal">
             <p id="label-status" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3"></p>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-4 gap-2">
                 <div class="bg-surface-high p-4">
                     <p class="text-[9px] font-bold text-primary-cyan uppercase tracking-widest mb-1">XP</p>
                     <p id="stat-xp" class="text-2xl font-black italic text-white leading-none">0</p>
@@ -89,7 +89,17 @@
                     <p id="label-missions" class="text-[9px] font-bold text-primary-cyan uppercase tracking-widest mb-1"></p>
                     <p id="stat-missions" class="text-2xl font-black italic text-white leading-none">0</p>
                 </div>
+                <div class="bg-surface-high p-4">
+                    <p id="label-streak" class="text-[9px] font-bold text-primary-cyan uppercase tracking-widest mb-1"></p>
+                    <p id="stat-streak" class="text-2xl font-black italic text-white leading-none">0🔥</p>
+                </div>
             </div>
+        </section>
+
+        <!-- Badges -->
+        <section class="reveal">
+            <p id="label-badges" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3"></p>
+            <div id="badges-grid" class="grid grid-cols-5 gap-2"></div>
         </section>
 
         <!-- Habitat Grid + Kort toggle -->
@@ -143,6 +153,23 @@
             <div class="space-y-2" id="animals-list"></div>
         </section>
 
+        <!-- iNaturalist Live Fund fra Danmark -->
+        <section class="reveal">
+            <div class="flex justify-between items-center mb-3">
+                <p id="label-inat" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]"></p>
+                <div class="flex items-center gap-1.5">
+                    <div class="live-dot"></div>
+                    <span class="text-[9px] font-black text-primary-cyan uppercase">iNaturalist</span>
+                </div>
+            </div>
+            <div id="inat-list" class="space-y-2">
+                <div class="bg-surface-high p-4 flex items-center gap-2">
+                    <div class="live-dot"></div>
+                    <p id="inat-loading" class="text-[10px] text-gray-500 uppercase italic"></p>
+                </div>
+            </div>
+        </section>
+
         <!-- CTA -->
         <section class="reveal pb-4">
             <button onclick="goScanner()" class="w-full bg-primary-cyan py-5 flex items-center justify-center gap-3 active:scale-95 transition-transform shadow-[0_0_40px_rgba(0,229,255,0.2)]">
@@ -189,6 +216,11 @@
             cta:      "Start Scanner",
             noFinds:  "Ingen fund endnu — start scanneren!",
             mapHint:  "Tryk på kortet for at zoome ind på naturområder.",
+            streak:   "Streak",
+            badges:   "Badges",
+            inat:     "Seneste fund i Danmark",
+            inatLoad: "Henter data fra iNaturalist...",
+            inatError:"Kunne ikke hente data. Prøv igen.",
             navHome:  "Hjem",
             navScan:  "Scanner",
             navMap:   "Kort",
@@ -231,6 +263,11 @@
             cta:      "Start Scanner",
             noFinds:  "No finds yet — start scanning!",
             mapHint:  "Tap the map to explore nature areas.",
+            streak:   "Streak",
+            badges:   "Badges",
+            inat:     "Recent finds in Denmark",
+            inatLoad: "Loading data from iNaturalist...",
+            inatError:"Could not load data. Please try again.",
             navHome:  "Home",
             navScan:  "Scanner",
             navMap:   "Map",
@@ -319,11 +356,49 @@
         document.getElementById('nav-map').innerText       = u.navMap;
         document.getElementById('nav-profile').innerText   = u.navProf;
         if (document.getElementById('map-hint')) document.getElementById('map-hint').innerText = u.mapHint || '';
+        if (document.getElementById('label-inat')) document.getElementById('label-inat').innerText = u.inat || '';
+        if (document.getElementById('inat-loading')) document.getElementById('inat-loading').innerText = u.inatLoad || '';
 
         // Stats
         document.getElementById('stat-xp').innerText       = xp;
         document.getElementById('stat-finds').innerText    = finds.length;
         document.getElementById('stat-missions').innerText = completed.length;
+        document.getElementById('label-streak').innerText  = u.streak || 'Streak';
+        document.getElementById('label-badges').innerText  = u.badges || 'Badges';
+        const streak = parseInt(localStorage.getItem('scanStreak')) || 0;
+        document.getElementById('stat-streak').innerText   = streak + '🔥';
+
+        // Badges
+        const BADGE_DEFS = [
+            { id: "first_scan",   da: "Første Fund",     en: "First Find",       icon: "stars" },
+            { id: "first_plant",  da: "Botaniker",        en: "Botanist",         icon: "local_florist" },
+            { id: "first_bird",   da: "Fuglekigger",      en: "Bird Watcher",     icon: "raven" },
+            { id: "first_fungus", da: "Svampejæger",      en: "Fungi Hunter",     icon: "psychiatry" },
+            { id: "first_insect", da: "Insektdetektiv",   en: "Insect Detective", icon: "bug_report" },
+            { id: "five_finds",   da: "5 Fund",           en: "5 Finds",          icon: "workspace_premium" },
+            { id: "ten_finds",    da: "10 Fund",          en: "10 Finds",         icon: "military_tech" },
+            { id: "streak_3",     da: "3 Dages Streak",   en: "3 Day Streak",     icon: "local_fire_department" },
+            { id: "streak_7",     da: "7 Dages Streak",   en: "7 Day Streak",     icon: "whatshot" },
+            { id: "mission_done", da: "Mission Fuldført", en: "Mission Complete", icon: "verified_user" },
+        ];
+        const earnedBadges = JSON.parse(localStorage.getItem('earnedBadges')) || [];
+        const badgesGrid = document.getElementById('badges-grid');
+        badgesGrid.innerHTML = '';
+        BADGE_DEFS.forEach(b => {
+            const earned = earnedBadges.includes(b.id);
+            const cell = document.createElement('div');
+            cell.className = "bg-surface-high p-3 flex flex-col items-center gap-1 " + (earned ? "" : "opacity-30");
+            cell.title = lang === 'da' ? b.da : b.en;
+            const icon = document.createElement('span');
+            icon.className = "material-symbols-outlined text-xl " + (earned ? "text-primary-cyan" : "text-gray-600");
+            icon.innerText = b.icon;
+            const lbl = document.createElement('p');
+            lbl.className = "text-[7px] font-black uppercase text-center leading-tight " + (earned ? "text-white" : "text-gray-600");
+            lbl.innerText = lang === 'da' ? b.da : b.en;
+            cell.appendChild(icon);
+            cell.appendChild(lbl);
+            badgesGrid.appendChild(cell);
+        });
 
         // Habitat grid
         const grid = document.getElementById('habitat-grid');
@@ -397,8 +472,13 @@
                 const nameEl = document.createElement('p');
                 nameEl.className = "text-base font-black uppercase text-white italic leading-none mt-1";
                 nameEl.innerText = f.name;
+                const catColors = { PLANTE:'text-green-400', FUGL:'text-blue-400', SVAMP:'text-orange-400', INSEKT:'text-yellow-400', DYR:'text-red-400', ANDEN:'text-gray-500' };
+                const catEl = document.createElement('p');
+                catEl.className = "text-[8px] font-black uppercase mt-0.5 " + (catColors[f.category] || 'text-gray-500');
+                catEl.innerText = f.category || '';
                 left.appendChild(dateEl);
                 left.appendChild(nameEl);
+                left.appendChild(catEl);
                 const icon = document.createElement('span');
                 icon.className = "material-symbols-outlined text-primary-cyan text-sm";
                 icon.innerText = "verified";
@@ -439,6 +519,117 @@
             item.appendChild(info);
             animalsEl.appendChild(item);
         });
+    }
+
+    // ─── INATURALIST LIVE DATA ───────────────────────────────────
+    async function fetchINaturalist() {
+        const u = UI[lang];
+        const listEl    = document.getElementById('inat-list');
+        const loadingEl = document.getElementById('inat-loading');
+        if (!listEl) return;
+
+        // Vis loading state
+        listEl.innerHTML = '';
+        const loadDiv = document.createElement('div');
+        loadDiv.className = "bg-surface-high p-4 flex items-center gap-2";
+        const dot = document.createElement('div');
+        dot.className = "live-dot";
+        const loadTxt = document.createElement('p');
+        loadTxt.className = "text-[10px] text-gray-500 uppercase italic";
+        loadTxt.innerText = u.inatLoad;
+        loadDiv.appendChild(dot);
+        loadDiv.appendChild(loadTxt);
+        listEl.appendChild(loadDiv);
+
+        try {
+            // place_id=97392 = Danmark, quality_grade=research = verificerede fund
+            const res = await fetch(
+                'https://api.inaturalist.org/v1/observations?place_id=97392&quality_grade=research&order=desc&order_by=created_at&per_page=8&photos=true',
+                { headers: { 'Accept': 'application/json' } }
+            );
+            if (!res.ok) throw new Error('API fejl');
+            const data = await res.json();
+
+            listEl.innerHTML = '';
+            if (!data.results || data.results.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = "bg-surface-high p-4";
+                const t = document.createElement('p');
+                t.className = "text-[10px] text-gray-600 uppercase italic";
+                t.innerText = u.inatError;
+                empty.appendChild(t);
+                listEl.appendChild(empty);
+                return;
+            }
+
+            data.results.forEach(obs => {
+                const name    = obs.taxon?.preferred_common_name || obs.taxon?.name || 'Ukendt art';
+                const sciName = obs.taxon?.name || '';
+                const photo   = obs.photos?.[0]?.url?.replace('square', 'small') || null;
+                const place   = obs.place_guess || '';
+                const date    = obs.observed_on
+                    ? new Date(obs.observed_on).toLocaleDateString(lang === 'da' ? 'da-DK' : 'en-US')
+                    : '';
+                const inatUrl = 'https://www.inaturalist.org/observations/' + obs.id;
+
+                const item = document.createElement('a');
+                item.href = inatUrl;
+                item.target = "_blank";
+                item.rel = "noopener";
+                item.className = "bg-surface-high flex items-center gap-3 overflow-hidden active:opacity-70";
+
+                if (photo) {
+                    const img = document.createElement('img');
+                    img.className = "animal-img";
+                    img.src = photo;
+                    img.alt = name;
+                    img.loading = "lazy";
+                    item.appendChild(img);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = "animal-img bg-background/50 flex items-center justify-center";
+                    const icon = document.createElement('span');
+                    icon.className = "material-symbols-outlined text-gray-600 text-xl";
+                    icon.innerText = "image_not_supported";
+                    placeholder.appendChild(icon);
+                    item.appendChild(placeholder);
+                }
+
+                const info = document.createElement('div');
+                info.className = "flex-1 py-3 pr-3";
+                const nameEl = document.createElement('p');
+                nameEl.className = "text-sm font-black uppercase text-white italic leading-none";
+                nameEl.innerText = name.toUpperCase();
+                const sciEl = document.createElement('p');
+                sciEl.className = "text-[9px] text-gray-500 italic mt-0.5";
+                sciEl.innerText = sciName;
+                const metaEl = document.createElement('p');
+                metaEl.className = "text-[9px] text-primary-cyan uppercase mt-1 font-bold";
+                metaEl.innerText = [date, place].filter(Boolean).join(' · ');
+
+                info.appendChild(nameEl);
+                info.appendChild(sciEl);
+                info.appendChild(metaEl);
+                item.appendChild(info);
+
+                const arrow = document.createElement('span');
+                arrow.className = "material-symbols-outlined text-gray-600 text-sm pr-3";
+                arrow.innerText = "open_in_new";
+                item.appendChild(arrow);
+
+                listEl.appendChild(item);
+            });
+
+        } catch (e) {
+            listEl.innerHTML = '';
+            const err = document.createElement('div');
+            err.className = "bg-surface-high p-4";
+            const t = document.createElement('p');
+            t.className = "text-[10px] text-gray-600 uppercase italic";
+            t.innerText = u.inatError;
+            err.appendChild(t);
+            listEl.appendChild(err);
+        }
     }
 
     // ─── SCROLL REVEAL ───────────────────────────────────────────
