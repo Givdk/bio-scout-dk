@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bio Scout — Nature Explorer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f0; min-height: 100vh; }
+    .app { max-width: 420px; margin: 0 auto; padding: 1rem; }
+
+    /* Session start */
+    #session-screen { text-align: center; padding: 3rem 1rem; }
+    #session-screen .icon { font-size: 48px; margin-bottom: 12px; }
+    #session-screen h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
+    #session-screen p { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 32px; }
+
+    /* Session bar */
+    #session-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 7px 12px; background: white; border-radius: 10px; border: 0.5px solid #e0e0e0; }
+    .loc-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .loc-label { font-size: 12px; color: #666; margin-left: 6px; }
+    .end-btn { font-size: 11px; color: #999; background: none; border: none; cursor: pointer; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+    .tab { flex: 1; padding: 9px 0; font-size: 12px; font-weight: 500; border-radius: 8px; cursor: pointer; border: 0.5px solid #e0e0e0; background: #f0f0eb; color: #444; transition: all 0.15s; }
+    .tab.active { background: #e1f5ee; color: #0f6e56; border-color: #5dcaa5; }
+
+    /* Cards */
+    .card { background: white; border: 0.5px solid #e0e0e0; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+
+    /* Upload zone */
+    .upload-zone { border: 1.5px dashed #ccc; border-radius: 12px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; margin-bottom: 12px; }
+    .upload-zone svg { width: 36px; height: 36px; stroke: #aaa; margin-bottom: 8px; }
+    .upload-zone p { font-size: 14px; color: #888; }
+
+    /* Buttons */
+    .btn-primary { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; background: #1d9e75; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 8px; }
+    .btn-primary:disabled { background: #9fe1cb; cursor: default; }
+    .btn-secondary { width: 100%; padding: 10px; font-size: 14px; font-weight: 500; background: transparent; color: #444; border: 0.5px solid #ccc; border-radius: 8px; cursor: pointer; margin-bottom: 8px; }
+
+    /* Badges */
+    .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+    .badge-teal { background: #e1f5ee; color: #0f6e56; }
+    .badge-amber { background: #faeeda; color: #854f0b; }
+    .badge-purple { background: #eeedfe; color: #3c3489; }
+
+    /* Preview image */
+    .preview-img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; }
+
+    /* Mystery box */
+    .mystery-box { background: #eeedfe; border: 0.5px solid #afa9ec; border-radius: 12px; padding: 1rem; margin-bottom: 12px; }
+    .mystery-box .label { font-size: 12px; font-weight: 600; color: #3c3489; margin-bottom: 6px; }
+    .mystery-box .question { font-size: 14px; color: #534ab7; line-height: 1.5; }
+
+    /* Voice button */
+    .voice-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .voice-btn { width: 80px; height: 80px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: box-shadow 0.2s; }
+    .voice-btn.idle { background: #1d9e75; }
+    .voice-btn.listening { background: #e24b4a; box-shadow: 0 0 0 10px rgba(226,75,74,0.15); }
+    .voice-hint { font-size: 13px; color: #888; text-align: center; }
+    .transcript-box { width: 100%; background: #f5f5f0; border: 0.5px solid #e0e0e0; border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #1a1a1a; line-height: 1.5; min-height: 48px; }
+
+    /* Score breakdown */
+    .breakdown-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 0.5px solid #f0f0f0; }
+    .breakdown-row:last-child { border-bottom: none; }
+
+    /* Journal items */
+    .journal-item { display: flex; gap: 12px; }
+    .journal-thumb { width: 52px; height: 52px; border-radius: 8px; flex-shrink: 0; overflow: hidden; background: #f0f0eb; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .journal-thumb img { width: 52px; height: 52px; object-fit: cover; }
+    .journal-meta { flex: 1; min-width: 0; }
+    .journal-name { font-size: 14px; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .journal-who { font-size: 12px; color: #888; margin-top: 2px; }
+    .journal-mystery { font-size: 12px; color: #534ab7; margin-top: 4px; line-height: 1.4; }
+    .journal-answer { font-size: 12px; color: #666; margin-top: 3px; font-style: italic; }
+    .journal-note { font-size: 11px; color: #854f0b; margin-top: 3px; }
+    .pts-pill { font-size: 12px; font-weight: 600; color: #0f6e56; background: #e1f5ee; padding: 2px 7px; border-radius: 99px; flex-shrink: 0; }
+
+    /* Leaderboard */
+    .board-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid #f0f0f0; }
+    .board-row:last-child { border-bottom: none; }
+    .board-rank { font-size: 13px; font-weight: 600; color: #888; width: 24px; flex-shrink: 0; }
+    .board-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+    .board-name { flex: 1; font-size: 14px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .board-pts { font-size: 13px; font-weight: 600; color: #0f6e56; flex-shrink: 0; }
+
+    /* Points grid */
+    .pts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .pts-card { background: white; border-radius: 8px; padding: 10px 12px; border: 0.5px solid #e0e0e0; }
+    .pts-card .pts-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+    .pts-card .pts-val { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+
+    /* Loading dots */
+    .dots { display: flex; gap: 6px; justify-content: center; padding: 4px 0; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #5dcaa5; animation: pulse 1s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+    /* Input */
+    input[type="text"] { width: 100%; padding: 10px 12px; font-size: 15px; border: 0.5px solid #ccc; border-radius: 8px; background: white; color: #1a1a1a; margin-bottom: 12px; outline: none; }
+    input[type="text"]:focus { border-color: #5dcaa5; }
+
+    .hidden { display: none !important; }
+    .empty-state { text-align: center; padding: 2rem 0; color: #888; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SESSION START -->
+  <div id="session-screen">
+    <div class="icon">🌿</div>
+    <h1>Bio Scout</h1>
+    <p>Go outside, find something interesting, and discover what it is. Your location will be saved so rare finds are scored accurately.</p>
+    <button class="btn-primary" id="start-btn" onclick="startSession()">Start session</button>
+    <p id="gps-hint" class="hidden" style="font-size:12px;color:#888;margin-top:8px;">Getting location...</p>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="main-app" class="hidden">
+
+    <!-- Session bar -->
+    <div id="session-bar">
+      <div style="display:flex;align-items:center;">
+        <div class="loc-dot" id="loc-dot" style="background:#ef9f27;"></div>
+        <span class="loc-label" id="loc-label">Getting location...</span>
+      </div>
+      <button class="end-btn" onclick="endSession()">End session</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tab-capture" onclick="showTab('capture')">Capture</button>
+      <button class="tab" id="tab-journal" onclick="showTab('journal')">Journal</button>
+      <button class="tab" id="tab-board" onclick="showTab('board')">Leaderboard</button>
+    </div>
+
+    <!-- CAPTURE -->
+    <div id="screen-capture">
+
+      <!-- Step: name -->
+      <div id="step-name" class="card">
+        <p style="font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Who's exploring?</p>
+        <p style="font-size:13px;color:#888;margin-bottom:14px;">Type your name before you start.</p>
+        <input type="text" id="name-input" placeholder="Your name..." />
+        <button class="btn-primary" onclick="submitName()">Let's explore!</button>
+      </div>
+
+      <!-- Step: upload -->
+      <div id="step-upload" class="hidden">
+        <p id="upload-greeting" style="font-size:14px;color:#666;margin-bottom:12px;"></p>
+        <label class="upload-zone" for="file-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+          <p>Tap to take a photo or upload</p>
+          <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(this)" />
+        </label>
+      </div>
+
+      <!-- Step: ready -->
+      <div id="step-ready" class="hidden">
+        <img id="preview-img" class="preview-img" />
+        <button class="btn-primary" onclick="identify()">Identify this nature find!</button>
+        <button class="btn-secondary" onclick="goToStep('upload')">Choose a different photo</button>
+      </div>
+
+      <!-- Step: identifying -->
+      <div id="step-identifying" class="hidden">
+        <img id="identifying-img" class="preview-img" style="opacity:0.6;" />
+        <div class="card" style="text-align:center;">
+          <p style="font-size:14px;color:#888;margin-bottom:10px;">Asking the nature expert...</p>
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        </div>
+      </div>
+
+      <!-- Step: identified -->
+      <div id="step-identified" class="hidden">
+        <img id="identified-img" class="preview-img" />
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span class="badge badge-teal">Identified!</span>
+            <span class="badge badge-amber hidden" id="rare-badge">Rare find!</span>
+          </div>
+          <p id="species-name" style="font-size:20px;font-weight:600;color:#1a1a1a;"></p>
+          <p id="species-latin" style="font-size:13px;color:#888;margin-top:3px;"></p>
+        </div>
+        <div class="mystery-box">
+          <div class="label">Mystery question</div>
+          <div class="question" id="mystery-text"></div>
+        </div>
+        <!-- Voice input -->
+        <div class="voice-wrap">
+          <button class="voice-btn idle" id="voice-btn" onclick="toggleVoice()">
+            <svg id="voice-icon" width="28" height="28" viewBox="0 0 24 24" fill="white">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="white" stroke-width="1.5" fill="none"/>
+              <line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="1.5"/>
+              <line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="1.5"/>
+            </svg>
+          </button>
+          <p class="voice-hint" id="voice-hint">Tap to answer out loud</p>
+          <div class="transcript-box hidden" id="transcript-box"></div>
+        </div>
+        <button class="btn-primary" id="submit-answer-btn" onclick="submitAnswer()" disabled>Submit my answer</button>
+      </div>
+
+      <!-- Step: scoring -->
+      <div id="step-scoring" class="hidden">
+        <div class="card" style="text-align:center;padding:2rem;">
+          <p style="font-size:14px;color:#888;margin-bottom:10px;">Counting your points...</p>
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        </div>
+      </div>
+
+      <!-- Step: done -->
+      <div id="step-done" class="hidden">
+        <div class="card" style="text-align:center;">
+          <p style="font-size:36px;margin-bottom:6px;">🌟</p>
+          <p id="pts-total" style="font-size:24px;font-weight:700;color:#1a1a1a;margin-bottom:4px;"></p>
+          <p id="encouragement" style="font-size:14px;color:#0f6e56;margin-bottom:16px;"></p>
+          <div id="breakdown"></div>
+        </div>
+        <button class="btn-primary" onclick="resetCapture()">Next explorer's turn!</button>
+        <button class="btn-secondary" onclick="resetCapture(); showTab('journal')">See class journal</button>
+      </div>
+
+    </div>
+
+    <!-- JOURNAL -->
+    <div id="screen-journal" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <p style="font-size:15px;font-weight:600;color:#1a1a1a;">Class journal</p>
+        <span class="badge badge-teal" id="journal-count">0 finds</span>
+      </div>
+      <div id="journal-list"></div>
+      <div id="journal-empty" class="empty-state">No finds yet — go explore outside!</div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="screen-board" class="hidden">
+      <p style="font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:12px;">Who's found the most?</p>
+      <div class="card" id="board-list"></div>
+      <div id="board-empty" class="empty-state hidden">No scores yet!</div>
+      <div class="pts-grid">
+        <div class="pts-card"><div class="pts-label">Base find</div><div class="pts-val">+10</div></div>
+        <div class="pts-card"><div class="pts-label">First in class</div><div class="pts-val">+10</div></div>
+        <div class="pts-card"><div class="pts-label">Mystery answer</div><div class="pts-val">+15</div></div>
+        <div class="pts-card"><div class="pts-label">Rare species</div><div class="pts-val">+20</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const POINT_RULES = { base: 10, firstInClass: 10, mystery: 15, rare: 20 };
+const AVATAR_COLORS = [
+  { bg:"#e1f5ee", txt:"#0f6e56" }, { bg:"#eeedfe", txt:"#3c3489" },
+  { bg:"#faeeda", txt:"#854f0b" }, { bg:"#faece7", txt:"#993c1d" },
+  { bg:"#e6f1fb", txt:"#185fa5" }, { bg:"#eaf3de", txt:"#3b6d11" },
+];
+const MEDALS = ["🥇","🥈","🥉"];
+const EMOJIS = ["🌿","🐛","🍂","🌸","🐝","🍄","🦎","🌾","🐞","🦋"];
+
+let session = null;
+let journal = [];
+let scores = {};
+let currentStudent = "";
+let currentIdentified = null;
+let currentImageFile = null;
+let currentImageB64 = null;
+let isListening = false;
+let recognition = null;
+const voiceSupported = "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+
+// ── HELPERS ────────────────────────────────────────────────────────
+function avatarColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+    const d = await r.json();
+    const a = d.address || {};
+    return [a.city || a.town || a.village || a.county, a.country].filter(Boolean).join(", ");
+  } catch { return null; }
+}
+
+async function callGemini(prompt, base64) {
+  const r = await fetch("/api/scan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, base64 }),
+  });
+  const d = await r.json();
+  return d?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+}
+
+async function callClaude(system, messages) {
+  const r = await fetch("/api/claude", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ system, messages }),
+  });
+  const d = await r.json();
+  return d?.content?.[0]?.text || "";
+}
+
+// ── SESSION ────────────────────────────────────────────────────────
+async function startSession() {
+  const btn = document.getElementById("start-btn");
+  const hint = document.getElementById("gps-hint");
+  btn.disabled = true;
+  btn.textContent = "Getting location...";
+  hint.classList.remove("hidden");
+
+  let location = null;
+  let locationStatus = "denied";
+
+  if (navigator.geolocation) {
+    await new Promise(resolve => {
+      navigator.geolocation.getCurrentPosition(
+        async pos => {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          const label = await reverseGeocode(lat, lng);
+          location = { lat, lng, label: label || `${lat.toFixed(2)}, ${lng.toFixed(2)}` };
+          locationStatus = "granted";
+          resolve();
+        },
+        () => resolve(),
+        { timeout: 8000 }
+      );
+    });
+  }
+
+  session = { location, locationStatus };
+  document.getElementById("session-screen").classList.add("hidden");
+  document.getElementById("main-app").classList.remove("hidden");
+
+  const dot = document.getElementById("loc-dot");
+  const lbl = document.getElementById("loc-label");
+  if (locationStatus === "granted" && location) {
+    dot.style.background = "#1d9e75";
+    lbl.textContent = location.label;
+  } else {
+    dot.style.background = "#ef9f27";
+    lbl.textContent = "No location — using Northern Europe";
+  }
+
+  goToStep("name");
+}
+
+function endSession() {
+  if (!confirm("End this session? Journal and scores will reset.")) return;
+  session = null; journal = []; scores = {};
+  document.getElementById("main-app").classList.add("hidden");
+  document.getElementById("session-screen").classList.remove("hidden");
+  document.getElementById("start-btn").disabled = false;
+  document.getElementById("start-btn").textContent = "Start session";
+  document.getElementById("gps-hint").classList.add("hidden");
+  resetCapture();
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────
+function showTab(tab) {
+  ["capture","journal","board"].forEach(t => {
+    document.getElementById("screen-" + t).classList.toggle("hidden", t !== tab);
+    document.getElementById("tab-" + t).classList.toggle("active", t === tab);
+  });
+  if (tab === "journal") renderJournal();
+  if (tab === "board") renderBoard();
+}
+
+function goToStep(step) {
+  ["name","upload","ready","identifying","identified","scoring","done"].forEach(s => {
+    document.getElementById("step-" + s).classList.toggle("hidden", s !== step);
+  });
+}
+
+// ── CAPTURE FLOW ───────────────────────────────────────────────────
+function submitName() {
+  const val = document.getElementById("name-input").value.trim();
+  if (!val) return;
+  currentStudent = val;
+  document.getElementById("upload-greeting").innerHTML =
+    `Hi <strong>${val}</strong> — found something? Take a photo!`;
+  goToStep("upload");
+}
+
+document.getElementById("name-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") submitName();
+});
+
+function handleImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentImageFile = URL.createObjectURL(file);
+    currentImageB64 = ev.target.result.split(",")[1];
+    document.getElementById("preview-img").src = currentImageFile;
+    goToStep("ready");
+  };
+  reader.readAsDataURL(file);
+}
+
+async function identify() {
+  document.getElementById("identifying-img").src = currentImageFile;
+  goToStep("identifying");
+
+  const locationContext = session.location
+    ? `Photo taken near ${session.location.label} (${session.location.lat.toFixed(3)}, ${session.location.lng.toFixed(3)}). Judge rarity for that specific local area and visible habitat.`
+    : `No location — judge rarity for temperate Northern Europe.`;
+
+  const prompt = `You are a nature identification expert for primary school children aged 6-10.
+${locationContext}
+Respond ONLY in this exact JSON format, no extra text:
+{
+  "name": "Common name",
+  "latin": "Latin name",
+  "mystery": "One open-ended question a 7-year-old would find exciting. Under 20 words.",
+  "isRare": true or false,
+  "rareReason": "One sentence for the teacher explaining rarity for this specific location"
+}`;
+
+  try {
+    const text = await callGemini(prompt, currentImageB64);
+    const clean = text.replace(/```json|```/g, "").trim();
+    currentIdentified = JSON.parse(clean);
+  } catch {
+    currentIdentified = { name: "Mystery creature", latin: "Unknown", mystery: "What do you think this creature eats?", isRare: false, rareReason: "" };
+  }
+
+  document.getElementById("identified-img").src = currentImageFile;
+  document.getElementById("species-name").textContent = currentIdentified.name;
+  document.getElementById("species-latin").textContent = currentIdentified.latin;
+  document.getElementById("mystery-text").textContent = currentIdentified.mystery;
+  document.getElementById("rare-badge").classList.toggle("hidden", !currentIdentified.isRare);
+
+  if (!voiceSupported) {
+    document.getElementById("voice-btn").style.display = "none";
+    document.getElementById("voice-hint").textContent = "Type your answer below";
+    document.getElementById("transcript-box").classList.remove("hidden");
+    document.getElementById("transcript-box").contentEditable = "true";
+    document.getElementById("transcript-box").addEventListener("input", updateSubmitBtn);
+  }
+
+  goToStep("identified");
+}
+
+// ── VOICE ──────────────────────────────────────────────────────────
+function toggleVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  if (isListening) {
+    recognition.stop();
+    return;
+  }
+  recognition = new SR();
+  recognition.lang = "en-US";
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.onresult = e => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join("");
+    document.getElementById("transcript-box").textContent = transcript;
+    document.getElementById("transcript-box").classList.remove("hidden");
+    updateSubmitBtn();
+  };
+  recognition.onstart = () => {
+    isListening = true;
+    const btn = document.getElementById("voice-btn");
+    btn.classList.remove("idle"); btn.classList.add("listening");
+    document.getElementById("voice-icon").innerHTML = `<rect x="6" y="6" width="12" height="12" rx="2"/>`;
+    document.getElementById("voice-hint").textContent = "Listening... tap to stop";
+  };
+  recognition.onend = () => {
+    isListening = false;
+    const btn = document.getElementById("voice-btn");
+    btn.classList.remove("listening"); btn.classList.add("idle");
+    document.getElementById("voice-icon").innerHTML = `
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="white" stroke-width="1.5" fill="none"/>
+      <line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="1.5"/>
+      <line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="1.5"/>`;
+    const hasText = document.getElementById("transcript-box").textContent.trim();
+    document.getElementById("voice-hint").textContent = hasText ? "Tap to re-record" : "Tap to answer out loud";
+  };
+  recognition.onerror = () => recognition.onend();
+  recognition.start();
+}
+
+function updateSubmitBtn() {
+  const text = document.getElementById("transcript-box").textContent.trim();
+  document.getElementById("submit-answer-btn").disabled = !text || isListening;
+}
+
+// ── SCORING ────────────────────────────────────────────────────────
+async function submitAnswer() {
+  const answer = document.getElementById("transcript-box").textContent.trim();
+  if (!answer) return;
+  goToStep("scoring");
+
+  const system = `You are a warm primary school teacher scoring a child's answer (age 6-10).
+Respond ONLY in this exact JSON format:
+{
+  "isGenuineAttempt": true or false,
+  "encouragement": "One warm sentence for the child, max 12 words",
+  "teacherNote": "One sentence for the teacher about thinking quality"
+}
+Genuine attempt = anything thoughtful, even if wrong. Only false for gibberish or random letters.`;
+
+  let scoring = { isGenuineAttempt: true, encouragement: "Great thinking!", teacherNote: "Student engaged." };
+  try {
+    const text = await callClaude(system, [{
+      role: "user",
+      content: `Species: ${currentIdentified.name}\nQuestion: ${currentIdentified.mystery}\nAnswer: ${answer}`
+    }]);
+    scoring = JSON.parse(text.replace(/```json|```/g, "").trim());
+  } catch {}
+
+  const alreadyFound = journal.some(e => e.name === currentIdentified.name);
+  let pts = POINT_RULES.base;
+  const breakdown = [{ label: "Nature find", pts: POINT_RULES.base }];
+  if (!alreadyFound) { pts += POINT_RULES.firstInClass; breakdown.push({ label: "First in class!", pts: POINT_RULES.firstInClass }); }
+  if (scoring.isGenuineAttempt) { pts += POINT_RULES.mystery; breakdown.push({ label: "Mystery answered", pts: POINT_RULES.mystery }); }
+  if (currentIdentified.isRare) { pts += POINT_RULES.rare; breakdown.push({ label: "Rare species!", pts: POINT_RULES.rare }); }
+
+  scores[currentStudent] = (scores[currentStudent] || 0) + pts;
+  journal.unshift({
+    name: currentIdentified.name, latin: currentIdentified.latin,
+    mystery: currentIdentified.mystery, answer, encouragement: scoring.encouragement,
+    teacherNote: scoring.teacherNote, student: currentStudent,
+    img: currentImageFile, emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+    pts, isRare: currentIdentified.isRare, rareReason: currentIdentified.rareReason,
+    firstFind: !alreadyFound,
+  });
+
+  document.getElementById("pts-total").textContent = `+${pts} points!`;
+  document.getElementById("encouragement").textContent = scoring.encouragement;
+  document.getElementById("breakdown").innerHTML = breakdown.map(b =>
+    `<div class="breakdown-row"><span style="color:#888">${b.label}</span><span style="font-weight:600;color:#0f6e56">+${b.pts}</span></div>`
+  ).join("");
+
+  goToStep("done");
+}
+
+function resetCapture() {
+  if (recognition) { try { recognition.stop(); } catch {} }
+  isListening = false;
+  currentStudent = ""; currentIdentified = null; currentImageFile = null; currentImageB64 = null;
+  document.getElementById("name-input").value = "";
+  document.getElementById("transcript-box").textContent = "";
+  document.getElementById("transcript-box").classList.add("hidden");
+  document.getElementById("submit-answer-btn").disabled = true;
+  document.getElementById("voice-hint").textContent = "Tap to answer out loud";
+  const vbtn = document.getElementById("voice-btn");
+  vbtn.classList.remove("listening"); vbtn.classList.add("idle");
+  goToStep("name");
+  showTab("capture");
+}
+
+// ── JOURNAL ────────────────────────────────────────────────────────
+function renderJournal() {
+  const list = document.getElementById("journal-list");
+  const empty = document.getElementById("journal-empty");
+  const count = document.getElementById("journal-count");
+  count.textContent = `${journal.length} ${journal.length === 1 ? "find" : "finds"}`;
+  if (!journal.length) { list.innerHTML = ""; empty.classList.remove("hidden"); return; }
+  empty.classList.add("hidden");
+  list.innerHTML = journal.map(e => `
+    <div class="card journal-item">
+      <div class="journal-thumb">
+        ${e.img ? `<img src="${e.img}" />` : e.emoji}
+      </div>
+      <div class="journal-meta">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+          <span class="journal-name">${e.name}</span>
+          <span class="pts-pill">+${e.pts}</span>
+        </div>
+        <div class="journal-who">${e.student}${e.firstFind ? ' <span class="badge badge-amber" style="font-size:10px;">first!</span>' : ''}${e.isRare ? ' <span class="badge badge-purple" style="font-size:10px;">rare</span>' : ''}</div>
+        <div class="journal-mystery">${e.mystery}</div>
+        ${e.answer ? `<div class="journal-answer">"${e.answer}"</div>` : ""}
+        ${e.teacherNote ? `<div class="journal-note">Teacher: ${e.teacherNote}</div>` : ""}
+        ${e.isRare && e.rareReason ? `<div class="journal-note" style="color:#3c3489;">Rare because: ${e.rareReason}</div>` : ""}
+      </div>
+    </div>`).join("");
+}
+
+// ── LEADERBOARD ────────────────────────────────────────────────────
+function renderBoard() {
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const list = document.getElementById("board-list");
+  const empty = document.getElementById("board-empty");
+  if (!sorted.length) { list.classList.add("hidden"); empty.classList.remove("hidden"); return; }
+  list.classList.remove("hidden"); empty.classList.add("hidden");
+  list.innerHTML = sorted.map(([name, pts], i) => {
+    const c = avatarColor(name);
+    return `<div class="board-row">
+      <span class="board-rank">${MEDALS[i] || "#" + (i + 1)}</span>
+      <div class="board-avatar" style="background:${c.bg};color:${c.txt}">${name[0].toUpperCase()}</div>
+      <span class="board-name">${name}</span>
+      <span class="board-pts">${pts} pts</span>
+    </div>`;
+  }).join("");
+}
+</script>
+</body>
+</html>
