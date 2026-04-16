@@ -1,13 +1,8 @@
-// api/scan.js — Vercel Serverless Function
-// Nøglen lever KUN her på serveren — aldrig i browseren
-
 module.exports = async function handler(req, res) {
-    // Kun POST tilladt
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    // Hent API-nøgle fra Vercel Environment Variable
     const API_KEY = process.env.GEMINI_API_KEY;
     if (!API_KEY) {
         return res.status(500).json({ error: "API key not configured on server" });
