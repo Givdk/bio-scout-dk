@@ -86,6 +86,15 @@
                 <p id="label-analysis" class="text-[9px] font-black text-primary-cyan tracking-[0.2em] mb-2 uppercase italic">Data Link Established</p>
                 <h3 id="ai-response" class="text-3xl font-black leading-none mb-3 uppercase"></h3>
                 <p id="ai-details" class="text-sm italic opacity-70 leading-relaxed border-t border-white/10 pt-4"></p>
+                <div id="confidence-box" class="hidden mt-4 pt-4 border-t border-white/10">
+                    <div class="flex justify-between items-center mb-1">
+                        <p id="label-confidence" class="text-[9px] font-black text-gray-500 uppercase tracking-widest"></p>
+                        <p id="confidence-value" class="text-[9px] font-black text-primary-cyan"></p>
+                    </div>
+                    <div class="w-full h-1 bg-white/5">
+                        <div id="confidence-bar" class="h-full transition-all duration-1000" style="width:0%"></div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -114,7 +123,8 @@
     </div>
 
 <script>
-    // API-nøglen lever sikkert på Vercel — ingen nøgle i denne fil
+    // ⚠️ Indsæt din API-nøgle her — push ALDRIG denne fil til et offentligt repo
+    const API_KEY = "DIN_API_NØGLE_HER";
 
     // ─── MISSIONER ───────────────────────────────────────────────
     // Tilføj flere missioner her — de låses op automatisk én ad gangen
@@ -159,7 +169,7 @@
             linking: "LINKER...", missionMet: "MISSION FULDFØRT",
             logbookEmpty: "Logbog tom.", allDone: "Alle missioner fuldført!",
             prompt: (target, id) =>
-                `Identificer arten på billedet. Bestem om det er en ${target} (Mission ${id}). Svar KUN på DANSK.\nFormat:\nLinje 1: ARTSNAVNET (KUN STORE BOGSTAVER).\nLinje 2: JA eller NEJ.\nLinje 3: Én kort sætning om arten.\nLinje 4: KATEGORI (skriv præcis ét af disse ord: PLANTE FUGL SVAMP INSEKT DYR ANDEN)`
+                `Identificer arten på billedet. Bestem om det er en ${target} (Mission ${id}). Svar KUN på DANSK.\nFormat:\nLinje 1: ARTSNAVNET (KUN STORE BOGSTAVER).\nLinje 2: JA eller NEJ.\nLinje 3: Én kort sætning om arten.\nLinje 4: KATEGORI (skriv præcis ét af disse ord: PLANTE FUGL SVAMP INSEKT DYR ANDEN)\nLinje 5: SIKKERHED (et tal mellem 0 og 100 der angiver hvor sikker du er på identifikationen - skriv KUN tallet)`
         },
         en: {
             points: "Bio-Points", objective: "Active Objective", logbook: "Field Logbook",
@@ -167,7 +177,7 @@
             linking: "LINKING...", missionMet: "MISSION COMPLETE",
             logbookEmpty: "Logbook empty.", allDone: "All missions complete!",
             prompt: (target, id) =>
-                `Identify the species in the image. Determine if it is a ${target} (Mission ${id}). Answer ONLY in ENGLISH.\nFormat:\nLine 1: SPECIES NAME (ALL CAPS).\nLine 2: YES or NO.\nLine 3: One short sentence about the species.\nLine 4: CATEGORY (write exactly one of these words: PLANT BIRD FUNGUS INSECT ANIMAL OTHER)`
+                `Identify the species in the image. Determine if it is a ${target} (Mission ${id}). Answer ONLY in ENGLISH.\nFormat:\nLine 1: SPECIES NAME (ALL CAPS).\nLine 2: YES or NO.\nLine 3: One short sentence about the species.\nLine 4: CATEGORY (write exactly one of these words: PLANT BIRD FUNGUS INSECT ANIMAL OTHER)\nLine 5: CONFIDENCE (a number between 0 and 100 indicating how confident you are - write ONLY the number)`
         }
     };
 
@@ -330,14 +340,21 @@
             const ui     = UI[currentLang];
             const target = mission[currentLang].target;
 
-            const res = await fetch("/api/scan", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    prompt: ui.prompt(target, mission.id),
-                    base64: base64
-                })
-            });
+            const res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: ui.prompt(target, mission.id) },
+                                { inline_data: { mime_type: "image/jpeg", data: base64 } }
+                            ]
+                        }]
+                    })
+                }
+            );
 
             const data = await res.json();
 
@@ -354,11 +371,25 @@
             const isMatch   = matchLine.includes("YES") || matchLine.includes("JA");
             const detail    = (lines[2] || "").replace(/[*#]/g, '').trim();
             const rawCat    = (lines[3] || "").replace(/[*#]/g, '').trim().toUpperCase();
-            // Normaliser kategori til dansk uanset sprog
             const catMap    = { PLANT:"PLANTE", BIRD:"FUGL", FUNGUS:"SVAMP", INSECT:"INSEKT", ANIMAL:"DYR", OTHER:"ANDEN",
                                 PLANTE:"PLANTE", FUGL:"FUGL", SVAMP:"SVAMP", INSEKT:"INSEKT", DYR:"DYR", ANDEN:"ANDEN" };
             const category  = catMap[rawCat] || "ANDEN";
+            const confidence = Math.min(100, Math.max(0, parseInt((lines[4] || "0").replace(/[^0-9]/g, '')) || 0));
             const isValid   = name.length > 2 && name !== "UNKNOWN";
+
+            // Vis confidence score
+            const confBox = document.getElementById('confidence-box');
+            const confBar = document.getElementById('confidence-bar');
+            const confVal = document.getElementById('confidence-value');
+            const confLbl = document.getElementById('label-confidence');
+            if (confidence > 0) {
+                confBox.classList.remove('hidden');
+                confLbl.innerText = currentLang === 'da' ? 'AI Sikkerhed' : 'AI Confidence';
+                confVal.innerText = confidence + '%';
+                // Farve: rød < 50, gul 50-79, grøn 80+
+                confBar.style.width = confidence + '%';
+                confBar.style.backgroundColor = confidence >= 80 ? '#00e5ff' : confidence >= 50 ? '#fbbf24' : '#ef4444';
+            }
 
             if (isMatch) {
                 aiResponse.innerText = UI[currentLang].missionMet;
@@ -393,7 +424,7 @@
                 const finds = JSON.parse(localStorage.getItem('scoutFinds')) || [];
                 if (!finds.some(f => f.name === name && f.date === today)) {
                     const displayDate = new Date().toLocaleDateString(currentLang === 'da' ? 'da-DK' : 'en-US');
-                    finds.push({ name, date: today, displayDate, category });
+                    finds.push({ name, date: today, displayDate, category, confidence });
                     localStorage.setItem('scoutFinds', JSON.stringify(finds));
                 }
                 // Opdater streak
