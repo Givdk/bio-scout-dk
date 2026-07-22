@@ -1,1 +1,2092 @@
 
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio-Scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --skovbund:#17281B;
+    --mos:#456B4C;
+    --mos-lys:#6B9473;
+    --lav:#CBD6C2;
+    --papir:#EDF0E4;
+    --papir-dyb:#E2E7D6;
+    --roen:#C2452A;
+    --bark:#6E5A44;
+    --display:'Fraunces',Georgia,serif;
+    --brod:'Karla',system-ui,sans-serif;
+    --log:'Space Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--papir);color:var(--skovbund);font-family:var(--brod);
+    font-size:17px;line-height:1.55;min-height:100vh;
+    display:flex;flex-direction:column;
+  }
+  .wrap{width:100%;max-width:820px;margin:0 auto;padding:0 24px}
+
+  /* header */
+  header{border-bottom:1px solid var(--lav);padding:18px 0;background:var(--papir)}
+  .hrow{display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .maerke{display:flex;align-items:baseline;gap:9px;text-decoration:none;color:inherit}
+  .maerke b{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.01em}
+  .maerke span{font-family:var(--log);font-size:9.5px;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--mos)}
+  .hknap{
+    font-family:var(--log);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    background:none;border:1px solid var(--lav);color:var(--bark);
+    padding:7px 13px;border-radius:2px;cursor:pointer;
+  }
+  .hknap:hover{border-color:var(--mos);color:var(--mos)}
+
+  main{flex:1;padding:36px 0 60px}
+
+  /* generelle elementer */
+  h1{font-family:var(--display);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.7rem);
+    line-height:1.08;letter-spacing:-.02em;margin-bottom:12px;
+    font-variation-settings:'SOFT' 40,'WONK' 1}
+  h2{font-family:var(--display);font-weight:600;font-size:1.45rem;
+    line-height:1.15;letter-spacing:-.015em;margin-bottom:10px}
+  .manchet{color:#3B4E39;margin-bottom:28px;max-width:52ch}
+  .eyebrow{font-family:var(--log);font-size:10px;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--mos);margin-bottom:10px}
+
+  .knap{
+    font-family:var(--brod);font-weight:700;font-size:1rem;
+    background:var(--mos);color:#fff;border:none;
+    padding:13px 26px;border-radius:2px;cursor:pointer;
+    transition:background .16s ease;
+  }
+  .knap:hover{background:var(--skovbund)}
+  .knap:disabled{background:var(--lav);color:#8A9683;cursor:not-allowed}
+  .knap--roed{background:var(--roen)}
+  .knap--roed:hover{background:#9E3520}
+  .knap--stille{background:none;color:var(--bark);border:1px solid var(--lav);
+    font-weight:500;padding:11px 20px}
+  .knap--stille:hover{background:none;border-color:var(--mos);color:var(--mos)}
+  button:focus-visible,a:focus-visible,label:focus-within{
+    outline:2px solid var(--mos);outline-offset:3px}
+
+  .kort{background:#fff;border:1px solid var(--lav);border-radius:4px;padding:24px}
+
+  /* valgknapper */
+  .valg{display:grid;gap:12px;margin-bottom:30px}
+  .valg--2{grid-template-columns:1fr 1fr}
+  .valg--4{grid-template-columns:repeat(4,1fr)}
+  .vkort{
+    background:#fff;border:1px solid var(--lav);border-radius:4px;
+    padding:18px;text-align:left;cursor:pointer;font-family:var(--brod);
+    color:inherit;font-size:1rem;transition:border-color .16s,transform .16s;
+  }
+  .vkort:hover{border-color:var(--mos);transform:translateY(-2px)}
+  .vkort.valgt{border-color:var(--mos);border-width:2px;padding:17px}
+  .vkort b{display:block;font-family:var(--display);font-weight:600;
+    font-size:1.12rem;margin-bottom:4px}
+  .vkort small{color:var(--bark);font-size:.83rem;line-height:1.4;display:block}
+  .vkort .ikon{font-size:1.5rem;display:block;margin-bottom:8px}
+
+  /* mission */
+  .mission{
+    background:#fff;border:1px solid var(--lav);border-left:4px solid var(--roen);
+    border-radius:4px;padding:26px;margin-bottom:22px;
+  }
+  .mission .ikon{font-size:2.3rem;display:block;margin-bottom:12px}
+  .mission h2{margin-bottom:8px}
+  .mission p{font-size:1.1rem;margin-bottom:14px}
+  .mission .meta{font-family:var(--log);font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--bark)}
+
+  /* kamera */
+  .drop{
+    border:2px dashed var(--lav);border-radius:4px;background:#fff;
+    padding:44px 24px;text-align:center;cursor:pointer;display:block;
+    transition:border-color .16s,background .16s;
+  }
+  .drop:hover{border-color:var(--mos);background:#fbfcfa}
+  .drop .ikon{font-size:2.6rem;display:block;margin-bottom:12px}
+  .drop b{font-family:var(--display);font-size:1.2rem;font-weight:600;
+    display:block;margin-bottom:6px}
+  .drop small{color:var(--bark);font-size:.88rem}
+  input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+
+  /* status / fejl */
+  .status{
+    display:flex;align-items:center;gap:12px;padding:16px 20px;
+    background:#fff;border:1px solid var(--lav);border-radius:4px;margin-bottom:18px;
+  }
+  .spinner{
+    width:17px;height:17px;border:2px solid var(--lav);border-top-color:var(--mos);
+    border-radius:50%;animation:snurr .7s linear infinite;flex-shrink:0;
+  }
+  @keyframes snurr{to{transform:rotate(360deg)}}
+  .advarsel{
+    background:#FBEAE6;border:1px solid #E8BCB2;border-left:4px solid var(--roen);
+    border-radius:4px;padding:18px 20px;margin-bottom:20px;
+  }
+  .advarsel b{display:block;margin-bottom:5px;font-family:var(--display);font-size:1.1rem}
+  .advarsel p{font-size:.94rem;color:#6B3325}
+
+  /* resultat */
+  .art-navn{font-family:var(--display);font-weight:700;
+    font-size:clamp(1.7rem,4vw,2.3rem);letter-spacing:-.02em;line-height:1.08}
+  .art-latin{font-style:italic;color:var(--bark);font-size:1rem;margin-bottom:14px}
+  .maerkat{
+    display:inline-block;font-family:var(--log);font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;padding:4px 10px;border-radius:2px;
+    background:var(--papir-dyb);color:var(--bark);margin-right:6px;
+  }
+  .maerkat--lav{background:#FBEAE6;color:#9E3520}
+  .fakta{
+    background:var(--papir-dyb);border-radius:3px;padding:14px 16px;
+    margin-top:16px;font-size:.96rem;
+  }
+  .fakta b{font-family:var(--log);font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--mos);display:block;margin-bottom:5px}
+
+  /* spørgsmål */
+  .spm{
+    background:#fff;border:1px solid var(--lav);border-left:4px solid var(--mos);
+    border-radius:4px;padding:24px;margin:22px 0;
+  }
+  .spm .tekst{font-family:var(--display);font-weight:600;font-size:1.3rem;
+    line-height:1.3;letter-spacing:-.01em}
+  .maal{
+    font-family:var(--log);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--bark);border-top:1px dotted var(--lav);
+    padding-top:12px;margin-top:16px;line-height:1.6;
+  }
+
+  textarea{
+    width:100%;font-family:var(--brod);font-size:1.02rem;line-height:1.5;
+    padding:15px;border:1px solid var(--lav);border-radius:3px;
+    background:#fff;color:inherit;resize:vertical;min-height:110px;
+  }
+  textarea:focus{outline:2px solid var(--mos);outline-offset:1px;border-color:var(--mos)}
+  .hint{font-size:.84rem;color:var(--bark);margin-top:8px}
+
+  .raekke{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
+
+  /* feedback */
+  .respons{
+    background:#fff;border:1px solid var(--lav);border-left:4px solid var(--mos-lys);
+    border-radius:4px;padding:24px;margin-bottom:18px;
+  }
+  .respons p{margin-bottom:14px}
+  .respons p:last-child{margin-bottom:0}
+  .naeste{font-family:var(--display);font-weight:600;font-size:1.15rem;
+    color:var(--mos);line-height:1.3}
+  .laerernote{
+    background:var(--papir-dyb);border-radius:3px;padding:13px 15px;
+    font-size:.9rem;margin-top:16px;
+  }
+  .laerernote b{font-family:var(--log);font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--bark);display:block;margin-bottom:5px}
+
+  /* samling */
+  .samling{border-top:1px solid var(--lav);margin-top:44px;padding-top:24px}
+  .samling-top{display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:14px;gap:16px;flex-wrap:wrap}
+  .samling-top h3{font-family:var(--display);font-weight:600;font-size:1.2rem}
+  .samling-tal{font-family:var(--log);font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--mos);font-weight:700}
+  .liste{display:grid;gap:0}
+  .linje{
+    display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;
+    font-family:var(--log);font-size:12.5px;padding:8px 0;
+    border-bottom:1px dotted rgba(107,90,68,.28);
+  }
+  .linje:last-child{border-bottom:none}
+  .linje .nr{color:var(--bark);font-size:11px}
+  .linje .n{font-weight:700;letter-spacing:-.01em}
+  .linje .a{color:var(--mos);font-size:11px;white-space:nowrap}
+  .tom{color:var(--bark);font-size:.92rem;padding:8px 0}
+
+  .koestatus{
+    font-family:var(--log);font-size:9.5px;letter-spacing:.1em;
+    text-transform:uppercase;background:var(--papir-dyb);color:var(--bark);
+    border:1px solid var(--lav);padding:6px 11px;border-radius:2px;
+  }
+  .koestatus.venter{border-color:var(--accent,#C2452A);color:#C2452A}
+
+  .banner{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--papir-dyb);border:1px solid var(--lav);
+    border-left:4px solid var(--bark);border-radius:4px;
+    padding:15px 18px;margin-bottom:20px;font-size:.94rem;
+  }
+  .banner b{font-family:var(--display);font-size:1.05rem;display:block}
+  .banner--klar{border-left-color:var(--mos)}
+
+  .gemt{
+    text-align:center;padding:40px 24px;background:#fff;
+    border:1px solid var(--lav);border-radius:4px;
+  }
+  .gemt .ikon{font-size:3rem;display:block;margin-bottom:14px}
+  .gemt b{font-family:var(--display);font-weight:600;font-size:1.5rem;
+    display:block;margin-bottom:8px}
+  .gemt p{color:var(--bark);max-width:38ch;margin:0 auto 20px}
+
+  .skjul{display:none !important}
+
+  @media (max-width:700px){
+    .valg--4{grid-template-columns:1fr 1fr}
+    .wrap{padding:0 18px}
+  }
+  @media (max-width:440px){
+    .valg--2,.valg--4{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hrow">
+    <a class="maerke" href="index.html">
+      <b>Bio-Scout</b><span id="tilstandMaerke">Skole</span>
+    </a>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="koestatus skjul" id="koeStatus"></span>
+      <button class="hknap" id="startForfra">Forfra</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- TRIN: sted -->
+  <section id="trin-sted" class="skjul">
+    <div class="eyebrow" id="stedEyebrow"></div>
+    <h1>Hvor er I henne?</h1>
+    <p class="manchet">Stedet gør artsbestemmelsen mere præcis — og giver jer
+      missioner, der kun findes lige der.</p>
+    <div class="valg valg--2" id="stedValg"></div>
+  </section>
+
+  <!-- TRIN: klassetrin (kun skole) -->
+  <section id="trin-klassetrin" class="skjul">
+    <div class="eyebrow">Undervisning</div>
+    <h1>Hvilket klassetrin?</h1>
+    <p class="manchet">Spørgsmål, sprog og respons tilpasses trinnet.</p>
+    <div class="valg valg--4" id="trinValg"></div>
+  </section>
+
+  <!-- TRIN: kompetenceområde (kun skole) -->
+  <section id="trin-omraade" class="skjul">
+    <div class="eyebrow" id="omraadeEyebrow">Undervisning</div>
+    <h1>Hvad skal I arbejde med?</h1>
+    <p class="manchet">De fire kompetenceområder fra Fælles Mål. Vælg ét — I kan
+      tage de andre på næste tur.</p>
+    <div class="valg valg--2" id="omraadeValg"></div>
+  </section>
+
+  <!-- TRIN: mission (kun fritid) -->
+  <section id="trin-mission" class="skjul">
+    <div class="eyebrow">Fritid</div>
+    <h1>Dagens mission</h1>
+    <div class="mission" id="missionKort"></div>
+    <div class="raekke">
+      <button class="knap knap--roed" id="missionStart">Vi tager den</button>
+      <button class="knap knap--stille" id="missionSkift">Giv mig en anden</button>
+    </div>
+  </section>
+
+  <!-- TRIN: foto -->
+  <section id="trin-foto" class="skjul">
+    <div class="eyebrow" id="fotoEyebrow"></div>
+    <h1 id="fotoOverskrift">Tag et billede af jeres fund</h1>
+    <p class="manchet" id="fotoManchet">
+      Fotografér dyret eller planten så tæt på som muligt. Billedet bliver
+      brugt til at genkende arten og bliver ikke gemt nogen steder.
+    </p>
+    <label class="drop" for="filInput" tabindex="0">
+      <span class="ikon">🌿</span>
+      <b>Tag billede eller vælg fra galleriet</b>
+      <small>Kun natur, dyr og planter — ikke personer</small>
+    </label>
+    <input type="file" id="filInput" accept="image/*" capture="environment">
+  </section>
+
+  <!-- TRIN: arbejder -->
+  <section id="trin-arbejder" class="skjul">
+    <div class="status">
+      <div class="spinner"></div>
+      <span id="arbejderTekst">Kigger på billedet…</span>
+    </div>
+  </section>
+
+  <!-- TRIN: gemt til senere -->
+  <section id="trin-gemt" class="skjul">
+    <div class="gemt">
+      <span class="ikon">🎒</span>
+      <b>Fundet er gemt</b>
+      <p id="gemtTekst">I er offline lige nu. Fundet bliver bestemt, så snart
+        I er tilbage på wifi.</p>
+      <button class="knap" id="gemtVidere">Find noget mere</button>
+    </div>
+  </section>
+
+  <!-- TRIN: resultat + spørgsmål -->
+  <section id="trin-resultat" class="skjul">
+    <div id="advarselBoks"></div>
+    <div class="kort" id="artKort"></div>
+    <div class="spm" id="spmKort"></div>
+
+    <label for="svarFelt" class="eyebrow">Jeres svar</label>
+    <textarea id="svarFelt" placeholder="Skriv hvad I tænker…"></textarea>
+    <p class="hint">Skriv om dyret eller planten — ikke om jer selv eller
+      hinandens navne.</p>
+
+    <div class="raekke">
+      <button class="knap" id="sendSvar">Send svar</button>
+      <button class="knap knap--stille" id="visHjaelp">Jeg er gået i stå</button>
+      <button class="knap knap--stille skjul" id="talKnap">🎤 Sig det i stedet</button>
+    </div>
+    <div id="hjaelpBoks"></div>
+  </section>
+
+  <!-- TRIN: respons -->
+  <section id="trin-respons" class="skjul">
+    <div class="respons" id="responsKort"></div>
+    <div class="raekke">
+      <button class="knap" id="nyttFund">Find noget nyt</button>
+      <button class="knap knap--stille" id="skiftOpgave">Ny opgave, samme fund</button>
+    </div>
+  </section>
+
+  <!-- SAMLING -->
+  <section class="samling" id="samlingSektion">
+    <div class="samling-top">
+      <h3 id="samlingTitel">Klassens liste</h3>
+      <span class="samling-tal" id="samlingTal">0 arter</span>
+    </div>
+    <div class="liste" id="samlingListe"></div>
+  </section>
+
+</main>
+
+<script type="module">
+import {
+  TILSTAND, KLASSETRIN, KOMPETENCEOMRAADER, MISSIONER,
+  vaelgMission, byggIdentifikationsPrompt, byggSkoleopgave,
+  byggFritidsspoergsmaal, byggSkolefeedback, byggFritidssvar,
+  parseJSON, opdaterSamling, samlingsStatus, naesteOmraade
+} from './opgaver.js';
+
+import { alleSteder, hentSted, missionerForSted, stedTilPrompt, vidsteDu }
+  from './steder.js';
+
+import { gemIKoe, antalIKoe, ryddKoe, erOnline, lytTilForbindelse, afvikleKoe,
+         nedskalerBillede } from './offline.js';
+
+// ---------------------------------------------------------------------------
+// TILSTAND
+// ---------------------------------------------------------------------------
+const params = new URLSearchParams(location.search);
+const tilstand = params.get('tilstand') === 'fritid' ? TILSTAND.FRITID : TILSTAND.SKOLE;
+const erSkole = tilstand === TILSTAND.SKOLE;
+
+const S = {
+  sted: null,
+  trin: null,
+  omraade: null,
+  mission: null,
+  art: null,
+  opgave: null,
+  brugteOmraader: [],
+  samling: [],
+};
+
+// ---------------------------------------------------------------------------
+// LAGRING — overlever refresh, men gemmer kun artsnavne. Aldrig billeder,
+// aldrig elevsvar, aldrig noget personhenførbart.
+// ---------------------------------------------------------------------------
+const NOEGLE = 'bioscout-samling-' + tilstand;
+
+function hentSamling(){
+  try{
+    const raa = localStorage.getItem(NOEGLE);
+    return raa ? JSON.parse(raa) : [];
+  }catch(e){ return []; }         // privat browsing e.l. — kør videre i hukommelsen
+}
+function gemSamling(){
+  try{ localStorage.setItem(NOEGLE, JSON.stringify(S.samling)); }catch(e){}
+}
+
+// ---------------------------------------------------------------------------
+// HJÆLPERE
+// ---------------------------------------------------------------------------
+const $ = id => document.getElementById(id);
+const TRIN_IDS = ['trin-sted','trin-klassetrin','trin-omraade','trin-mission',
+                  'trin-foto','trin-arbejder','trin-gemt','trin-resultat',
+                  'trin-respons'];
+
+function vis(id){
+  TRIN_IDS.forEach(t => $(t).classList.add('skjul'));
+  if(id) $(id).classList.remove('skjul');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+async function kald(sti, krop){
+  const r = await fetch(sti, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(krop)
+  });
+  if(!r.ok){
+    const t = await r.text().catch(()=> '');
+    throw new Error('Serveren svarede ' + r.status + '. ' + t.slice(0,120));
+  }
+  return r.json();
+}
+
+async function spoergClaude(prompt){
+  const data = await kald('/api/claude', { messages:[{role:'user', content:prompt}] });
+  if(data.error) throw new Error(data.error.message || 'Ukendt fejl fra Claude');
+  const tekst = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  return parseJSON(tekst);
+}
+
+async function spoergGemini(prompt, base64){
+  const data = await kald('/api/scan', { prompt, base64 });
+  if(data.error) throw new Error(data.error.message || 'Ukendt fejl fra Gemini');
+  const tekst = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if(!tekst) throw new Error('Tomt svar fra billedgenkendelsen');
+  return parseJSON(tekst);
+}
+
+function fejlboks(besked, hvad){
+  return `<div class="advarsel">
+    <b>${besked}</b>
+    <p>${hvad}</p>
+  </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// OPSÆTNING AF TILSTAND
+// ---------------------------------------------------------------------------
+$('tilstandMaerke').textContent = erSkole ? 'Skole' : 'SFO / klub';
+$('samlingTitel').textContent   = erSkole ? 'Klassens liste' : 'Klubbens liste';
+$('fotoEyebrow').textContent    = erSkole ? 'Undervisning' : 'Fritid';
+
+if(!erSkole){
+  $('fotoOverskrift').textContent = 'Hvad fandt I?';
+  $('fotoManchet').textContent =
+    'Tag et billede af det, I har fundet. Billedet bliver kun brugt til at ' +
+    'genkende arten — det bliver ikke gemt.';
+}
+
+// Byg klassetrinvalg
+Object.entries(KLASSETRIN).forEach(([id, k]) => {
+  const b = document.createElement('button');
+  b.className = 'vkort';
+  b.innerHTML = `<b>${k.label}</b><small>${k.fag}</small>`;
+  b.onclick = () => { S.trin = id; visOmraader(); };
+  $('trinValg').appendChild(b);
+});
+
+function visOmraader(){
+  const k = KLASSETRIN[S.trin];
+  $('omraadeEyebrow').textContent = k.label + ' · ' + k.fag;
+  const box = $('omraadeValg');
+  box.innerHTML = '';
+  Object.entries(KOMPETENCEOMRAADER).forEach(([id, o]) => {
+    const b = document.createElement('button');
+    b.className = 'vkort' + (S.brugteOmraader.includes(id) ? '' : '');
+    b.innerHTML = `<span class="ikon">${o.ikon}</span><b>${o.label}</b>
+                   <small>${o.laeringsmaal[S.trin]}</small>`;
+    b.onclick = () => { S.omraade = id; vis('trin-foto'); };
+    box.appendChild(b);
+  });
+  vis('trin-omraade');
+}
+
+function visMission(){
+  const pulje = missionerForSted(S.sted, MISSIONER);
+  const m = S.mission = pulje[Math.floor(Math.random() * pulje.length)];
+  $('missionKort').innerHTML = `
+    <span class="ikon">${m.ikon}</span>
+    <h2>${m.titel}</h2>
+    <p>${m.opdrag}</p>
+    <div class="meta">${m.varighed} · udendørs</div>`;
+  vis('trin-mission');
+}
+
+$('missionSkift').onclick = visMission;
+$('missionStart').onclick = () => vis('trin-foto');
+
+// ---------------------------------------------------------------------------
+// BILLEDE — læses, sendes, kasseres. Gemmes aldrig.
+// ---------------------------------------------------------------------------
+$('filInput').onchange = async (e) => {
+  const fil = e.target.files?.[0];
+  if(!fil) return;
+  e.target.value = '';
+
+  vis('trin-arbejder');
+  $('arbejderTekst').textContent = 'Tjekker forbindelsen…';
+
+  // Appen spørger ikke, hvilket udstyr den kører på. Den spørger nettet.
+  const online = await erOnline();
+
+  if(!online){
+    // Ingen forbindelse: billedet skaleres ned og lægges i kø på selve enheden.
+    try{
+      await gemIKoe(fil, {
+        tilstand, trin:S.trin, omraade:S.omraade,
+        missionId:S.mission?.id, stedId:S.sted
+      });
+      const n = await antalIKoe();
+      $('gemtTekst').textContent =
+        n === 1
+          ? 'I er offline. Fundet bliver bestemt, så snart I er på wifi igen.'
+          : 'I er offline. ' + n + ' fund venter på at blive bestemt.';
+      opdaterKoeStatus();
+      vis('trin-gemt');
+    }catch(err){
+      vis('trin-foto');
+      $('trin-foto').insertAdjacentHTML('afterbegin', fejlboks(
+        'Kunne ikke gemme fundet', err.message));
+    }
+    return;
+  }
+
+  // Der er forbindelse: bestem arten med det samme.
+  $('arbejderTekst').textContent = 'Kigger på billedet…';
+  try{
+    let base64 = await nedskalerBillede(fil);
+    const art = await spoergGemini(
+      byggIdentifikationsPrompt(tilstand, S.trin, stedTilPrompt(S.sted)), base64
+    );
+    base64 = null;
+
+    if(art.personPaaBillede){ afvisPerson(); return; }
+
+    S.art = art;
+    await lavOpgave();
+
+  }catch(err){
+    vis('trin-foto');
+    $('trin-foto').insertAdjacentHTML('afterbegin', fejlboks(
+      'Det gik ikke', 'Prøv igen om et øjeblik. (' + err.message + ')'
+    ));
+  }
+};
+
+function afvisPerson(){
+  vis('trin-foto');
+  $('trin-foto').insertAdjacentHTML('afterbegin', fejlboks(
+    'Der er en person på billedet',
+    'Billedet er slettet og ikke gemt. Tag et nyt billede af dyret eller ' +
+    'planten alene — Bio-Scout må ikke bruges til billeder af mennesker.'
+  ));
+  setTimeout(()=>document.querySelector('#trin-foto .advarsel')?.remove(), 9000);
+}
+
+$('gemtVidere').onclick = () => { if(erSkole){ vis('trin-foto'); } else { visMission(); } };
+
+// ---------------------------------------------------------------------------
+// OPGAVE
+// ---------------------------------------------------------------------------
+async function lavOpgave(){
+  vis('trin-arbejder');
+  const vd = vidsteDu(S.sted);
+  $('arbejderTekst').textContent = vd || (erSkole
+    ? 'Laver en opgave til jer…' : 'Finder på noget at undre sig over…');
+
+  const svar = erSkole
+    ? await spoergClaude(byggSkoleopgave(S.art, S.trin, S.omraade))
+    : await spoergClaude(byggFritidsspoergsmaal(S.art, S.mission));
+
+  S.opgave = erSkole
+    ? svar
+    : { spoergsmaal: svar.undren, hjaelp: svar.naesteMission, godtSvar: '' };
+
+  // Fundet ryger på listen — kun navnet, intet andet.
+  const res = opdaterSamling(S.samling, S.art);
+  S.samling = res.samling;
+  gemSamling();
+  tegnSamling(res.nyArt);
+
+  tegnResultat();
+  vis('trin-resultat');
+}
+
+function tegnResultat(){
+  const a = S.art;
+  const usikker = a.sikkerhed === 'lav';
+
+  $('advarselBoks').innerHTML = usikker ? fejlboks(
+    'Jeg er ikke sikker',
+    'Billedet var svært at tolke. Prøv et nyt billede tættere på — eller ' +
+    'arbejd videre og se, om I selv kan komme nærmere.'
+  ) : '';
+
+  $('artKort').innerHTML = `
+    <div class="art-navn">${a.navn || 'Ukendt'}</div>
+    ${a.latin ? `<div class="art-latin">${a.latin}</div>` : ''}
+    <div>
+      ${a.gruppe ? `<span class="maerkat">${a.gruppe}</span>` : ''}
+      <span class="maerkat ${usikker?'maerkat--lav':''}">Sikkerhed: ${a.sikkerhed||'?'}</span>
+    </div>
+    <p style="margin-top:14px">${a.beskrivelse||''}</p>
+    ${a.levested ? `<p style="margin-top:8px;color:var(--bark);font-size:.94rem">
+        <b>Levested:</b> ${a.levested}</p>` : ''}
+    ${a.vildtFakta ? `<div class="fakta"><b>Vidste I det?</b>${a.vildtFakta}</div>` : ''}`;
+
+  const maal = erSkole
+    ? `<div class="maal">${KLASSETRIN[S.trin].fag} · ${KLASSETRIN[S.trin].label} ·
+        ${KOMPETENCEOMRAADER[S.omraade].label}<br>
+        Læringsmål: ${KOMPETENCEOMRAADER[S.omraade].laeringsmaal[S.trin]}</div>`
+    : '';
+
+  $('spmKort').innerHTML = `<div class="tekst">${S.opgave.spoergsmaal}</div>${maal}`;
+  $('svarFelt').value = '';
+  $('hjaelpBoks').innerHTML = '';
+}
+
+$('visHjaelp').onclick = () => {
+  $('hjaelpBoks').innerHTML =
+    `<div class="fakta" style="margin-top:18px"><b>Et lille skub</b>${S.opgave.hjaelp||''}</div>`;
+};
+
+// ---------------------------------------------------------------------------
+// SVAR
+// ---------------------------------------------------------------------------
+$('sendSvar').onclick = async () => {
+  const svar = $('svarFelt').value.trim();
+  if(!svar){ $('svarFelt').focus(); return; }
+
+  vis('trin-arbejder');
+  $('arbejderTekst').textContent = 'Læser jeres svar…';
+
+  try{
+    if(erSkole){
+      const f = await spoergClaude(
+        byggSkolefeedback(S.art, S.trin, S.omraade, svar, S.opgave));
+      $('responsKort').innerHTML = `
+        <p>${f.feedback}</p>
+        <p class="naeste">${f.naesteSkridt}</p>
+        <div class="laerernote"><b>Til læreren</b>${f.laerernote}
+          <br><span style="color:var(--bark)">Målet: ${f.maalnaaet}</span></div>`;
+    }else{
+      const f = await spoergClaude(
+        byggFritidssvar(S.art, svar, S.opgave.spoergsmaal));
+      $('responsKort').innerHTML = `
+        <p>${f.svar}</p>
+        <p class="naeste">${f.gaaUdOgLed}</p>`;
+    }
+    vis('trin-respons');
+  }catch(err){
+    vis('trin-resultat');
+    $('advarselBoks').innerHTML = fejlboks(
+      'Svaret kom ikke igennem', 'Prøv at sende igen. (' + err.message + ')');
+  }
+};
+
+$('nyttFund').onclick = () => {
+  S.art = null; S.opgave = null;
+  if(erSkole){ vis('trin-foto'); } else { visMission(); }
+};
+
+$('skiftOpgave').onclick = async () => {
+  if(erSkole){
+    S.brugteOmraader.push(S.omraade);
+    S.omraade = naesteOmraade(S.brugteOmraader);
+  }
+  try{ await lavOpgave(); }
+  catch(err){
+    vis('trin-resultat');
+    $('advarselBoks').innerHTML = fejlboks('Det gik ikke', err.message);
+  }
+};
+
+$('startForfra').onclick = () => {
+  S.art = null; S.opgave = null; S.omraade = null; S.brugteOmraader = [];
+  S.trin = null; S.sted = null;
+  visSteder();
+};
+
+// ---------------------------------------------------------------------------
+// SAMLING
+// ---------------------------------------------------------------------------
+function tegnSamling(fremhaevSidste=false){
+  const st = samlingsStatus(S.samling);
+  $('samlingTal').textContent =
+    st.antalArter + (st.antalArter===1?' art':' arter') + ' · ' + st.antalFund + ' fund';
+
+  const liste = $('samlingListe');
+  if(!S.samling.length){
+    liste.innerHTML = `<p class="tom">Ingen fund endnu. Det første kommer, når I går ud.</p>`;
+    return;
+  }
+  liste.innerHTML = S.samling.map((a,i) => `
+    <div class="linje">
+      <span class="nr">${String(i+1).padStart(2,'0')}</span>
+      <span class="n">${a.navn}${a.antal>1?` <span style="color:var(--bark);font-weight:400">×${a.antal}</span>`:''}</span>
+      <span class="a">${a.gruppe||''}</span>
+    </div>`).join('');
+}
+
+// ---------------------------------------------------------------------------
+// STEMME — slukket som standard. Skal tændes bevidst.
+// Barnestemmer er personoplysninger; derfor er dette et aktivt tilvalg.
+// ---------------------------------------------------------------------------
+const StemmeAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(StemmeAPI && params.get('stemme') === 'til'){
+  const knap = $('talKnap');
+  knap.classList.remove('skjul');
+  const genkender = new StemmeAPI();
+  genkender.lang = 'da-DK';
+  genkender.interimResults = false;
+  knap.onclick = () => {
+    knap.textContent = '🎤 Lytter…';
+    genkender.start();
+  };
+  genkender.onresult = e => {
+    $('svarFelt').value = e.results[0][0].transcript;
+    knap.textContent = '🎤 Sig det i stedet';
+  };
+  genkender.onerror = genkender.onend = () => {
+    knap.textContent = '🎤 Sig det i stedet';
+  };
+}
+
+// ---------------------------------------------------------------------------
+// KØEN — status og afvikling
+// ---------------------------------------------------------------------------
+async function opdaterKoeStatus(){
+  const n = await antalIKoe();
+  const m = $('koeStatus');
+  if(!n){ m.classList.add('skjul'); return; }
+  m.classList.remove('skjul');
+  m.classList.add('venter');
+  m.textContent = n + (n===1 ? ' fund venter' : ' fund venter');
+}
+
+async function tilbydAfvikling(){
+  const n = await antalIKoe();
+  if(!n) return;
+  if(!(await erOnline())) return;
+
+  const vaert = document.querySelector('main.wrap');
+  if(document.getElementById('koeBanner')) return;
+
+  vaert.insertAdjacentHTML('afterbegin', `
+    <div class="banner banner--klar" id="koeBanner">
+      <div style="flex:1">
+        <b>I er tilbage på nettet</b>
+        ${n} ${n===1?'fund fra turen venter':'fund fra turen venter'} på at blive bestemt.
+      </div>
+      <button class="knap" id="koeStart">Bestem dem nu</button>
+      <button class="knap knap--stille" id="koeRyd">Slet dem</button>
+    </div>`);
+
+  $('koeStart').onclick = koerKoe;
+  $('koeRyd').onclick = async () => {
+    await ryddKoe();
+    $('koeBanner')?.remove();
+    opdaterKoeStatus();
+  };
+}
+
+async function koerKoe(){
+  const banner = $('koeBanner');
+  if(banner) banner.innerHTML =
+    `<div class="spinner"></div><div style="flex:1">Bestemmer fundene…
+     <span id="koeRest"></span></div>`;
+
+  let nye = 0, afvist = 0, fejlede = 0;
+
+  await afvikleKoe(
+    // identificér
+    async (base64, meta) => spoergGemini(
+      byggIdentifikationsPrompt(meta.tilstand || tilstand, meta.trin,
+                                stedTilPrompt(meta.stedId)), base64),
+    // ved fund
+    (art, meta, rest) => {
+      const r = opdaterSamling(S.samling, art);
+      S.samling = r.samling; gemSamling(); tegnSamling();
+      if(r.nyArt) nye++;
+      const el = $('koeRest');
+      if(el) el.textContent = rest ? '(' + rest + ' tilbage)' : '';
+    },
+    // ved fejl
+    () => { fejlede++; }
+  );
+
+  await opdaterKoeStatus();
+
+  if(banner){
+    banner.className = 'banner banner--klar';
+    banner.innerHTML = `<div style="flex:1"><b>Turen er på listen</b>
+      ${nye ? nye + (nye===1?' ny art':' nye arter') + ' er kommet til.' : 'Ingen nye arter denne gang.'}
+      ${fejlede ? ' ' + fejlede + ' billede(r) kunne ikke bestemmes og er slettet.' : ''}</div>
+      <button class="knap knap--stille" id="koeLuk">Luk</button>`;
+    $('koeLuk').onclick = () => banner.remove();
+  }
+}
+
+lytTilForbindelse(tilbydAfvikling, opdaterKoeStatus);
+
+// ---------------------------------------------------------------------------
+// STEDVÆLGER
+// ---------------------------------------------------------------------------
+function visSteder(){
+  $('stedEyebrow').textContent = erSkole ? 'Undervisning' : 'Fritid';
+  const box = $('stedValg');
+  box.innerHTML = '';
+
+  alleSteder().forEach(st => {
+    const b = document.createElement('button');
+    b.className = 'vkort';
+    b.innerHTML = `<span class="ikon">${st.ikon}</span><b>${st.navn}</b>
+                   <small>${st.kort}</small>`;
+    b.onclick = () => { S.sted = st.id; efterSted(); };
+    box.appendChild(b);
+  });
+
+  const b = document.createElement('button');
+  b.className = 'vkort';
+  b.innerHTML = `<span class="ikon">📍</span><b>Et andet sted</b>
+                 <small>Fungerer fint — bestemmelsen bliver bare lidt mindre præcis</small>`;
+  b.onclick = () => { S.sted = null; efterSted(); };
+  box.appendChild(b);
+
+  vis('trin-sted');
+}
+
+function efterSted(){
+  if(erSkole){ vis('trin-klassetrin'); } else { visMission(); }
+}
+
+// ---------------------------------------------------------------------------
+// START
+// ---------------------------------------------------------------------------
+S.samling = hentSamling();
+tegnSamling();
+opdaterKoeStatus();
+tilbydAfvikling();
+visSteder();
+</script>
+
+</body>
+</html>
+
+/**
+ * offline.js — Feltkø til Bio-Scout
+ *
+ * PROBLEMET: skolens iPads har intet SIM-kort, og hverken Brøndbyskoven eller
+ * Valbyparken har wifi. Appen kan altså ikke identificere noget i felten.
+ *
+ * LØSNINGEN: børnene fotograferer ude i naturen. Billederne lægges i en kø på
+ * selve iPad'en. Når klassen kommer tilbage på skolens wifi, arbejdes køen
+ * igennem, og fundene ryger på listen.
+ *
+ * PRIVATLIV — de tre regler der holder løftet så stramt som muligt:
+ *
+ *   1. Billedet forlader aldrig iPad'en, før det identificeres. Ingen server,
+ *      ingen sky, ingen mellemstation.
+ *   2. Billedet slettes i samme øjeblik arten er bestemt. Kun navnet gemmes.
+ *   3. Køen tømmer sig selv efter et døgn — også hvis nogen glemmer det.
+ *
+ * Der bruges IndexedDB frem for localStorage, fordi localStorage kun rummer
+ * omkring 5 MB og ikke er bygget til billeddata.
+ */
+
+const DB_NAVN    = "bioscout-felt";
+const LAGER      = "koe";
+const VERSION    = 1;
+const LEVETID_MS = 24 * 60 * 60 * 1000;   // et døgn
+const MAX_PX     = 900;                    // længste side efter nedskalering
+const KVALITET   = 0.65;                   // JPEG-kvalitet
+
+// ---------------------------------------------------------------------------
+// DATABASE
+// ---------------------------------------------------------------------------
+
+function aabnDB() {
+  return new Promise((ok, nej) => {
+    const anmod = indexedDB.open(DB_NAVN, VERSION);
+    anmod.onupgradeneeded = () => {
+      const db = anmod.result;
+      if (!db.objectStoreNames.contains(LAGER)) {
+        const lager = db.createObjectStore(LAGER, { keyPath: "id", autoIncrement: true });
+        lager.createIndex("tid", "tid");
+      }
+    };
+    anmod.onsuccess = () => ok(anmod.result);
+    anmod.onerror   = () => nej(new Error("Kunne ikke åbne feltkøen"));
+  });
+}
+
+function transaktion(lager, tilstand, arbejd) {
+  return aabnDB().then(db => new Promise((ok, nej) => {
+    const t = db.transaction(lager, tilstand);
+    const s = t.objectStore(lager);
+    let resultat;
+    try { resultat = arbejd(s); } catch (e) { nej(e); return; }
+    t.oncomplete = () => ok(resultat && resultat.result !== undefined
+      ? resultat.result : resultat);
+    t.onerror    = () => nej(new Error("Feltkøen svarede ikke"));
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// NEDSKALERING — mindre billeder fylder mindre og sendes hurtigere.
+// En art kan sagtens bestemmes ud fra 900 px.
+// ---------------------------------------------------------------------------
+
+export function nedskalerBillede(fil) {
+  return new Promise((ok, nej) => {
+    const url = URL.createObjectURL(fil);
+    const img = new Image();
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width: b, height: h } = img;
+      if (Math.max(b, h) > MAX_PX) {
+        const f = MAX_PX / Math.max(b, h);
+        b = Math.round(b * f);
+        h = Math.round(h * f);
+      }
+      const c = document.createElement("canvas");
+      c.width = b; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, b, h);
+      ok(c.toDataURL("image/jpeg", KVALITET).split(",")[1]);   // base64 uden præfiks
+    };
+
+    img.onerror = () => { URL.revokeObjectURL(url); nej(new Error("Kunne ikke læse billedet")); };
+    img.src = url;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// KØEN
+// ---------------------------------------------------------------------------
+
+/**
+ * Læg et fund i køen.
+ * @param {File} fil - billedet fra kameraet
+ * @param {object} meta - {tilstand, trin, omraade, missionId, stedId}
+ */
+export async function gemIKoe(fil, meta = {}) {
+  const base64 = await nedskalerBillede(fil);
+  await transaktion(LAGER, "readwrite", s =>
+    s.add({ base64, meta, tid: Date.now() })
+  );
+  return antalIKoe();
+}
+
+/** Alle ventende fund, ældste først. */
+export async function hentKoe() {
+  await ryddUdloebne();
+  const alle = await transaktion(LAGER, "readonly", s => s.getAll());
+  return (alle || []).sort((a, b) => a.tid - b.tid);
+}
+
+export async function antalIKoe() {
+  await ryddUdloebne();
+  const n = await transaktion(LAGER, "readonly", s => s.count());
+  return n || 0;
+}
+
+/** Slet ét fund — kaldes så snart arten er bestemt. */
+export function sletFraKoe(id) {
+  return transaktion(LAGER, "readwrite", s => s.delete(id));
+}
+
+/** Tøm hele køen. Bør altid være en synlig knap i UI'et. */
+export function ryddKoe() {
+  return transaktion(LAGER, "readwrite", s => s.clear());
+}
+
+/** Sletter alt over et døgn gammelt. Kører automatisk ved hvert opslag. */
+export async function ryddUdloebne() {
+  const graense = Date.now() - LEVETID_MS;
+  const alle = await transaktion(LAGER, "readonly", s => s.getAll());
+  const gamle = (alle || []).filter(p => p.tid < graense);
+  for (const p of gamle) {
+    await transaktion(LAGER, "readwrite", s => s.delete(p.id));
+  }
+  return gamle.length;
+}
+
+// ---------------------------------------------------------------------------
+// FORBINDELSE
+// ---------------------------------------------------------------------------
+
+/**
+ * navigator.onLine lyver ofte: den siger "online", når iPad'en hænger på et
+ * wifi uden internet bagved. Derfor prøves der et rigtigt kald.
+ */
+export async function erOnline() {
+  if (!navigator.onLine) return false;
+  try {
+    const svar = await fetch("/api/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),                 // tomt kald → 400, men det beviser forbindelse
+      signal: AbortSignal.timeout(4000),
+    });
+    return svar.status > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Kald tilbage når forbindelsen kommer eller går. */
+export function lytTilForbindelse(naarOnline, naarOffline) {
+  window.addEventListener("online",  () => naarOnline && naarOnline());
+  window.addEventListener("offline", () => naarOffline && naarOffline());
+}
+
+// ---------------------------------------------------------------------------
+// AFVIKLING AF KØEN
+// ---------------------------------------------------------------------------
+
+/**
+ * Arbejder køen igennem, ét fund ad gangen.
+ *
+ * @param {function} identificer - async (base64, meta) => art
+ * @param {function} paaFund     - (art, meta, restITil) => void
+ * @param {function} paaFejl     - (fejl, post) => void
+ *
+ * Et fund slettes, så snart det er behandlet — også hvis der var en person på
+ * billedet, eller hvis identifikationen slog fejl. Intet bliver liggende.
+ */
+export async function afvikleKoe(identificer, paaFund, paaFejl) {
+  const koe = await hentKoe();
+  let behandlet = 0;
+
+  for (const post of koe) {
+    try {
+      const art = await identificer(post.base64, post.meta);
+      await sletFraKoe(post.id);
+      behandlet++;
+      if (!art.personPaaBillede && paaFund) {
+        paaFund(art, post.meta, koe.length - behandlet);
+      }
+    } catch (fejl) {
+      await sletFraKoe(post.id);      // ryd op uanset hvad
+      behandlet++;
+      if (paaFejl) paaFejl(fejl, post);
+    }
+  }
+
+  return behandlet;
+}
+
+/**
+ * opgaver.js — Pædagogisk motor til Nature Explorer / Bio-Scout
+ *
+ * TO TILSTANDE, ÉN MOTOR:
+ *
+ *   SKOLE    → undervisning. Klassetrin, kompetencemål fra Fælles Mål,
+ *              formativ feedback og lærernote. Læreren er til stede.
+ *
+ *   FRITID   → SFO og klub. Aldersblandet, frivilligt, kort.
+ *              Ingen vurdering, ingen klassetrin, ingen mål på skærmen.
+ *              Nysgerrighed og fælles samling driver det.
+ *
+ * Samme fund kan bruges i begge tilstande — det er netop det samspil mellem
+ * SFO'ens aktiviteter og skolens undervisning, som SFO'ens mål- og
+ * indholdsbeskrivelse skal redegøre for (folkeskolelovens § 40, stk. 4).
+ */
+
+export const TILSTAND = { SKOLE: "skole", FRITID: "fritid" };
+
+// ===========================================================================
+// DEL 1 — SKOLETILSTAND
+// ===========================================================================
+
+export const KLASSETRIN = {
+  "1-2": {
+    label: "1.-2. klasse",
+    fag: "Natur/teknologi",
+    sprogniveau:
+      "Meget enkelt dansk. Korte sætninger. Konkrete, sanselige ord (farve, form, " +
+      "størrelse, lyd, hvor den bor). Undgå fagord uden forklaring. Max 2 linjer.",
+    forventning:
+      "Eleven svarer ud fra egne iagttagelser. Et svar er godt, hvis eleven " +
+      "beskriver noget, den faktisk kan se eller har oplevet.",
+  },
+  "3-4": {
+    label: "3.-4. klasse",
+    fag: "Natur/teknologi",
+    sprogniveau:
+      "Enkelt dansk med få fagord, der forklares i samme sætning. Max 3 linjer.",
+    forventning:
+      "Eleven kan udføre enkle undersøgelser og begrunde med mindst én observation.",
+  },
+  "5-6": {
+    label: "5.-6. klasse",
+    fag: "Natur/teknologi",
+    sprogniveau:
+      "Alderssvarende dansk med naturfaglige begreber (levested, tilpasning, " +
+      "fødekæde, art). Begreberne må gerne udfordre lidt.",
+    forventning:
+      "Eleven kan designe en undersøgelse ud fra en begyndende hypotese og " +
+      "forklare en sammenhæng mellem organisme og levested.",
+  },
+  "7-9": {
+    label: "7.-9. klasse",
+    fag: "Biologi",
+    sprogniveau:
+      "Fagligt dansk med korrekt biologisk terminologi (økosystem, tilpasning, " +
+      "biodiversitet, evolution, næringsstofkredsløb, indikatorart).",
+    forventning:
+      "Eleven kan forklare med biologisk fagsprog, argumentere ud fra evidens " +
+      "og perspektivere til biodiversitet og bæredygtighed.",
+  },
+};
+
+export const KOMPETENCEOMRAADER = {
+  undersoegelse: {
+    label: "Undersøgelse",
+    ikon: "🔍",
+    laeringsmaal: {
+      "1-2": "Eleven kan udføre enkle undersøgelser på baggrund af egne og andres spørgsmål.",
+      "3-4": "Eleven kan gennemføre enkle undersøgelser med brug af enkelt udstyr.",
+      "5-6": "Eleven kan designe undersøgelser på baggrund af begyndende hypotesedannelse.",
+      "7-9": "Eleven kan designe, gennemføre og vurdere undersøgelser i biologi.",
+    },
+    opgavetype:
+      "Stil ét spørgsmål, der får eleven til at KIGGE IGEN på organismen og " +
+      "beskrive en konkret iagttagelse — en kropsdel, en farve, et mønster, " +
+      "hvor den sad, eller hvad den lavede.",
+  },
+  modellering: {
+    label: "Modellering",
+    ikon: "🧩",
+    laeringsmaal: {
+      "1-2": "Eleven kan anvende naturtro modeller.",
+      "3-4": "Eleven kan anvende modeller med stigende abstraktionsgrad.",
+      "5-6": "Eleven kan designe enkle modeller.",
+      "7-9": "Eleven kan anvende og vurdere modeller i biologi.",
+    },
+    opgavetype:
+      "Bed eleven placere organismen i en sammenhæng — tegne eller beskrive en " +
+      "fødekæde, den indgår i, eller hvor den hører til i sit levested. " +
+      "Eleven skal bygge en model, ikke huske et faktum.",
+  },
+  perspektivering: {
+    label: "Perspektivering",
+    ikon: "🌍",
+    laeringsmaal: {
+      "1-2": "Eleven kan genkende natur og teknologi i sin hverdag.",
+      "3-4": "Eleven kan relatere natur og teknologi til andre kontekster.",
+      "5-6": "Eleven kan perspektivere natur/teknologi til omverdenen og aktuelle hændelser.",
+      "7-9": "Eleven kan perspektivere biologi til omverdenen og relatere fagets indhold til udvikling af naturvidenskabelig erkendelse.",
+    },
+    opgavetype:
+      "Kobl organismen til elevens egen hverdag eller til et større tema " +
+      "(årstider, biodiversitet, menneskets påvirkning). Konkret, ikke moraliserende.",
+  },
+  kommunikation: {
+    label: "Kommunikation",
+    ikon: "💬",
+    laeringsmaal: {
+      "1-2": "Eleven kan kommunikere om natur og teknologi.",
+      "3-4": "Eleven kan beskrive egne undersøgelser med naturfaglige ord.",
+      "5-6": "Eleven kan kommunikere om natur/teknologi med brug af naturfaglige begreber.",
+      "7-9": "Eleven kan kommunikere om naturfaglige forhold med biologi.",
+    },
+    opgavetype:
+      "Bed eleven forklare noget om organismen, som om det skulle fortælles " +
+      "til en yngre elev eller en kammerat, der ikke var med ude.",
+  },
+};
+
+// ===========================================================================
+// DEL 2 — FRITIDSTILSTAND (SFO OG KLUB)
+// ===========================================================================
+
+/**
+ * Missioner erstatter opgaver. De er aldersblinde: en 6-årig og en 12-årig
+ * kan løse den samme mission på hvert sit niveau uden at nogen vælger niveau.
+ * De sender børnene UD — skærmen er kun undervejs.
+ */
+export const MISSIONER = [
+  {
+    id: "under-stenen",
+    titel: "Under stenen",
+    ikon: "🪨",
+    opdrag: "Find noget levende under en sten eller en træstamme.",
+    varighed: "10-15 min",
+    udendoers: true,
+  },
+  {
+    id: "mindre-end-finger",
+    titel: "Mindre end din finger",
+    ikon: "🐜",
+    opdrag: "Find et dyr, der er mindre end din lillefinger.",
+    varighed: "10 min",
+    udendoers: true,
+  },
+  {
+    id: "aeldre-end-dig",
+    titel: "Ældre end dig",
+    ikon: "🌳",
+    opdrag: "Find noget levende, der er ældre end dig selv.",
+    varighed: "15 min",
+    udendoers: true,
+  },
+  {
+    id: "tre-slags-blade",
+    titel: "Tre slags blade",
+    ikon: "🍃",
+    opdrag: "Saml tre blade fra tre forskellige planter.",
+    varighed: "15 min",
+    udendoers: true,
+  },
+  {
+    id: "flyver",
+    titel: "Noget der flyver",
+    ikon: "🦋",
+    opdrag: "Fotografér noget, der kan flyve. Det tæller også, hvis det sidder stille.",
+    varighed: "15-20 min",
+    udendoers: true,
+  },
+  {
+    id: "farvejagt",
+    titel: "Farvejagten",
+    ikon: "🎨",
+    opdrag: "Find noget levende i en farve, du ikke troede fandtes i naturen.",
+    varighed: "15 min",
+    udendoers: true,
+  },
+  {
+    id: "samme-sted-igen",
+    titel: "Samme sted igen",
+    ikon: "🔁",
+    opdrag: "Gå hen til et sted, klubben har været før. Er der noget nyt nu?",
+    varighed: "20 min",
+    udendoers: true,
+  },
+  {
+    id: "nogen-bor-her",
+    titel: "Nogen bor her",
+    ikon: "🏠",
+    opdrag: "Find et spor efter et dyr — et hul, en rede, gnavemærker, fjer.",
+    varighed: "15 min",
+    udendoers: true,
+  },
+];
+
+/** Vælger en mission — enten tilfældig eller efter id. */
+export function vaelgMission(id = null) {
+  if (id) return MISSIONER.find((m) => m.id === id) || MISSIONER[0];
+  return MISSIONER[Math.floor(Math.random() * MISSIONER.length)];
+}
+
+// ===========================================================================
+// DEL 3 — PROMPT-BYGGERE
+// ===========================================================================
+
+/** Billedgenkendelse (Gemini). Virker i begge tilstande. */
+export function byggIdentifikationsPrompt(tilstand, trin = null, stedTekst = "") {
+  const maalgruppe =
+    tilstand === TILSTAND.SKOLE
+      ? `elever i ${KLASSETRIN[trin].label} (${KLASSETRIN[trin].fag})`
+      : "børn mellem 6 og 14 år i en SFO eller klub";
+
+  const sprog =
+    tilstand === TILSTAND.SKOLE
+      ? KLASSETRIN[trin].sprogniveau
+      : "Enkelt, levende dansk som en begejstret naturvejleder ville tale. " +
+        "Skal kunne forstås af en 6-årig, men ikke være barnligt for en 12-årig. " +
+        "Ingen skolesprog, ingen fagmål.";
+
+  return `Du er en dansk naturvejleder, der hjælper ${maalgruppe}.
+
+FØRST: se efter, om der er et menneske på billedet — et ansigt, en person,
+en hånd der holder noget tæller ikke, men en person i billedet gør.
+Dette er vigtigt af hensyn til børnenes privatliv.
+
+DEREFTER: identificér organismen (dyr, plante, svamp, insekt m.m.).
+
+Svar KUN med gyldig JSON, uden markdown og uden indledning:
+{
+  "personPaaBillede": true eller false,
+  "navn": "dansk artsnavn",
+  "latin": "videnskabeligt navn hvis kendt, ellers tom streng",
+  "gruppe": "fx insekt, fugl, blomsterplante, svamp",
+  "sikkerhed": "høj | middel | lav",
+  "beskrivelse": "2-3 sætninger om organismen",
+  "levested": "hvor den typisk findes i Danmark",
+  "vildtFakta": "én overraskende ting om den, som får børn til at sige wow"
+}
+
+Hvis "personPaaBillede" er true, udfyld de øvrige felter med tomme strenge.
+Sprogkrav: ${sprog}
+Hvis du ikke kan se en organisme tydeligt, sæt "sikkerhed" til "lav" og forklar hvorfor i "beskrivelse".${stedTekst}`;
+}
+
+/** SKOLE: opgave forankret i kompetencemål. */
+export function byggSkoleopgave(art, trin, omraade) {
+  const k = KLASSETRIN[trin];
+  const komp = KOMPETENCEOMRAADER[omraade];
+
+  return `Du laver en opgave til en elev i ${k.label} i faget ${k.fag}.
+
+Eleven har fundet og fotograferet: ${art.navn}${art.latin ? ` (${art.latin})` : ""}.
+Levested: ${art.levested || "ukendt"}.
+
+Kompetenceområde: ${komp.label}
+Læringsmål: ${komp.laeringsmaal[trin]}
+Opgavetype: ${komp.opgavetype}
+Sprogkrav: ${k.sprogniveau}
+
+Svar KUN med gyldig JSON, uden markdown:
+{
+  "spoergsmaal": "selve spørgsmålet til eleven",
+  "hjaelp": "et lille hint, hvis eleven går i stå — må ikke afsløre svaret",
+  "godtSvar": "hvad kendetegner et godt svar på dette trin (til læreren)"
+}`;
+}
+
+/** FRITID: undren i stedet for opgave. Ingen rigtige eller forkerte svar. */
+export function byggFritidsspoergsmaal(art, mission) {
+  return `Du er en naturvejleder i en dansk SFO eller klub. Et barn mellem 6 og 14 år
+har lige fotograferet: ${art.navn}${art.latin ? ` (${art.latin})` : ""}.
+
+Missionen var: "${mission.opdrag}"
+
+Stil ÉT spørgsmål, der gør barnet nysgerrigt. Vigtige regler:
+- Det må IKKE være et quizspørgsmål med et rigtigt svar.
+- Det skal kunne besvares af både en 6-årig og en 12-årig, hver på sit niveau.
+- Det skal helst få barnet til at kigge på fundet igen eller gå videre ud.
+- Ingen skolesprog. Ingen læringsmål. Dette er fritid.
+- Barnet kan ikke læse lange tekster. Max to linjer.
+
+Svar KUN med gyldig JSON, uden markdown:
+{
+  "undren": "dit spørgsmål til barnet",
+  "vildtFakta": "én sætning om organismen, der er sjov eller overraskende",
+  "naesteMission": "et forslag til hvad barnet kan lede efter nu, én sætning"
+}`;
+}
+
+/** SKOLE: formativ feedback med lærernote. */
+export function byggSkolefeedback(art, trin, omraade, elevSvar, opgave) {
+  const k = KLASSETRIN[trin];
+  const komp = KOMPETENCEOMRAADER[omraade];
+
+  return `Du giver formativ feedback til en elev i ${k.label} i faget ${k.fag}.
+
+Organisme: ${art.navn}
+Spørgsmål: ${opgave.spoergsmaal}
+Elevens svar: "${elevSvar}"
+
+Læringsmål: ${komp.laeringsmaal[trin]}
+Forventning på trinnet: ${k.forventning}
+
+Retningslinjer:
+- Skriv direkte TIL eleven i du-form på dansk.
+- Start med noget konkret, eleven faktisk skrev. Ikke tom ros.
+- Peg på ÉN ting, eleven kan gøre bedre eller kigge nærmere på.
+- Slut med ét nyt spørgsmål, der driver undersøgelsen videre.
+- Ret aldrig eleven hårdt. Et delvist svar er et skridt på vejen.
+- Sprogkrav: ${k.sprogniveau}
+
+Svar KUN med gyldig JSON, uden markdown:
+{
+  "feedback": "3-4 sætninger til eleven",
+  "naesteSkridt": "ét spørgsmål der driver undersøgelsen videre",
+  "maalnaaet": "ja | delvist | endnu-ikke",
+  "laerernote": "1 sætning til læreren om hvor eleven står ift. læringsmålet"
+}`;
+}
+
+/** FRITID: svar på barnets undren. Ingen bedømmelse overhovedet. */
+export function byggFritidssvar(art, barnetsSvar, undren) {
+  return `Et barn i en SFO eller klub har fotograferet ${art.navn}.
+
+Du spurgte: "${undren}"
+Barnet svarede: "${barnetsSvar}"
+
+Svar tilbage som en begejstret naturvejleder. Regler:
+- Bedøm ALDRIG svaret. Der er intet rigtigt eller forkert her.
+- Byg videre på det barnet sagde — tag det alvorligt, også hvis det er skævt.
+- Tilføj én ting, barnet ikke vidste.
+- Send barnet videre ud med noget nyt at lede efter.
+- Max 3 korte sætninger. Ingen skolesprog.
+
+Svar KUN med gyldig JSON, uden markdown:
+{
+  "svar": "dit svar til barnet, max 3 sætninger",
+  "gaaUdOgLed": "hvad barnet skal lede efter nu, én sætning"
+}`;
+}
+
+// ===========================================================================
+// DEL 4 — SAMLING (fælles artsliste for klassen, SFO'en eller klubben)
+// ===========================================================================
+
+/**
+ * Motivationen i fritidstilstand er ikke point, men samlingen:
+ * "hvor mange arter har VI fundet?". Den virker på tværs af aldre,
+ * belønner de sjældne fund og skaber fællesskab frem for konkurrence.
+ */
+export function opdaterSamling(samling, art) {
+  const eksisterende = samling.find(
+    (a) => a.navn.toLowerCase() === art.navn.toLowerCase()
+  );
+
+  if (eksisterende) {
+    eksisterende.antal += 1;
+    eksisterende.sidstSet = new Date().toISOString();
+    return { samling, nyArt: false, art: eksisterende };
+  }
+
+  const ny = {
+    navn: art.navn,
+    latin: art.latin || "",
+    gruppe: art.gruppe || "",
+    antal: 1,
+    foersteGang: new Date().toISOString(),
+    sidstSet: new Date().toISOString(),
+  };
+  samling.push(ny);
+  return { samling, nyArt: true, art: ny };
+}
+
+/** Nøgletal til opslagstavlen i SFO'en eller klasselokalet. */
+export function samlingsStatus(samling) {
+  const grupper = {};
+  samling.forEach((a) => {
+    const g = a.gruppe || "andet";
+    grupper[g] = (grupper[g] || 0) + 1;
+  });
+
+  return {
+    antalArter: samling.length,
+    antalFund: samling.reduce((sum, a) => sum + a.antal, 0),
+    grupper,
+    sjaeldneste: samling
+      .filter((a) => a.antal === 1)
+      .map((a) => a.navn)
+      .slice(0, 5),
+  };
+}
+
+// ===========================================================================
+// DEL 5 — HJÆLPEFUNKTIONER
+// ===========================================================================
+
+/** Robust JSON-parsing af LLM-svar (fjerner markdown-fences). */
+export function parseJSON(tekst) {
+  return JSON.parse(tekst.replace(/```json|```/g, "").trim());
+}
+
+/** Til lærervisning i skoletilstand. */
+export function laeringsmaalTekst(trin, omraade) {
+  const k = KLASSETRIN[trin];
+  const komp = KOMPETENCEOMRAADER[omraade];
+  return {
+    fag: k.fag,
+    trin: k.label,
+    kompetenceomraade: komp.label,
+    maal: komp.laeringsmaal[trin],
+  };
+}
+
+/** Sikrer at klassen kommer hele vejen rundt om de fire kompetenceområder. */
+export function naesteOmraade(brugte = []) {
+  const alle = Object.keys(KOMPETENCEOMRAADER);
+  const ubrugte = alle.filter((o) => !brugte.includes(o));
+  return ubrugte.length ? ubrugte[0] : alle[0];
+}
+
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio-Scout — gå ud og find noget levende</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --skovbund:#17281B;
+    --mos:#456B4C;
+    --mos-lys:#6B9473;
+    --lav:#CBD6C2;
+    --papir:#EDF0E4;
+    --papir-dyb:#E2E7D6;
+    --roen:#C2452A;
+    --bark:#6E5A44;
+
+    --display:'Fraunces',Georgia,serif;
+    --brod:'Karla',system-ui,sans-serif;
+    --log:'Space Mono',ui-monospace,monospace;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html{-webkit-text-size-adjust:100%}
+
+  body{
+    background:var(--papir);
+    color:var(--skovbund);
+    font-family:var(--brod);
+    font-size:17px;
+    line-height:1.55;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    padding:26px 0 0;
+  }
+  .maerke{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .maerke b{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:21px;
+    letter-spacing:-.01em;
+  }
+  .maerke span{
+    font-family:var(--log);
+    font-size:10.5px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--mos);
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:56px;
+    align-items:center;
+    padding:64px 0 60px;
+  }
+
+  h1{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(2.6rem,5.6vw,4.15rem);
+    line-height:1.02;
+    letter-spacing:-.025em;
+    font-variation-settings:'SOFT' 40,'WONK' 1;
+    margin-bottom:22px;
+  }
+  h1 em{
+    font-style:normal;
+    color:var(--mos);
+  }
+
+  .manchet{
+    font-size:1.16rem;
+    max-width:35ch;
+    color:#31452F;
+  }
+
+  /* ---------- feltlog: sidens signatur ---------- */
+  .feltlog{
+    background:var(--papir-dyb);
+    border:1px solid var(--lav);
+    border-radius:3px;
+    padding:20px 22px 22px;
+    box-shadow:0 1px 0 rgba(23,40,27,.05);
+  }
+  .feltlog-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:var(--log);
+    font-size:10px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--bark);
+    padding-bottom:12px;
+    margin-bottom:4px;
+    border-bottom:1px solid var(--lav);
+  }
+  .taeller{color:var(--mos);font-weight:700}
+
+  .linje{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:12px;
+    align-items:baseline;
+    font-family:var(--log);
+    font-size:12.5px;
+    padding:7px 0;
+    border-bottom:1px dotted rgba(107,90,68,.28);
+    opacity:0;
+    transform:translateY(-5px);
+    animation:ind .5s ease forwards;
+  }
+  .linje:last-child{border-bottom:none}
+  .nr{color:var(--bark);font-size:11px}
+  .art{color:var(--skovbund);font-weight:700;letter-spacing:-.01em}
+  .art i{
+    font-family:var(--brod);
+    font-style:italic;
+    font-weight:400;
+    font-size:12px;
+    color:var(--bark);
+    letter-spacing:0;
+  }
+  .sted{color:var(--mos);font-size:11px;text-align:right;white-space:nowrap}
+  .ny{color:var(--roen);font-weight:700}
+
+  @keyframes ind{to{opacity:1;transform:none}}
+
+  /* ---------- de to døre ---------- */
+  .doere{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    padding-bottom:56px;
+  }
+
+  .doer{
+    display:flex;
+    flex-direction:column;
+    background:#fff;
+    border:1px solid var(--lav);
+    border-radius:4px;
+    padding:30px 28px 26px;
+    text-decoration:none;
+    color:inherit;
+    transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+  }
+  .doer:hover,.doer:focus-visible{
+    border-color:var(--mos);
+    transform:translateY(-2px);
+    box-shadow:0 6px 22px rgba(23,40,27,.09);
+  }
+  .doer:focus-visible{outline:2px solid var(--mos);outline-offset:3px}
+
+  .doer-mrk{
+    font-family:var(--log);
+    font-size:10px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--mos);
+    margin-bottom:14px;
+  }
+  .doer h2{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:1.72rem;
+    line-height:1.12;
+    letter-spacing:-.02em;
+    margin-bottom:10px;
+  }
+  .doer p{
+    font-size:.97rem;
+    color:#3B4E39;
+    margin-bottom:22px;
+    flex:1;
+  }
+  .knap{
+    align-self:flex-start;
+    font-family:var(--brod);
+    font-weight:700;
+    font-size:.95rem;
+    background:var(--mos);
+    color:#fff;
+    padding:11px 22px;
+    border-radius:2px;
+  }
+  .doer:hover .knap{background:var(--skovbund)}
+  .doer--fritid .knap{background:var(--roen)}
+  .doer--fritid .doer-mrk{color:var(--roen)}
+
+  /* ---------- tillidslinje ---------- */
+  .tillid{
+    margin-top:auto;
+    border-top:1px solid var(--lav);
+    padding:22px 0 40px;
+    display:flex;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+    font-size:.88rem;
+    color:#48583F;
+  }
+  .tillid strong{color:var(--skovbund)}
+  .tillid span{
+    font-family:var(--log);
+    font-size:10.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--bark);
+  }
+
+  /* ---------- mobil ---------- */
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr;gap:36px;padding:44px 0 40px}
+    .doere{grid-template-columns:1fr}
+    .wrap{padding:0 20px}
+    .manchet{max-width:none}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .linje{animation:none;opacity:1;transform:none}
+    .doer{transition:none}
+    .doer:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap maerke">
+    <b>Bio-Scout</b>
+    <span>Natur · Skole · SFO</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div>
+      <h1>Gå ud og find<br>noget <em>levende</em>.</h1>
+      <p class="manchet">
+        Børnene fotograferer det, de finder. Bio-Scout hjælper dem med at
+        genkende det — og samler alle fund på én fælles liste.
+      </p>
+    </div>
+
+    <div class="feltlog" aria-label="Eksempel på en feltlog">
+      <div class="feltlog-top">
+        <span>Feltlog · seneste fund</span>
+        <span class="taeller" id="taeller">0 arter</span>
+      </div>
+      <div id="log"></div>
+    </div>
+  </section>
+
+  <section class="doere">
+    <a class="doer" href="nature.html?tilstand=skole">
+      <div class="doer-mrk">Undervisning</div>
+      <h2>Vi er en klasse</h2>
+      <p>
+        Opgaver koblet til kompetencemålene i natur/teknologi og biologi.
+        Vælg klassetrin, og få formativ respons I kan arbejde videre ud fra.
+      </p>
+      <div class="knap">Start i skolen</div>
+    </a>
+
+    <a class="doer doer--fritid" href="nature.html?tilstand=fritid">
+      <div class="doer-mrk">Fritid</div>
+      <h2>Vi er SFO eller klub</h2>
+      <p>
+        Én mission, og så ud af døren. Ingen niveauer, ingen point og ingen
+        vurdering — bare fund, der ryger på klubbens liste.
+      </p>
+      <div class="knap">Vælg en mission</div>
+    </a>
+  </section>
+
+</main>
+
+<footer class="wrap tillid">
+  <p>
+    <strong>Bio-Scout gemmer ingen billeder, opretter ingen profiler og
+    indsamler ingen personoplysninger.</strong> Kun artsnavne gemmes.
+  </p>
+  <span>Bygget til dansk natur</span>
+</footer>
+
+<script>
+  const fund = [
+    ["Skrubtudse",       "Bufo bufo",           "Hareskoven"],
+    ["Nældens takvinge", "Aglais urticae",      "Amager Fælled"],
+    ["Spætmejse",        "Sitta europaea",      "Dyrehaven"],
+    ["Hvid anemone",     "Anemone nemorosa",    "Rold Skov"],
+    ["Alm. mariehøne",   "Coccinella 7-punctata","Mols Bjerge"],
+    ["Stor vandsalamander","Triturus cristatus","Skjern Enge"],
+    ["Bøg",              "Fagus sylvatica",     "Hareskoven"]
+  ];
+
+  const log = document.getElementById("log");
+  const taeller = document.getElementById("taeller");
+  const rolig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  fund.forEach(([navn, latin, sted], i) => {
+    const r = document.createElement("div");
+    r.className = "linje";
+    r.style.animationDelay = rolig ? "0s" : (0.25 + i * 0.16) + "s";
+    r.innerHTML =
+      '<span class="nr">' + String(i + 1).padStart(2, "0") + '</span>' +
+      '<span class="art">' + navn + ' <i>' + latin + '</i></span>' +
+      '<span class="sted">' + sted + '</span>';
+    log.appendChild(r);
+  });
+
+  // Tælleren følger listen, så tallet betyder noget i stedet for at pynte.
+  let n = 0;
+  const tik = () => {
+    n++;
+    taeller.textContent = n + (n === 1 ? " art" : " arter");
+    if (n < fund.length) setTimeout(tik, 160);
+  };
+  rolig ? (taeller.textContent = fund.length + " arter") : setTimeout(tik, 400);
+</script>
+
+</body>
+</html>
+/**
+ * steder.js — Stedspakker til Bio-Scout
+ *
+ * Hvorfor stedet betyder noget:
+ *
+ *  1. IDENTIFIKATION BLIVER BEDRE. Når billedgenkendelsen ved, at billedet er
+ *     taget i en løvskov på Vestegnen frem for "et sted i Danmark", bliver
+ *     gættet markant mere præcist. Stedet sendes med i prompten.
+ *
+ *  2. MISSIONERNE BLIVER ÆGTE. "Find noget levende under en sten" er fint.
+ *     "Find Grisekæret og se, hvem der bor i det" er en rigtig opgave et
+ *     rigtigt sted.
+ *
+ *  3. PERSPEKTIVERINGEN BLIVER KONKRET. Begge steder er natur, mennesker har
+ *     skabt. Det er en historie, børn kan stå midt i.
+ *
+ * Tilføj flere steder ved at kopiere et objekt og rette indholdet.
+ */
+
+export const STEDER = {
+
+  // =========================================================================
+  brøndbyskoven: {
+    id: "brøndbyskoven",
+    navn: "Brøndbyskoven",
+    kort: "Løvskov på Vestegnen",
+    ikon: "🌳",
+
+    // Sendes med til billedgenkendelsen
+    habitat:
+      "Anlagt lystskov på Vestegnen ved København. Blanding af løvtræer og " +
+      "nåletræer; bøg dominerer i Hovedskoven, mens Østskoven har bøg, ahorn " +
+      "og spidsløn samt fugtige partier med rød-el og pil. Bakkeskoven er " +
+      "yngre og mere åben med sletter og vandhullet Grisekæret. Der efterlades " +
+      "dødt ved til svampe, insekter og hulrugende fugle.",
+
+    // Den historie, der gør stedet til andet end en baggrund
+    historie:
+      "Skoven blev plantet fra 1952 til 1960 på gammel landbrugsjord. Hele " +
+      "skoven er altså yngre end de fleste bedsteforældre — de første to træer " +
+      "står stadig på Festpladsen.",
+
+    vidsteDu: [
+      "Der er registreret omkring 130 forskellige fuglearter i skoven.",
+      "De døde træer får lov at blive stående med vilje — det er der, spætterne bor.",
+      "Bakkeskoven blev først plantet i 2003. Nogle af træerne er yngre end dig.",
+    ],
+
+    // Missioner der kun giver mening netop her
+    missioner: [
+      {
+        id: "bs-ældre",
+        titel: "Ældre end skoven?",
+        ikon: "🌲",
+        opdrag:
+          "Skoven blev plantet i 1952. Find et træ, du tror er fra dengang — " +
+          "og et, der er kommet til siden.",
+        varighed: "20 min",
+        udendoers: true,
+      },
+      {
+        id: "bs-doedtrae",
+        titel: "Det døde træ lever",
+        ikon: "🪵",
+        opdrag:
+          "Find et dødt eller væltet træ. Hvor mange forskellige ting kan I " +
+          "finde, der bor i det?",
+        varighed: "20 min",
+        udendoers: true,
+      },
+      {
+        id: "bs-spaette",
+        titel: "Hvem har banket her?",
+        ikon: "🐦",
+        opdrag:
+          "Led efter huller i træstammer. Nogle er lavet af spætter. " +
+          "Kan I finde et hul, nogen bor i lige nu?",
+        varighed: "20 min",
+        udendoers: true,
+      },
+      {
+        id: "bs-vand",
+        titel: "Ved vandet",
+        ikon: "💧",
+        opdrag:
+          "Gå ned til vandhullet. Find noget levende i eller lige ved vandet.",
+        varighed: "25 min",
+        udendoers: true,
+      },
+      {
+        id: "bs-lysning",
+        titel: "Lys og skygge",
+        ikon: "☀️",
+        opdrag:
+          "Find en plante, der vokser i en lysning — og en, der vokser under " +
+          "de tætte træer. Er de ens?",
+        varighed: "20 min",
+        udendoers: true,
+      },
+    ],
+  },
+
+  // =========================================================================
+  valbyparken: {
+    id: "valbyparken",
+    navn: "Valbyparken",
+    kort: "Park, sø og kyst i København",
+    ikon: "🌿",
+
+    habitat:
+      "Stor bypark i København, der strækker sig ned til Kalveboderne. Åbne " +
+      "græssletter med grupper af eg og lærk, spredte buskadser, en lavvandet " +
+      "sø ved hovedindgangen, fire anlagte vandhuller (Den Grønne Frøpark) med " +
+      "stendiger, en kilometerlang allé af pyramidepopler, rosenhave og " +
+      "temahaver med både danske og fremmede træarter samt kyst mod " +
+      "vildtreservatet Kalveboderne.",
+
+    historie:
+      "Området var losseplads fra 1913 til 1937. Da dyngen lukkede, blev der " +
+      "kørt jord ovenpå, sået græs og plantet træer — parken står bogstaveligt " +
+      "talt oven på Københavns gamle affald.",
+
+    vidsteDu: [
+      "Der er fundet op mod 40 rødlistede fuglearter i og omkring parken.",
+      "Der lever fire forskellige arter flagermus i området.",
+      "Vandhullerne blev gravet i 1995, alene for at frøer og tudser kunne yngle.",
+      "Nogle af træerne i temahaverne hører slet ikke hjemme i Danmark.",
+    ],
+
+    missioner: [
+      {
+        id: "vp-froepark",
+        titel: "Frøparken",
+        ikon: "🐸",
+        opdrag:
+          "Find de ovale vandhuller. Hvad kan I se i vandet — og hvad gemmer " +
+          "sig ved stendigerne?",
+        varighed: "25 min",
+        udendoers: true,
+      },
+      {
+        id: "vp-losseplads",
+        titel: "Oven på affaldet",
+        ikon: "🕰️",
+        opdrag:
+          "Her lå en losseplads for 90 år siden. Find tre forskellige levende " +
+          "ting, der vokser her nu.",
+        varighed: "20 min",
+        udendoers: true,
+      },
+      {
+        id: "vp-fremmed",
+        titel: "Den der ikke hører til",
+        ikon: "🌏",
+        opdrag:
+          "I temahaverne står træer fra andre verdensdele. Find et træ, I " +
+          "aldrig har set før.",
+        varighed: "20 min",
+        udendoers: true,
+      },
+      {
+        id: "vp-kysten",
+        titel: "Ud til vandet",
+        ikon: "🦆",
+        opdrag:
+          "Gå ned til Kalveboderne. Find noget, der lever ved eller på vandet.",
+        varighed: "30 min",
+        udendoers: true,
+      },
+      {
+        id: "vp-blomst",
+        titel: "Hvem besøger blomsten?",
+        ikon: "🐝",
+        opdrag:
+          "Find en blomst med et insekt på. Bliv stående og se, hvor længe " +
+          "det bliver.",
+        varighed: "15 min",
+        udendoers: true,
+      },
+      {
+        id: "vp-allé",
+        titel: "Den lange allé",
+        ikon: "🌾",
+        opdrag:
+          "Poppelalléen er præcis én kilometer lang. Find noget levende i " +
+          "hver ende — er det det samme?",
+        varighed: "30 min",
+        udendoers: true,
+      },
+    ],
+  },
+};
+
+// ---------------------------------------------------------------------------
+// HJÆLPEFUNKTIONER
+// ---------------------------------------------------------------------------
+
+/** Alle steder som liste — til at bygge en vælger i UI'et. */
+export function alleSteder() {
+  return Object.values(STEDER);
+}
+
+/** Hent et sted. Returnerer null for "ingen steder valgt", hvilket er gyldigt. */
+export function hentSted(id) {
+  return id && STEDER[id] ? STEDER[id] : null;
+}
+
+/**
+ * Missioner til fritidstilstand: stedets egne først, derefter de almene.
+ * Kald med de generelle missioner fra opgaver.js som andet argument.
+ */
+export function missionerForSted(stedId, almeneMissioner = []) {
+  const sted = hentSted(stedId);
+  return sted ? [...sted.missioner, ...almeneMissioner] : almeneMissioner;
+}
+
+/**
+ * Tekststump om stedet, der lægges ind i identifikationsprompten.
+ * Tom streng hvis intet sted er valgt — så opfører appen sig som før.
+ */
+export function stedTilPrompt(stedId) {
+  const sted = hentSted(stedId);
+  if (!sted) return "";
+  return `\n\nBilledet er taget i ${sted.navn}. Om stedet: ${sted.habitat}\n` +
+         `Brug det til at gøre din bestemmelse mere præcis — arter, der ikke ` +
+         `findes i denne type levested, er usandsynlige.`;
+}
+
+/** Et tilfældigt "vidste du"-punkt til at vise, mens der ventes. */
+export function vidsteDu(stedId) {
+  const sted = hentSted(stedId);
+  if (!sted) return "";
+  return sted.vidsteDu[Math.floor(Math.random() * sted.vidsteDu.length)];
+}
+
