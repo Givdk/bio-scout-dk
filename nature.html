@@ -1,612 +1,881 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bio Scout — Nature Explorer</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f0; min-height: 100vh; }
-    .app { max-width: 420px; margin: 0 auto; padding: 1rem; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio-Scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --skovbund:#17281B;
+    --mos:#456B4C;
+    --mos-lys:#6B9473;
+    --lav:#CBD6C2;
+    --papir:#EDF0E4;
+    --papir-dyb:#E2E7D6;
+    --roen:#C2452A;
+    --bark:#6E5A44;
+    --display:'Fraunces',Georgia,serif;
+    --brod:'Karla',system-ui,sans-serif;
+    --log:'Space Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--papir);color:var(--skovbund);font-family:var(--brod);
+    font-size:17px;line-height:1.55;min-height:100vh;
+    display:flex;flex-direction:column;
+  }
+  .wrap{width:100%;max-width:820px;margin:0 auto;padding:0 24px}
 
-    /* Session start */
-    #session-screen { text-align: center; padding: 3rem 1rem; }
-    #session-screen .icon { font-size: 48px; margin-bottom: 12px; }
-    #session-screen h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
-    #session-screen p { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 32px; }
+  /* header */
+  header{border-bottom:1px solid var(--lav);padding:18px 0;background:var(--papir)}
+  .hrow{display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .maerke{display:flex;align-items:baseline;gap:9px;text-decoration:none;color:inherit}
+  .maerke b{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.01em}
+  .maerke span{font-family:var(--log);font-size:9.5px;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--mos)}
+  .hknap{
+    font-family:var(--log);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    background:none;border:1px solid var(--lav);color:var(--bark);
+    padding:7px 13px;border-radius:2px;cursor:pointer;
+  }
+  .hknap:hover{border-color:var(--mos);color:var(--mos)}
 
-    /* Session bar */
-    #session-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 7px 12px; background: white; border-radius: 10px; border: 0.5px solid #e0e0e0; }
-    .loc-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .loc-label { font-size: 12px; color: #666; margin-left: 6px; }
-    .end-btn { font-size: 11px; color: #999; background: none; border: none; cursor: pointer; }
+  main{flex:1;padding:36px 0 60px}
 
-    /* Tabs */
-    .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
-    .tab { flex: 1; padding: 9px 0; font-size: 12px; font-weight: 500; border-radius: 8px; cursor: pointer; border: 0.5px solid #e0e0e0; background: #f0f0eb; color: #444; transition: all 0.15s; }
-    .tab.active { background: #e1f5ee; color: #0f6e56; border-color: #5dcaa5; }
+  /* generelle elementer */
+  h1{font-family:var(--display);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.7rem);
+    line-height:1.08;letter-spacing:-.02em;margin-bottom:12px;
+    font-variation-settings:'SOFT' 40,'WONK' 1}
+  h2{font-family:var(--display);font-weight:600;font-size:1.45rem;
+    line-height:1.15;letter-spacing:-.015em;margin-bottom:10px}
+  .manchet{color:#3B4E39;margin-bottom:28px;max-width:52ch}
+  .eyebrow{font-family:var(--log);font-size:10px;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--mos);margin-bottom:10px}
 
-    /* Cards */
-    .card { background: white; border: 0.5px solid #e0e0e0; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+  .knap{
+    font-family:var(--brod);font-weight:700;font-size:1rem;
+    background:var(--mos);color:#fff;border:none;
+    padding:13px 26px;border-radius:2px;cursor:pointer;
+    transition:background .16s ease;
+  }
+  .knap:hover{background:var(--skovbund)}
+  .knap:disabled{background:var(--lav);color:#8A9683;cursor:not-allowed}
+  .knap--roed{background:var(--roen)}
+  .knap--roed:hover{background:#9E3520}
+  .knap--stille{background:none;color:var(--bark);border:1px solid var(--lav);
+    font-weight:500;padding:11px 20px}
+  .knap--stille:hover{background:none;border-color:var(--mos);color:var(--mos)}
+  button:focus-visible,a:focus-visible,label:focus-within{
+    outline:2px solid var(--mos);outline-offset:3px}
 
-    /* Upload zone */
-    .upload-zone { border: 1.5px dashed #ccc; border-radius: 12px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; margin-bottom: 12px; }
-    .upload-zone svg { width: 36px; height: 36px; stroke: #aaa; margin-bottom: 8px; }
-    .upload-zone p { font-size: 14px; color: #888; }
+  .kort{background:#fff;border:1px solid var(--lav);border-radius:4px;padding:24px}
 
-    /* Buttons */
-    .btn-primary { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; background: #1d9e75; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 8px; }
-    .btn-primary:disabled { background: #9fe1cb; cursor: default; }
-    .btn-secondary { width: 100%; padding: 10px; font-size: 14px; font-weight: 500; background: transparent; color: #444; border: 0.5px solid #ccc; border-radius: 8px; cursor: pointer; margin-bottom: 8px; }
+  /* valgknapper */
+  .valg{display:grid;gap:12px;margin-bottom:30px}
+  .valg--2{grid-template-columns:1fr 1fr}
+  .valg--4{grid-template-columns:repeat(4,1fr)}
+  .vkort{
+    background:#fff;border:1px solid var(--lav);border-radius:4px;
+    padding:18px;text-align:left;cursor:pointer;font-family:var(--brod);
+    color:inherit;font-size:1rem;transition:border-color .16s,transform .16s;
+  }
+  .vkort:hover{border-color:var(--mos);transform:translateY(-2px)}
+  .vkort.valgt{border-color:var(--mos);border-width:2px;padding:17px}
+  .vkort b{display:block;font-family:var(--display);font-weight:600;
+    font-size:1.12rem;margin-bottom:4px}
+  .vkort small{color:var(--bark);font-size:.83rem;line-height:1.4;display:block}
+  .vkort .ikon{font-size:1.5rem;display:block;margin-bottom:8px}
 
-    /* Badges */
-    .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
-    .badge-teal { background: #e1f5ee; color: #0f6e56; }
-    .badge-amber { background: #faeeda; color: #854f0b; }
-    .badge-purple { background: #eeedfe; color: #3c3489; }
+  /* mission */
+  .mission{
+    background:#fff;border:1px solid var(--lav);border-left:4px solid var(--roen);
+    border-radius:4px;padding:26px;margin-bottom:22px;
+  }
+  .mission .ikon{font-size:2.3rem;display:block;margin-bottom:12px}
+  .mission h2{margin-bottom:8px}
+  .mission p{font-size:1.1rem;margin-bottom:14px}
+  .mission .meta{font-family:var(--log);font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--bark)}
 
-    /* Preview image */
-    .preview-img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; }
+  /* kamera */
+  .drop{
+    border:2px dashed var(--lav);border-radius:4px;background:#fff;
+    padding:44px 24px;text-align:center;cursor:pointer;display:block;
+    transition:border-color .16s,background .16s;
+  }
+  .drop:hover{border-color:var(--mos);background:#fbfcfa}
+  .drop .ikon{font-size:2.6rem;display:block;margin-bottom:12px}
+  .drop b{font-family:var(--display);font-size:1.2rem;font-weight:600;
+    display:block;margin-bottom:6px}
+  .drop small{color:var(--bark);font-size:.88rem}
+  input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
 
-    /* Mystery box */
-    .mystery-box { background: #eeedfe; border: 0.5px solid #afa9ec; border-radius: 12px; padding: 1rem; margin-bottom: 12px; }
-    .mystery-box .label { font-size: 12px; font-weight: 600; color: #3c3489; margin-bottom: 6px; }
-    .mystery-box .question { font-size: 14px; color: #534ab7; line-height: 1.5; }
+  /* status / fejl */
+  .status{
+    display:flex;align-items:center;gap:12px;padding:16px 20px;
+    background:#fff;border:1px solid var(--lav);border-radius:4px;margin-bottom:18px;
+  }
+  .spinner{
+    width:17px;height:17px;border:2px solid var(--lav);border-top-color:var(--mos);
+    border-radius:50%;animation:snurr .7s linear infinite;flex-shrink:0;
+  }
+  @keyframes snurr{to{transform:rotate(360deg)}}
+  .advarsel{
+    background:#FBEAE6;border:1px solid #E8BCB2;border-left:4px solid var(--roen);
+    border-radius:4px;padding:18px 20px;margin-bottom:20px;
+  }
+  .advarsel b{display:block;margin-bottom:5px;font-family:var(--display);font-size:1.1rem}
+  .advarsel p{font-size:.94rem;color:#6B3325}
 
-    /* Voice button */
-    .voice-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .voice-btn { width: 80px; height: 80px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: box-shadow 0.2s; }
-    .voice-btn.idle { background: #1d9e75; }
-    .voice-btn.listening { background: #e24b4a; box-shadow: 0 0 0 10px rgba(226,75,74,0.15); }
-    .voice-hint { font-size: 13px; color: #888; text-align: center; }
-    .transcript-box { width: 100%; background: #f5f5f0; border: 0.5px solid #e0e0e0; border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #1a1a1a; line-height: 1.5; min-height: 48px; }
+  /* resultat */
+  .art-navn{font-family:var(--display);font-weight:700;
+    font-size:clamp(1.7rem,4vw,2.3rem);letter-spacing:-.02em;line-height:1.08}
+  .art-latin{font-style:italic;color:var(--bark);font-size:1rem;margin-bottom:14px}
+  .maerkat{
+    display:inline-block;font-family:var(--log);font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;padding:4px 10px;border-radius:2px;
+    background:var(--papir-dyb);color:var(--bark);margin-right:6px;
+  }
+  .maerkat--lav{background:#FBEAE6;color:#9E3520}
+  .fakta{
+    background:var(--papir-dyb);border-radius:3px;padding:14px 16px;
+    margin-top:16px;font-size:.96rem;
+  }
+  .fakta b{font-family:var(--log);font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--mos);display:block;margin-bottom:5px}
 
-    /* Score breakdown */
-    .breakdown-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 0.5px solid #f0f0f0; }
-    .breakdown-row:last-child { border-bottom: none; }
+  /* spørgsmål */
+  .spm{
+    background:#fff;border:1px solid var(--lav);border-left:4px solid var(--mos);
+    border-radius:4px;padding:24px;margin:22px 0;
+  }
+  .spm .tekst{font-family:var(--display);font-weight:600;font-size:1.3rem;
+    line-height:1.3;letter-spacing:-.01em}
+  .maal{
+    font-family:var(--log);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--bark);border-top:1px dotted var(--lav);
+    padding-top:12px;margin-top:16px;line-height:1.6;
+  }
 
-    /* Journal items */
-    .journal-item { display: flex; gap: 12px; }
-    .journal-thumb { width: 52px; height: 52px; border-radius: 8px; flex-shrink: 0; overflow: hidden; background: #f0f0eb; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-    .journal-thumb img { width: 52px; height: 52px; object-fit: cover; }
-    .journal-meta { flex: 1; min-width: 0; }
-    .journal-name { font-size: 14px; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .journal-who { font-size: 12px; color: #888; margin-top: 2px; }
-    .journal-mystery { font-size: 12px; color: #534ab7; margin-top: 4px; line-height: 1.4; }
-    .journal-answer { font-size: 12px; color: #666; margin-top: 3px; font-style: italic; }
-    .journal-note { font-size: 11px; color: #854f0b; margin-top: 3px; }
-    .pts-pill { font-size: 12px; font-weight: 600; color: #0f6e56; background: #e1f5ee; padding: 2px 7px; border-radius: 99px; flex-shrink: 0; }
+  textarea{
+    width:100%;font-family:var(--brod);font-size:1.02rem;line-height:1.5;
+    padding:15px;border:1px solid var(--lav);border-radius:3px;
+    background:#fff;color:inherit;resize:vertical;min-height:110px;
+  }
+  textarea:focus{outline:2px solid var(--mos);outline-offset:1px;border-color:var(--mos)}
+  .hint{font-size:.84rem;color:var(--bark);margin-top:8px}
 
-    /* Leaderboard */
-    .board-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid #f0f0f0; }
-    .board-row:last-child { border-bottom: none; }
-    .board-rank { font-size: 13px; font-weight: 600; color: #888; width: 24px; flex-shrink: 0; }
-    .board-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
-    .board-name { flex: 1; font-size: 14px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .board-pts { font-size: 13px; font-weight: 600; color: #0f6e56; flex-shrink: 0; }
+  .raekke{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
 
-    /* Points grid */
-    .pts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-    .pts-card { background: white; border-radius: 8px; padding: 10px 12px; border: 0.5px solid #e0e0e0; }
-    .pts-card .pts-label { font-size: 11px; color: #888; margin-bottom: 4px; }
-    .pts-card .pts-val { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+  /* feedback */
+  .respons{
+    background:#fff;border:1px solid var(--lav);border-left:4px solid var(--mos-lys);
+    border-radius:4px;padding:24px;margin-bottom:18px;
+  }
+  .respons p{margin-bottom:14px}
+  .respons p:last-child{margin-bottom:0}
+  .naeste{font-family:var(--display);font-weight:600;font-size:1.15rem;
+    color:var(--mos);line-height:1.3}
+  .laerernote{
+    background:var(--papir-dyb);border-radius:3px;padding:13px 15px;
+    font-size:.9rem;margin-top:16px;
+  }
+  .laerernote b{font-family:var(--log);font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--bark);display:block;margin-bottom:5px}
 
-    /* Loading dots */
-    .dots { display: flex; gap: 6px; justify-content: center; padding: 4px 0; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #5dcaa5; animation: pulse 1s infinite; }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+  /* samling */
+  .samling{border-top:1px solid var(--lav);margin-top:44px;padding-top:24px}
+  .samling-top{display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:14px;gap:16px;flex-wrap:wrap}
+  .samling-top h3{font-family:var(--display);font-weight:600;font-size:1.2rem}
+  .samling-tal{font-family:var(--log);font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--mos);font-weight:700}
+  .liste{display:grid;gap:0}
+  .linje{
+    display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;
+    font-family:var(--log);font-size:12.5px;padding:8px 0;
+    border-bottom:1px dotted rgba(107,90,68,.28);
+  }
+  .linje:last-child{border-bottom:none}
+  .linje .nr{color:var(--bark);font-size:11px}
+  .linje .n{font-weight:700;letter-spacing:-.01em}
+  .linje .a{color:var(--mos);font-size:11px;white-space:nowrap}
+  .tom{color:var(--bark);font-size:.92rem;padding:8px 0}
 
-    /* Input */
-    input[type="text"] { width: 100%; padding: 10px 12px; font-size: 15px; border: 0.5px solid #ccc; border-radius: 8px; background: white; color: #1a1a1a; margin-bottom: 12px; outline: none; }
-    input[type="text"]:focus { border-color: #5dcaa5; }
+  .koestatus{
+    font-family:var(--log);font-size:9.5px;letter-spacing:.1em;
+    text-transform:uppercase;background:var(--papir-dyb);color:var(--bark);
+    border:1px solid var(--lav);padding:6px 11px;border-radius:2px;
+  }
+  .koestatus.venter{border-color:var(--accent,#C2452A);color:#C2452A}
 
-    .hidden { display: none !important; }
-    .empty-state { text-align: center; padding: 2rem 0; color: #888; font-size: 14px; }
-  </style>
+  .banner{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--papir-dyb);border:1px solid var(--lav);
+    border-left:4px solid var(--bark);border-radius:4px;
+    padding:15px 18px;margin-bottom:20px;font-size:.94rem;
+  }
+  .banner b{font-family:var(--display);font-size:1.05rem;display:block}
+  .banner--klar{border-left-color:var(--mos)}
+
+  .gemt{
+    text-align:center;padding:40px 24px;background:#fff;
+    border:1px solid var(--lav);border-radius:4px;
+  }
+  .gemt .ikon{font-size:3rem;display:block;margin-bottom:14px}
+  .gemt b{font-family:var(--display);font-weight:600;font-size:1.5rem;
+    display:block;margin-bottom:8px}
+  .gemt p{color:var(--bark);max-width:38ch;margin:0 auto 20px}
+
+  .skjul{display:none !important}
+
+  @media (max-width:700px){
+    .valg--4{grid-template-columns:1fr 1fr}
+    .wrap{padding:0 18px}
+  }
+  @media (max-width:440px){
+    .valg--2,.valg--4{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  }
+</style>
 </head>
 <body>
-<div class="app">
 
-  <!-- SESSION START -->
-  <div id="session-screen">
-    <div class="icon">🌿</div>
-    <h1>Bio Scout</h1>
-    <p>Go outside, find something interesting, and discover what it is. Your location will be saved so rare finds are scored accurately.</p>
-    <button class="btn-primary" id="start-btn" onclick="startSession()">Start session</button>
-    <p id="gps-hint" class="hidden" style="font-size:12px;color:#888;margin-top:8px;">Getting location...</p>
+<header>
+  <div class="wrap hrow">
+    <a class="maerke" href="index.html">
+      <b>Bio-Scout</b><span id="tilstandMaerke">Skole</span>
+    </a>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="koestatus skjul" id="koeStatus"></span>
+      <button class="hknap" id="startForfra">Forfra</button>
+    </div>
   </div>
+</header>
 
-  <!-- MAIN APP -->
-  <div id="main-app" class="hidden">
+<main class="wrap">
 
-    <!-- Session bar -->
-    <div id="session-bar">
-      <div style="display:flex;align-items:center;">
-        <div class="loc-dot" id="loc-dot" style="background:#ef9f27;"></div>
-        <span class="loc-label" id="loc-label">Getting location...</span>
-      </div>
-      <button class="end-btn" onclick="endSession()">End session</button>
+  <!-- TRIN: sted -->
+  <section id="trin-sted" class="skjul">
+    <div class="eyebrow" id="stedEyebrow"></div>
+    <h1>Hvor er I henne?</h1>
+    <p class="manchet">Stedet gør artsbestemmelsen mere præcis — og giver jer
+      missioner, der kun findes lige der.</p>
+    <div class="valg valg--2" id="stedValg"></div>
+  </section>
+
+  <!-- TRIN: klassetrin (kun skole) -->
+  <section id="trin-klassetrin" class="skjul">
+    <div class="eyebrow">Undervisning</div>
+    <h1>Hvilket klassetrin?</h1>
+    <p class="manchet">Spørgsmål, sprog og respons tilpasses trinnet.</p>
+    <div class="valg valg--4" id="trinValg"></div>
+  </section>
+
+  <!-- TRIN: kompetenceområde (kun skole) -->
+  <section id="trin-omraade" class="skjul">
+    <div class="eyebrow" id="omraadeEyebrow">Undervisning</div>
+    <h1>Hvad skal I arbejde med?</h1>
+    <p class="manchet">De fire kompetenceområder fra Fælles Mål. Vælg ét — I kan
+      tage de andre på næste tur.</p>
+    <div class="valg valg--2" id="omraadeValg"></div>
+  </section>
+
+  <!-- TRIN: mission (kun fritid) -->
+  <section id="trin-mission" class="skjul">
+    <div class="eyebrow">Fritid</div>
+    <h1>Dagens mission</h1>
+    <div class="mission" id="missionKort"></div>
+    <div class="raekke">
+      <button class="knap knap--roed" id="missionStart">Vi tager den</button>
+      <button class="knap knap--stille" id="missionSkift">Giv mig en anden</button>
     </div>
+  </section>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab active" id="tab-capture" onclick="showTab('capture')">Capture</button>
-      <button class="tab" id="tab-journal" onclick="showTab('journal')">Journal</button>
-      <button class="tab" id="tab-board" onclick="showTab('board')">Leaderboard</button>
+  <!-- TRIN: foto -->
+  <section id="trin-foto" class="skjul">
+    <div class="eyebrow" id="fotoEyebrow"></div>
+    <h1 id="fotoOverskrift">Tag et billede af jeres fund</h1>
+    <p class="manchet" id="fotoManchet">
+      Fotografér dyret eller planten så tæt på som muligt. Billedet bliver
+      brugt til at genkende arten og bliver ikke gemt nogen steder.
+    </p>
+    <label class="drop" for="filInput" tabindex="0">
+      <span class="ikon">🌿</span>
+      <b>Tag billede eller vælg fra galleriet</b>
+      <small>Kun natur, dyr og planter — ikke personer</small>
+    </label>
+    <input type="file" id="filInput" accept="image/*" capture="environment">
+  </section>
+
+  <!-- TRIN: arbejder -->
+  <section id="trin-arbejder" class="skjul">
+    <div class="status">
+      <div class="spinner"></div>
+      <span id="arbejderTekst">Kigger på billedet…</span>
     </div>
+  </section>
 
-    <!-- CAPTURE -->
-    <div id="screen-capture">
-
-      <!-- Step: name -->
-      <div id="step-name" class="card">
-        <p style="font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Who's exploring?</p>
-        <p style="font-size:13px;color:#888;margin-bottom:14px;">Type your name before you start.</p>
-        <input type="text" id="name-input" placeholder="Your name..." />
-        <button class="btn-primary" onclick="submitName()">Let's explore!</button>
-      </div>
-
-      <!-- Step: upload -->
-      <div id="step-upload" class="hidden">
-        <p id="upload-greeting" style="font-size:14px;color:#666;margin-bottom:12px;"></p>
-        <label class="upload-zone" for="file-input">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-          <p>Tap to take a photo or upload</p>
-          <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(this)" />
-        </label>
-      </div>
-
-      <!-- Step: ready -->
-      <div id="step-ready" class="hidden">
-        <img id="preview-img" class="preview-img" />
-        <button class="btn-primary" onclick="identify()">Identify this nature find!</button>
-        <button class="btn-secondary" onclick="goToStep('upload')">Choose a different photo</button>
-      </div>
-
-      <!-- Step: identifying -->
-      <div id="step-identifying" class="hidden">
-        <img id="identifying-img" class="preview-img" style="opacity:0.6;" />
-        <div class="card" style="text-align:center;">
-          <p style="font-size:14px;color:#888;margin-bottom:10px;">Asking the nature expert...</p>
-          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        </div>
-      </div>
-
-      <!-- Step: identified -->
-      <div id="step-identified" class="hidden">
-        <img id="identified-img" class="preview-img" />
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span class="badge badge-teal">Identified!</span>
-            <span class="badge badge-amber hidden" id="rare-badge">Rare find!</span>
-          </div>
-          <p id="species-name" style="font-size:20px;font-weight:600;color:#1a1a1a;"></p>
-          <p id="species-latin" style="font-size:13px;color:#888;margin-top:3px;"></p>
-        </div>
-        <div class="mystery-box">
-          <div class="label">Mystery question</div>
-          <div class="question" id="mystery-text"></div>
-        </div>
-        <!-- Voice input -->
-        <div class="voice-wrap">
-          <button class="voice-btn idle" id="voice-btn" onclick="toggleVoice()">
-            <svg id="voice-icon" width="28" height="28" viewBox="0 0 24 24" fill="white">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="white" stroke-width="1.5" fill="none"/>
-              <line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="1.5"/>
-              <line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="1.5"/>
-            </svg>
-          </button>
-          <p class="voice-hint" id="voice-hint">Tap to answer out loud</p>
-          <div class="transcript-box hidden" id="transcript-box"></div>
-        </div>
-        <button class="btn-primary" id="submit-answer-btn" onclick="submitAnswer()" disabled>Submit my answer</button>
-      </div>
-
-      <!-- Step: scoring -->
-      <div id="step-scoring" class="hidden">
-        <div class="card" style="text-align:center;padding:2rem;">
-          <p style="font-size:14px;color:#888;margin-bottom:10px;">Counting your points...</p>
-          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        </div>
-      </div>
-
-      <!-- Step: done -->
-      <div id="step-done" class="hidden">
-        <div class="card" style="text-align:center;">
-          <p style="font-size:36px;margin-bottom:6px;">🌟</p>
-          <p id="pts-total" style="font-size:24px;font-weight:700;color:#1a1a1a;margin-bottom:4px;"></p>
-          <p id="encouragement" style="font-size:14px;color:#0f6e56;margin-bottom:16px;"></p>
-          <div id="breakdown"></div>
-        </div>
-        <button class="btn-primary" onclick="resetCapture()">Next explorer's turn!</button>
-        <button class="btn-secondary" onclick="resetCapture(); showTab('journal')">See class journal</button>
-      </div>
-
+  <!-- TRIN: gemt til senere -->
+  <section id="trin-gemt" class="skjul">
+    <div class="gemt">
+      <span class="ikon">🎒</span>
+      <b>Fundet er gemt</b>
+      <p id="gemtTekst">I er offline lige nu. Fundet bliver bestemt, så snart
+        I er tilbage på wifi.</p>
+      <button class="knap" id="gemtVidere">Find noget mere</button>
     </div>
+  </section>
 
-    <!-- JOURNAL -->
-    <div id="screen-journal" class="hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <p style="font-size:15px;font-weight:600;color:#1a1a1a;">Class journal</p>
-        <span class="badge badge-teal" id="journal-count">0 finds</span>
-      </div>
-      <div id="journal-list"></div>
-      <div id="journal-empty" class="empty-state">No finds yet — go explore outside!</div>
+  <!-- TRIN: resultat + spørgsmål -->
+  <section id="trin-resultat" class="skjul">
+    <div id="advarselBoks"></div>
+    <div class="kort" id="artKort"></div>
+    <div class="spm" id="spmKort"></div>
+
+    <label for="svarFelt" class="eyebrow">Jeres svar</label>
+    <textarea id="svarFelt" placeholder="Skriv hvad I tænker…"></textarea>
+    <p class="hint">Skriv om dyret eller planten — ikke om jer selv eller
+      hinandens navne.</p>
+
+    <div class="raekke">
+      <button class="knap" id="sendSvar">Send svar</button>
+      <button class="knap knap--stille" id="visHjaelp">Jeg er gået i stå</button>
+      <button class="knap knap--stille skjul" id="talKnap">🎤 Sig det i stedet</button>
     </div>
+    <div id="hjaelpBoks"></div>
+  </section>
 
-    <!-- LEADERBOARD -->
-    <div id="screen-board" class="hidden">
-      <p style="font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:12px;">Who's found the most?</p>
-      <div class="card" id="board-list"></div>
-      <div id="board-empty" class="empty-state hidden">No scores yet!</div>
-      <div class="pts-grid">
-        <div class="pts-card"><div class="pts-label">Base find</div><div class="pts-val">+10</div></div>
-        <div class="pts-card"><div class="pts-label">First in class</div><div class="pts-val">+10</div></div>
-        <div class="pts-card"><div class="pts-label">Mystery answer</div><div class="pts-val">+15</div></div>
-        <div class="pts-card"><div class="pts-label">Rare species</div><div class="pts-val">+20</div></div>
-      </div>
+  <!-- TRIN: respons -->
+  <section id="trin-respons" class="skjul">
+    <div class="respons" id="responsKort"></div>
+    <div class="raekke">
+      <button class="knap" id="nyttFund">Find noget nyt</button>
+      <button class="knap knap--stille" id="skiftOpgave">Ny opgave, samme fund</button>
     </div>
+  </section>
 
-  </div>
-</div>
+  <!-- SAMLING -->
+  <section class="samling" id="samlingSektion">
+    <div class="samling-top">
+      <h3 id="samlingTitel">Klassens liste</h3>
+      <span class="samling-tal" id="samlingTal">0 arter</span>
+    </div>
+    <div class="liste" id="samlingListe"></div>
+  </section>
 
-<script>
-const POINT_RULES = { base: 10, firstInClass: 10, mystery: 15, rare: 20 };
-const AVATAR_COLORS = [
-  { bg:"#e1f5ee", txt:"#0f6e56" }, { bg:"#eeedfe", txt:"#3c3489" },
-  { bg:"#faeeda", txt:"#854f0b" }, { bg:"#faece7", txt:"#993c1d" },
-  { bg:"#e6f1fb", txt:"#185fa5" }, { bg:"#eaf3de", txt:"#3b6d11" },
-];
-const MEDALS = ["🥇","🥈","🥉"];
-const EMOJIS = ["🌿","🐛","🍂","🌸","🐝","🍄","🦎","🌾","🐞","🦋"];
+</main>
 
-let session = null;
-let journal = [];
-let scores = {};
-let currentStudent = "";
-let currentIdentified = null;
-let currentImageFile = null;
-let currentImageB64 = null;
-let isListening = false;
-let recognition = null;
-const voiceSupported = "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+<script type="module">
+import {
+  TILSTAND, KLASSETRIN, KOMPETENCEOMRAADER, MISSIONER,
+  vaelgMission, byggIdentifikationsPrompt, byggSkoleopgave,
+  byggFritidsspoergsmaal, byggSkolefeedback, byggFritidssvar,
+  parseJSON, opdaterSamling, samlingsStatus, naesteOmraade
+} from './opgaver.js';
 
-// ── HELPERS ────────────────────────────────────────────────────────
-function avatarColor(name) {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+import { alleSteder, hentSted, missionerForSted, stedTilPrompt, vidsteDu }
+  from './steder.js';
+
+import { gemIKoe, antalIKoe, ryddKoe, erOnline, lytTilForbindelse, afvikleKoe,
+         nedskalerBillede } from './offline.js';
+
+// ---------------------------------------------------------------------------
+// TILSTAND
+// ---------------------------------------------------------------------------
+const params = new URLSearchParams(location.search);
+const tilstand = params.get('tilstand') === 'fritid' ? TILSTAND.FRITID : TILSTAND.SKOLE;
+const erSkole = tilstand === TILSTAND.SKOLE;
+
+const S = {
+  sted: null,
+  trin: null,
+  omraade: null,
+  mission: null,
+  art: null,
+  opgave: null,
+  brugteOmraader: [],
+  samling: [],
+};
+
+// ---------------------------------------------------------------------------
+// LAGRING — overlever refresh, men gemmer kun artsnavne. Aldrig billeder,
+// aldrig elevsvar, aldrig noget personhenførbart.
+// ---------------------------------------------------------------------------
+const NOEGLE = 'bioscout-samling-' + tilstand;
+
+function hentSamling(){
+  try{
+    const raa = localStorage.getItem(NOEGLE);
+    return raa ? JSON.parse(raa) : [];
+  }catch(e){ return []; }         // privat browsing e.l. — kør videre i hukommelsen
+}
+function gemSamling(){
+  try{ localStorage.setItem(NOEGLE, JSON.stringify(S.samling)); }catch(e){}
 }
 
-async function reverseGeocode(lat, lng) {
-  try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-    const d = await r.json();
-    const a = d.address || {};
-    return [a.city || a.town || a.village || a.county, a.country].filter(Boolean).join(", ");
-  } catch { return null; }
+// ---------------------------------------------------------------------------
+// HJÆLPERE
+// ---------------------------------------------------------------------------
+const $ = id => document.getElementById(id);
+const TRIN_IDS = ['trin-sted','trin-klassetrin','trin-omraade','trin-mission',
+                  'trin-foto','trin-arbejder','trin-gemt','trin-resultat',
+                  'trin-respons'];
+
+function vis(id){
+  TRIN_IDS.forEach(t => $(t).classList.add('skjul'));
+  if(id) $(id).classList.remove('skjul');
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-async function callGemini(prompt, base64) {
-  const r = await fetch("/api/scan", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, base64 }),
+async function kald(sti, krop){
+  const r = await fetch(sti, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(krop)
   });
-  const d = await r.json();
-  return d?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-}
-
-async function callClaude(system, messages) {
-  const r = await fetch("/api/claude", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ system, messages }),
-  });
-  const d = await r.json();
-  return d?.content?.[0]?.text || "";
-}
-
-// ── SESSION ────────────────────────────────────────────────────────
-async function startSession() {
-  const btn = document.getElementById("start-btn");
-  const hint = document.getElementById("gps-hint");
-  btn.disabled = true;
-  btn.textContent = "Getting location...";
-  hint.classList.remove("hidden");
-
-  let location = null;
-  let locationStatus = "denied";
-
-  if (navigator.geolocation) {
-    await new Promise(resolve => {
-      navigator.geolocation.getCurrentPosition(
-        async pos => {
-          const { latitude: lat, longitude: lng } = pos.coords;
-          const label = await reverseGeocode(lat, lng);
-          location = { lat, lng, label: label || `${lat.toFixed(2)}, ${lng.toFixed(2)}` };
-          locationStatus = "granted";
-          resolve();
-        },
-        () => resolve(),
-        { timeout: 8000 }
-      );
-    });
+  if(!r.ok){
+    const t = await r.text().catch(()=> '');
+    throw new Error('Serveren svarede ' + r.status + '. ' + t.slice(0,120));
   }
-
-  session = { location, locationStatus };
-  document.getElementById("session-screen").classList.add("hidden");
-  document.getElementById("main-app").classList.remove("hidden");
-
-  const dot = document.getElementById("loc-dot");
-  const lbl = document.getElementById("loc-label");
-  if (locationStatus === "granted" && location) {
-    dot.style.background = "#1d9e75";
-    lbl.textContent = location.label;
-  } else {
-    dot.style.background = "#ef9f27";
-    lbl.textContent = "No location — using Northern Europe";
-  }
-
-  goToStep("name");
+  return r.json();
 }
 
-function endSession() {
-  if (!confirm("End this session? Journal and scores will reset.")) return;
-  session = null; journal = []; scores = {};
-  document.getElementById("main-app").classList.add("hidden");
-  document.getElementById("session-screen").classList.remove("hidden");
-  document.getElementById("start-btn").disabled = false;
-  document.getElementById("start-btn").textContent = "Start session";
-  document.getElementById("gps-hint").classList.add("hidden");
-  resetCapture();
+async function spoergClaude(prompt){
+  const data = await kald('/api/claude', { messages:[{role:'user', content:prompt}] });
+  if(data.error) throw new Error(data.error.message || 'Ukendt fejl fra Claude');
+  const tekst = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  return parseJSON(tekst);
 }
 
-// ── NAVIGATION ─────────────────────────────────────────────────────
-function showTab(tab) {
-  ["capture","journal","board"].forEach(t => {
-    document.getElementById("screen-" + t).classList.toggle("hidden", t !== tab);
-    document.getElementById("tab-" + t).classList.toggle("active", t === tab);
-  });
-  if (tab === "journal") renderJournal();
-  if (tab === "board") renderBoard();
+async function spoergGemini(prompt, base64){
+  const data = await kald('/api/scan', { prompt, base64 });
+  if(data.error) throw new Error(data.error.message || 'Ukendt fejl fra Gemini');
+  const tekst = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if(!tekst) throw new Error('Tomt svar fra billedgenkendelsen');
+  return parseJSON(tekst);
 }
 
-function goToStep(step) {
-  ["name","upload","ready","identifying","identified","scoring","done"].forEach(s => {
-    document.getElementById("step-" + s).classList.toggle("hidden", s !== step);
-  });
+function fejlboks(besked, hvad){
+  return `<div class="advarsel">
+    <b>${besked}</b>
+    <p>${hvad}</p>
+  </div>`;
 }
 
-// ── CAPTURE FLOW ───────────────────────────────────────────────────
-function submitName() {
-  const val = document.getElementById("name-input").value.trim();
-  if (!val) return;
-  currentStudent = val;
-  document.getElementById("upload-greeting").innerHTML =
-    `Hi <strong>${val}</strong> — found something? Take a photo!`;
-  goToStep("upload");
+// ---------------------------------------------------------------------------
+// OPSÆTNING AF TILSTAND
+// ---------------------------------------------------------------------------
+$('tilstandMaerke').textContent = erSkole ? 'Skole' : 'SFO / klub';
+$('samlingTitel').textContent   = erSkole ? 'Klassens liste' : 'Klubbens liste';
+$('fotoEyebrow').textContent    = erSkole ? 'Undervisning' : 'Fritid';
+
+if(!erSkole){
+  $('fotoOverskrift').textContent = 'Hvad fandt I?';
+  $('fotoManchet').textContent =
+    'Tag et billede af det, I har fundet. Billedet bliver kun brugt til at ' +
+    'genkende arten — det bliver ikke gemt.';
 }
 
-document.getElementById("name-input").addEventListener("keydown", e => {
-  if (e.key === "Enter") submitName();
+// Byg klassetrinvalg
+Object.entries(KLASSETRIN).forEach(([id, k]) => {
+  const b = document.createElement('button');
+  b.className = 'vkort';
+  b.innerHTML = `<b>${k.label}</b><small>${k.fag}</small>`;
+  b.onclick = () => { S.trin = id; visOmraader(); };
+  $('trinValg').appendChild(b);
 });
 
-function handleImage(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    currentImageFile = URL.createObjectURL(file);
-    currentImageB64 = ev.target.result.split(",")[1];
-    document.getElementById("preview-img").src = currentImageFile;
-    goToStep("ready");
-  };
-  reader.readAsDataURL(file);
+function visOmraader(){
+  const k = KLASSETRIN[S.trin];
+  $('omraadeEyebrow').textContent = k.label + ' · ' + k.fag;
+  const box = $('omraadeValg');
+  box.innerHTML = '';
+  Object.entries(KOMPETENCEOMRAADER).forEach(([id, o]) => {
+    const b = document.createElement('button');
+    b.className = 'vkort' + (S.brugteOmraader.includes(id) ? '' : '');
+    b.innerHTML = `<span class="ikon">${o.ikon}</span><b>${o.label}</b>
+                   <small>${o.laeringsmaal[S.trin]}</small>`;
+    b.onclick = () => { S.omraade = id; vis('trin-foto'); };
+    box.appendChild(b);
+  });
+  vis('trin-omraade');
 }
 
-async function identify() {
-  document.getElementById("identifying-img").src = currentImageFile;
-  goToStep("identifying");
-
-  const locationContext = session.location
-    ? `Photo taken near ${session.location.label} (${session.location.lat.toFixed(3)}, ${session.location.lng.toFixed(3)}). Judge rarity for that specific local area and visible habitat.`
-    : `No location — judge rarity for temperate Northern Europe.`;
-
-  const prompt = `You are a nature identification expert for primary school children aged 6-10.
-${locationContext}
-Respond ONLY in this exact JSON format, no extra text:
-{
-  "name": "Common name",
-  "latin": "Latin name",
-  "mystery": "One open-ended question a 7-year-old would find exciting. Under 20 words.",
-  "isRare": true or false,
-  "rareReason": "One sentence for the teacher explaining rarity for this specific location"
-}`;
-
-  try {
-    const text = await callGemini(prompt, currentImageB64);
-    const clean = text.replace(/```json|```/g, "").trim();
-    currentIdentified = JSON.parse(clean);
-  } catch {
-    currentIdentified = { name: "Mystery creature", latin: "Unknown", mystery: "What do you think this creature eats?", isRare: false, rareReason: "" };
-  }
-
-  document.getElementById("identified-img").src = currentImageFile;
-  document.getElementById("species-name").textContent = currentIdentified.name;
-  document.getElementById("species-latin").textContent = currentIdentified.latin;
-  document.getElementById("mystery-text").textContent = currentIdentified.mystery;
-  document.getElementById("rare-badge").classList.toggle("hidden", !currentIdentified.isRare);
-
-  if (!voiceSupported) {
-    document.getElementById("voice-btn").style.display = "none";
-    document.getElementById("voice-hint").textContent = "Type your answer below";
-    document.getElementById("transcript-box").classList.remove("hidden");
-    document.getElementById("transcript-box").contentEditable = "true";
-    document.getElementById("transcript-box").addEventListener("input", updateSubmitBtn);
-  }
-
-  goToStep("identified");
+function visMission(){
+  const pulje = missionerForSted(S.sted, MISSIONER);
+  const m = S.mission = pulje[Math.floor(Math.random() * pulje.length)];
+  $('missionKort').innerHTML = `
+    <span class="ikon">${m.ikon}</span>
+    <h2>${m.titel}</h2>
+    <p>${m.opdrag}</p>
+    <div class="meta">${m.varighed} · udendørs</div>`;
+  vis('trin-mission');
 }
 
-// ── VOICE ──────────────────────────────────────────────────────────
-function toggleVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
-  if (isListening) {
-    recognition.stop();
+$('missionSkift').onclick = visMission;
+$('missionStart').onclick = () => vis('trin-foto');
+
+// ---------------------------------------------------------------------------
+// BILLEDE — læses, sendes, kasseres. Gemmes aldrig.
+// ---------------------------------------------------------------------------
+$('filInput').onchange = async (e) => {
+  const fil = e.target.files?.[0];
+  if(!fil) return;
+  e.target.value = '';
+
+  vis('trin-arbejder');
+  $('arbejderTekst').textContent = 'Tjekker forbindelsen…';
+
+  // Appen spørger ikke, hvilket udstyr den kører på. Den spørger nettet.
+  const online = await erOnline();
+
+  if(!online){
+    // Ingen forbindelse: billedet skaleres ned og lægges i kø på selve enheden.
+    try{
+      await gemIKoe(fil, {
+        tilstand, trin:S.trin, omraade:S.omraade,
+        missionId:S.mission?.id, stedId:S.sted
+      });
+      const n = await antalIKoe();
+      $('gemtTekst').textContent =
+        n === 1
+          ? 'I er offline. Fundet bliver bestemt, så snart I er på wifi igen.'
+          : 'I er offline. ' + n + ' fund venter på at blive bestemt.';
+      opdaterKoeStatus();
+      vis('trin-gemt');
+    }catch(err){
+      vis('trin-foto');
+      $('trin-foto').insertAdjacentHTML('afterbegin', fejlboks(
+        'Kunne ikke gemme fundet', err.message));
+    }
     return;
   }
-  recognition = new SR();
-  recognition.lang = "en-US";
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.onresult = e => {
-    const transcript = Array.from(e.results).map(r => r[0].transcript).join("");
-    document.getElementById("transcript-box").textContent = transcript;
-    document.getElementById("transcript-box").classList.remove("hidden");
-    updateSubmitBtn();
-  };
-  recognition.onstart = () => {
-    isListening = true;
-    const btn = document.getElementById("voice-btn");
-    btn.classList.remove("idle"); btn.classList.add("listening");
-    document.getElementById("voice-icon").innerHTML = `<rect x="6" y="6" width="12" height="12" rx="2"/>`;
-    document.getElementById("voice-hint").textContent = "Listening... tap to stop";
-  };
-  recognition.onend = () => {
-    isListening = false;
-    const btn = document.getElementById("voice-btn");
-    btn.classList.remove("listening"); btn.classList.add("idle");
-    document.getElementById("voice-icon").innerHTML = `
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="white" stroke-width="1.5" fill="none"/>
-      <line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="1.5"/>
-      <line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="1.5"/>`;
-    const hasText = document.getElementById("transcript-box").textContent.trim();
-    document.getElementById("voice-hint").textContent = hasText ? "Tap to re-record" : "Tap to answer out loud";
-  };
-  recognition.onerror = () => recognition.onend();
-  recognition.start();
+
+  // Der er forbindelse: bestem arten med det samme.
+  $('arbejderTekst').textContent = 'Kigger på billedet…';
+  try{
+    let base64 = await nedskalerBillede(fil);
+    const art = await spoergGemini(
+      byggIdentifikationsPrompt(tilstand, S.trin, stedTilPrompt(S.sted)), base64
+    );
+    base64 = null;
+
+    if(art.personPaaBillede){ afvisPerson(); return; }
+
+    S.art = art;
+    await lavOpgave();
+
+  }catch(err){
+    vis('trin-foto');
+    $('trin-foto').insertAdjacentHTML('afterbegin', fejlboks(
+      'Det gik ikke', 'Prøv igen om et øjeblik. (' + err.message + ')'
+    ));
+  }
+};
+
+function afvisPerson(){
+  vis('trin-foto');
+  $('trin-foto').insertAdjacentHTML('afterbegin', fejlboks(
+    'Der er en person på billedet',
+    'Billedet er slettet og ikke gemt. Tag et nyt billede af dyret eller ' +
+    'planten alene — Bio-Scout må ikke bruges til billeder af mennesker.'
+  ));
+  setTimeout(()=>document.querySelector('#trin-foto .advarsel')?.remove(), 9000);
 }
 
-function updateSubmitBtn() {
-  const text = document.getElementById("transcript-box").textContent.trim();
-  document.getElementById("submit-answer-btn").disabled = !text || isListening;
+$('gemtVidere').onclick = () => { if(erSkole){ vis('trin-foto'); } else { visMission(); } };
+
+// ---------------------------------------------------------------------------
+// OPGAVE
+// ---------------------------------------------------------------------------
+async function lavOpgave(){
+  vis('trin-arbejder');
+  const vd = vidsteDu(S.sted);
+  $('arbejderTekst').textContent = vd || (erSkole
+    ? 'Laver en opgave til jer…' : 'Finder på noget at undre sig over…');
+
+  const svar = erSkole
+    ? await spoergClaude(byggSkoleopgave(S.art, S.trin, S.omraade))
+    : await spoergClaude(byggFritidsspoergsmaal(S.art, S.mission));
+
+  S.opgave = erSkole
+    ? svar
+    : { spoergsmaal: svar.undren, hjaelp: svar.naesteMission, godtSvar: '' };
+
+  // Fundet ryger på listen — kun navnet, intet andet.
+  const res = opdaterSamling(S.samling, S.art);
+  S.samling = res.samling;
+  gemSamling();
+  tegnSamling(res.nyArt);
+
+  tegnResultat();
+  vis('trin-resultat');
 }
 
-// ── SCORING ────────────────────────────────────────────────────────
-async function submitAnswer() {
-  const answer = document.getElementById("transcript-box").textContent.trim();
-  if (!answer) return;
-  goToStep("scoring");
+function tegnResultat(){
+  const a = S.art;
+  const usikker = a.sikkerhed === 'lav';
 
-  const system = `You are a warm primary school teacher scoring a child's answer (age 6-10).
-Respond ONLY in this exact JSON format:
-{
-  "isGenuineAttempt": true or false,
-  "encouragement": "One warm sentence for the child, max 12 words",
-  "teacherNote": "One sentence for the teacher about thinking quality"
+  $('advarselBoks').innerHTML = usikker ? fejlboks(
+    'Jeg er ikke sikker',
+    'Billedet var svært at tolke. Prøv et nyt billede tættere på — eller ' +
+    'arbejd videre og se, om I selv kan komme nærmere.'
+  ) : '';
+
+  $('artKort').innerHTML = `
+    <div class="art-navn">${a.navn || 'Ukendt'}</div>
+    ${a.latin ? `<div class="art-latin">${a.latin}</div>` : ''}
+    <div>
+      ${a.gruppe ? `<span class="maerkat">${a.gruppe}</span>` : ''}
+      <span class="maerkat ${usikker?'maerkat--lav':''}">Sikkerhed: ${a.sikkerhed||'?'}</span>
+    </div>
+    <p style="margin-top:14px">${a.beskrivelse||''}</p>
+    ${a.levested ? `<p style="margin-top:8px;color:var(--bark);font-size:.94rem">
+        <b>Levested:</b> ${a.levested}</p>` : ''}
+    ${a.vildtFakta ? `<div class="fakta"><b>Vidste I det?</b>${a.vildtFakta}</div>` : ''}`;
+
+  const maal = erSkole
+    ? `<div class="maal">${KLASSETRIN[S.trin].fag} · ${KLASSETRIN[S.trin].label} ·
+        ${KOMPETENCEOMRAADER[S.omraade].label}<br>
+        Læringsmål: ${KOMPETENCEOMRAADER[S.omraade].laeringsmaal[S.trin]}</div>`
+    : '';
+
+  $('spmKort').innerHTML = `<div class="tekst">${S.opgave.spoergsmaal}</div>${maal}`;
+  $('svarFelt').value = '';
+  $('hjaelpBoks').innerHTML = '';
 }
-Genuine attempt = anything thoughtful, even if wrong. Only false for gibberish or random letters.`;
 
-  let scoring = { isGenuineAttempt: true, encouragement: "Great thinking!", teacherNote: "Student engaged." };
-  try {
-    const text = await callClaude(system, [{
-      role: "user",
-      content: `Species: ${currentIdentified.name}\nQuestion: ${currentIdentified.mystery}\nAnswer: ${answer}`
-    }]);
-    scoring = JSON.parse(text.replace(/```json|```/g, "").trim());
-  } catch {}
+$('visHjaelp').onclick = () => {
+  $('hjaelpBoks').innerHTML =
+    `<div class="fakta" style="margin-top:18px"><b>Et lille skub</b>${S.opgave.hjaelp||''}</div>`;
+};
 
-  const alreadyFound = journal.some(e => e.name === currentIdentified.name);
-  let pts = POINT_RULES.base;
-  const breakdown = [{ label: "Nature find", pts: POINT_RULES.base }];
-  if (!alreadyFound) { pts += POINT_RULES.firstInClass; breakdown.push({ label: "First in class!", pts: POINT_RULES.firstInClass }); }
-  if (scoring.isGenuineAttempt) { pts += POINT_RULES.mystery; breakdown.push({ label: "Mystery answered", pts: POINT_RULES.mystery }); }
-  if (currentIdentified.isRare) { pts += POINT_RULES.rare; breakdown.push({ label: "Rare species!", pts: POINT_RULES.rare }); }
+// ---------------------------------------------------------------------------
+// SVAR
+// ---------------------------------------------------------------------------
+$('sendSvar').onclick = async () => {
+  const svar = $('svarFelt').value.trim();
+  if(!svar){ $('svarFelt').focus(); return; }
 
-  scores[currentStudent] = (scores[currentStudent] || 0) + pts;
-  journal.unshift({
-    name: currentIdentified.name, latin: currentIdentified.latin,
-    mystery: currentIdentified.mystery, answer, encouragement: scoring.encouragement,
-    teacherNote: scoring.teacherNote, student: currentStudent,
-    img: currentImageFile, emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
-    pts, isRare: currentIdentified.isRare, rareReason: currentIdentified.rareReason,
-    firstFind: !alreadyFound,
+  vis('trin-arbejder');
+  $('arbejderTekst').textContent = 'Læser jeres svar…';
+
+  try{
+    if(erSkole){
+      const f = await spoergClaude(
+        byggSkolefeedback(S.art, S.trin, S.omraade, svar, S.opgave));
+      $('responsKort').innerHTML = `
+        <p>${f.feedback}</p>
+        <p class="naeste">${f.naesteSkridt}</p>
+        <div class="laerernote"><b>Til læreren</b>${f.laerernote}
+          <br><span style="color:var(--bark)">Målet: ${f.maalnaaet}</span></div>`;
+    }else{
+      const f = await spoergClaude(
+        byggFritidssvar(S.art, svar, S.opgave.spoergsmaal));
+      $('responsKort').innerHTML = `
+        <p>${f.svar}</p>
+        <p class="naeste">${f.gaaUdOgLed}</p>`;
+    }
+    vis('trin-respons');
+  }catch(err){
+    vis('trin-resultat');
+    $('advarselBoks').innerHTML = fejlboks(
+      'Svaret kom ikke igennem', 'Prøv at sende igen. (' + err.message + ')');
+  }
+};
+
+$('nyttFund').onclick = () => {
+  S.art = null; S.opgave = null;
+  if(erSkole){ vis('trin-foto'); } else { visMission(); }
+};
+
+$('skiftOpgave').onclick = async () => {
+  if(erSkole){
+    S.brugteOmraader.push(S.omraade);
+    S.omraade = naesteOmraade(S.brugteOmraader);
+  }
+  try{ await lavOpgave(); }
+  catch(err){
+    vis('trin-resultat');
+    $('advarselBoks').innerHTML = fejlboks('Det gik ikke', err.message);
+  }
+};
+
+$('startForfra').onclick = () => {
+  S.art = null; S.opgave = null; S.omraade = null; S.brugteOmraader = [];
+  S.trin = null; S.sted = null;
+  visSteder();
+};
+
+// ---------------------------------------------------------------------------
+// SAMLING
+// ---------------------------------------------------------------------------
+function tegnSamling(fremhaevSidste=false){
+  const st = samlingsStatus(S.samling);
+  $('samlingTal').textContent =
+    st.antalArter + (st.antalArter===1?' art':' arter') + ' · ' + st.antalFund + ' fund';
+
+  const liste = $('samlingListe');
+  if(!S.samling.length){
+    liste.innerHTML = `<p class="tom">Ingen fund endnu. Det første kommer, når I går ud.</p>`;
+    return;
+  }
+  liste.innerHTML = S.samling.map((a,i) => `
+    <div class="linje">
+      <span class="nr">${String(i+1).padStart(2,'0')}</span>
+      <span class="n">${a.navn}${a.antal>1?` <span style="color:var(--bark);font-weight:400">×${a.antal}</span>`:''}</span>
+      <span class="a">${a.gruppe||''}</span>
+    </div>`).join('');
+}
+
+// ---------------------------------------------------------------------------
+// STEMME — slukket som standard. Skal tændes bevidst.
+// Barnestemmer er personoplysninger; derfor er dette et aktivt tilvalg.
+// ---------------------------------------------------------------------------
+const StemmeAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(StemmeAPI && params.get('stemme') === 'til'){
+  const knap = $('talKnap');
+  knap.classList.remove('skjul');
+  const genkender = new StemmeAPI();
+  genkender.lang = 'da-DK';
+  genkender.interimResults = false;
+  knap.onclick = () => {
+    knap.textContent = '🎤 Lytter…';
+    genkender.start();
+  };
+  genkender.onresult = e => {
+    $('svarFelt').value = e.results[0][0].transcript;
+    knap.textContent = '🎤 Sig det i stedet';
+  };
+  genkender.onerror = genkender.onend = () => {
+    knap.textContent = '🎤 Sig det i stedet';
+  };
+}
+
+// ---------------------------------------------------------------------------
+// KØEN — status og afvikling
+// ---------------------------------------------------------------------------
+async function opdaterKoeStatus(){
+  const n = await antalIKoe();
+  const m = $('koeStatus');
+  if(!n){ m.classList.add('skjul'); return; }
+  m.classList.remove('skjul');
+  m.classList.add('venter');
+  m.textContent = n + (n===1 ? ' fund venter' : ' fund venter');
+}
+
+async function tilbydAfvikling(){
+  const n = await antalIKoe();
+  if(!n) return;
+  if(!(await erOnline())) return;
+
+  const vaert = document.querySelector('main.wrap');
+  if(document.getElementById('koeBanner')) return;
+
+  vaert.insertAdjacentHTML('afterbegin', `
+    <div class="banner banner--klar" id="koeBanner">
+      <div style="flex:1">
+        <b>I er tilbage på nettet</b>
+        ${n} ${n===1?'fund fra turen venter':'fund fra turen venter'} på at blive bestemt.
+      </div>
+      <button class="knap" id="koeStart">Bestem dem nu</button>
+      <button class="knap knap--stille" id="koeRyd">Slet dem</button>
+    </div>`);
+
+  $('koeStart').onclick = koerKoe;
+  $('koeRyd').onclick = async () => {
+    await ryddKoe();
+    $('koeBanner')?.remove();
+    opdaterKoeStatus();
+  };
+}
+
+async function koerKoe(){
+  const banner = $('koeBanner');
+  if(banner) banner.innerHTML =
+    `<div class="spinner"></div><div style="flex:1">Bestemmer fundene…
+     <span id="koeRest"></span></div>`;
+
+  let nye = 0, afvist = 0, fejlede = 0;
+
+  await afvikleKoe(
+    // identificér
+    async (base64, meta) => spoergGemini(
+      byggIdentifikationsPrompt(meta.tilstand || tilstand, meta.trin,
+                                stedTilPrompt(meta.stedId)), base64),
+    // ved fund
+    (art, meta, rest) => {
+      const r = opdaterSamling(S.samling, art);
+      S.samling = r.samling; gemSamling(); tegnSamling();
+      if(r.nyArt) nye++;
+      const el = $('koeRest');
+      if(el) el.textContent = rest ? '(' + rest + ' tilbage)' : '';
+    },
+    // ved fejl
+    () => { fejlede++; }
+  );
+
+  await opdaterKoeStatus();
+
+  if(banner){
+    banner.className = 'banner banner--klar';
+    banner.innerHTML = `<div style="flex:1"><b>Turen er på listen</b>
+      ${nye ? nye + (nye===1?' ny art':' nye arter') + ' er kommet til.' : 'Ingen nye arter denne gang.'}
+      ${fejlede ? ' ' + fejlede + ' billede(r) kunne ikke bestemmes og er slettet.' : ''}</div>
+      <button class="knap knap--stille" id="koeLuk">Luk</button>`;
+    $('koeLuk').onclick = () => banner.remove();
+  }
+}
+
+lytTilForbindelse(tilbydAfvikling, opdaterKoeStatus);
+
+// ---------------------------------------------------------------------------
+// STEDVÆLGER
+// ---------------------------------------------------------------------------
+function visSteder(){
+  $('stedEyebrow').textContent = erSkole ? 'Undervisning' : 'Fritid';
+  const box = $('stedValg');
+  box.innerHTML = '';
+
+  alleSteder().forEach(st => {
+    const b = document.createElement('button');
+    b.className = 'vkort';
+    b.innerHTML = `<span class="ikon">${st.ikon}</span><b>${st.navn}</b>
+                   <small>${st.kort}</small>`;
+    b.onclick = () => { S.sted = st.id; efterSted(); };
+    box.appendChild(b);
   });
 
-  document.getElementById("pts-total").textContent = `+${pts} points!`;
-  document.getElementById("encouragement").textContent = scoring.encouragement;
-  document.getElementById("breakdown").innerHTML = breakdown.map(b =>
-    `<div class="breakdown-row"><span style="color:#888">${b.label}</span><span style="font-weight:600;color:#0f6e56">+${b.pts}</span></div>`
-  ).join("");
+  const b = document.createElement('button');
+  b.className = 'vkort';
+  b.innerHTML = `<span class="ikon">📍</span><b>Et andet sted</b>
+                 <small>Fungerer fint — bestemmelsen bliver bare lidt mindre præcis</small>`;
+  b.onclick = () => { S.sted = null; efterSted(); };
+  box.appendChild(b);
 
-  goToStep("done");
+  vis('trin-sted');
 }
 
-function resetCapture() {
-  if (recognition) { try { recognition.stop(); } catch {} }
-  isListening = false;
-  currentStudent = ""; currentIdentified = null; currentImageFile = null; currentImageB64 = null;
-  document.getElementById("name-input").value = "";
-  document.getElementById("transcript-box").textContent = "";
-  document.getElementById("transcript-box").classList.add("hidden");
-  document.getElementById("submit-answer-btn").disabled = true;
-  document.getElementById("voice-hint").textContent = "Tap to answer out loud";
-  const vbtn = document.getElementById("voice-btn");
-  vbtn.classList.remove("listening"); vbtn.classList.add("idle");
-  goToStep("name");
-  showTab("capture");
+function efterSted(){
+  if(erSkole){ vis('trin-klassetrin'); } else { visMission(); }
 }
 
-// ── JOURNAL ────────────────────────────────────────────────────────
-function renderJournal() {
-  const list = document.getElementById("journal-list");
-  const empty = document.getElementById("journal-empty");
-  const count = document.getElementById("journal-count");
-  count.textContent = `${journal.length} ${journal.length === 1 ? "find" : "finds"}`;
-  if (!journal.length) { list.innerHTML = ""; empty.classList.remove("hidden"); return; }
-  empty.classList.add("hidden");
-  list.innerHTML = journal.map(e => `
-    <div class="card journal-item">
-      <div class="journal-thumb">
-        ${e.img ? `<img src="${e.img}" />` : e.emoji}
-      </div>
-      <div class="journal-meta">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-          <span class="journal-name">${e.name}</span>
-          <span class="pts-pill">+${e.pts}</span>
-        </div>
-        <div class="journal-who">${e.student}${e.firstFind ? ' <span class="badge badge-amber" style="font-size:10px;">first!</span>' : ''}${e.isRare ? ' <span class="badge badge-purple" style="font-size:10px;">rare</span>' : ''}</div>
-        <div class="journal-mystery">${e.mystery}</div>
-        ${e.answer ? `<div class="journal-answer">"${e.answer}"</div>` : ""}
-        ${e.teacherNote ? `<div class="journal-note">Teacher: ${e.teacherNote}</div>` : ""}
-        ${e.isRare && e.rareReason ? `<div class="journal-note" style="color:#3c3489;">Rare because: ${e.rareReason}</div>` : ""}
-      </div>
-    </div>`).join("");
-}
-
-// ── LEADERBOARD ────────────────────────────────────────────────────
-function renderBoard() {
-  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const list = document.getElementById("board-list");
-  const empty = document.getElementById("board-empty");
-  if (!sorted.length) { list.classList.add("hidden"); empty.classList.remove("hidden"); return; }
-  list.classList.remove("hidden"); empty.classList.add("hidden");
-  list.innerHTML = sorted.map(([name, pts], i) => {
-    const c = avatarColor(name);
-    return `<div class="board-row">
-      <span class="board-rank">${MEDALS[i] || "#" + (i + 1)}</span>
-      <div class="board-avatar" style="background:${c.bg};color:${c.txt}">${name[0].toUpperCase()}</div>
-      <span class="board-name">${name}</span>
-      <span class="board-pts">${pts} pts</span>
-    </div>`;
-  }).join("");
-}
+// ---------------------------------------------------------------------------
+// START
+// ---------------------------------------------------------------------------
+S.samling = hentSamling();
+tegnSamling();
+opdaterKoeStatus();
+tilbydAfvikling();
+visSteder();
 </script>
+
 </body>
 </html>
