@@ -147,16 +147,27 @@ export async function ryddUdloebne() {
  */
 export async function erOnline() {
   if (!navigator.onLine) return false;
+
+  // AbortSignal.timeout() kom først i Safari 16 (2022) og findes ikke på
+  // ældre skole-iPads. Der ville den kaste en fejl, som blev opfanget
+  // nedenfor og tolket som "offline" — og så ville alle billeder ryge i
+  // køen uden nogensinde at blive bestemt. Derfor bygges timeouten
+  // manuelt med AbortController, som har virket siden 2018.
+  const styring = new AbortController();
+  const ur = setTimeout(() => styring.abort(), 4000);
+
   try {
     const svar = await fetch("/api/scan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),                 // tomt kald → 400, men det beviser forbindelse
-      signal: AbortSignal.timeout(4000),
+      signal: styring.signal,
     });
     return svar.status > 0;
   } catch {
     return false;
+  } finally {
+    clearTimeout(ur);
   }
 }
 
