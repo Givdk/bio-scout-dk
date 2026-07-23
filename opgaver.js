@@ -129,76 +129,237 @@ export const KOMPETENCEOMRAADER = {
  * De sender børnene UD — skærmen er kun undervejs.
  */
 export const MISSIONER = [
-  {
-    id: "under-stenen",
-    titel: "Under stenen",
-    ikon: "🪨",
-    opdrag: "Find noget levende under en sten eller en træstamme.",
-    varighed: "10-15 min",
-    udendoers: true,
-  },
-  {
-    id: "mindre-end-finger",
-    titel: "Mindre end din finger",
-    ikon: "🐜",
-    opdrag: "Find et dyr, der er mindre end din lillefinger.",
-    varighed: "10 min",
-    udendoers: true,
-  },
-  {
-    id: "aeldre-end-dig",
-    titel: "Ældre end dig",
-    ikon: "🌳",
-    opdrag: "Find noget levende, der er ældre end dig selv.",
-    varighed: "15 min",
-    udendoers: true,
-  },
-  {
-    id: "tre-slags-blade",
-    titel: "Tre slags blade",
-    ikon: "🍃",
-    opdrag: "Saml tre blade fra tre forskellige planter.",
-    varighed: "15 min",
-    udendoers: true,
-  },
-  {
-    id: "flyver",
-    titel: "Noget der flyver",
-    ikon: "🦋",
-    opdrag: "Fotografér noget, der kan flyve. Det tæller også, hvis det sidder stille.",
-    varighed: "15-20 min",
-    udendoers: true,
-  },
-  {
-    id: "farvejagt",
-    titel: "Farvejagten",
-    ikon: "🎨",
-    opdrag: "Find noget levende i en farve, du ikke troede fandtes i naturen.",
-    varighed: "15 min",
-    udendoers: true,
-  },
-  {
-    id: "samme-sted-igen",
-    titel: "Samme sted igen",
-    ikon: "🔁",
-    opdrag: "Gå hen til et sted, klubben har været før. Er der noget nyt nu?",
-    varighed: "20 min",
-    udendoers: true,
-  },
-  {
-    id: "nogen-bor-her",
-    titel: "Nogen bor her",
-    ikon: "🏠",
-    opdrag: "Find et spor efter et dyr — et hul, en rede, gnavemærker, fjer.",
-    varighed: "15 min",
-    udendoers: true,
-  },
+
+  // ---- LED EFTER NOGET BESTEMT -------------------------------------------
+  { id:"under-stenen", titel:"Under stenen", ikon:"🪨", kategori:"find",
+    opdrag:"Find noget levende under en sten eller en træstamme.",
+    varighed:"10-15 min", udendoers:true },
+
+  { id:"mindre-end-finger", titel:"Mindre end din finger", ikon:"🐜", kategori:"find",
+    opdrag:"Find et dyr, der er mindre end din lillefinger.",
+    varighed:"10 min", udendoers:true },
+
+  { id:"aeldre-end-dig", titel:"Ældre end dig", ikon:"🌳", kategori:"find",
+    opdrag:"Find noget levende, der er ældre end dig selv.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"tre-slags-blade", titel:"Tre slags blade", ikon:"🍃", kategori:"find",
+    opdrag:"Saml tre blade fra tre forskellige planter.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"flyver", titel:"Noget der flyver", ikon:"🦋", kategori:"find",
+    opdrag:"Fotografér noget, der kan flyve. Det tæller også, hvis det sidder stille.",
+    varighed:"15-20 min", udendoers:true, aarstid:["forår","sommer","efterår"] },
+
+  { id:"farvejagt", titel:"Farvejagten", ikon:"🎨", kategori:"find",
+    opdrag:"Find noget levende i en farve, du ikke troede fandtes i naturen.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"prikker", titel:"Prikker og pletter", ikon:"🐞", kategori:"find",
+    opdrag:"Find noget levende med prikker, pletter eller striber.",
+    varighed:"10 min", udendoers:true },
+
+  { id:"hoejt-lavt", titel:"Højt og lavt", ikon:"↕️", kategori:"find",
+    opdrag:"Find noget levende så højt oppe, du kan nå — og noget helt nede ved jorden.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"gemmer-sig", titel:"Noget der gemmer sig", ikon:"🫣", kategori:"find",
+    opdrag:"Find noget levende, man kun ser, hvis man kigger rigtig godt efter.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"helt-rundt", titel:"Helt rundt", ikon:"⭕", kategori:"find",
+    opdrag:"Find noget levende, der er rundt.",
+    varighed:"10 min", udendoers:true },
+
+  { id:"sidder-fast", titel:"Noget der sidder fast", ikon:"🧲", kategori:"find",
+    opdrag:"Find noget levende, der sidder fast på noget andet.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"mindste-blomst", titel:"Den mindste blomst", ikon:"🌼", kategori:"find",
+    opdrag:"Find den allermindste blomst, I kan få øje på.",
+    varighed:"15 min", udendoers:true, aarstid:["forår","sommer"] },
+
+  { id:"flere-ben", titel:"Flere end fire ben", ikon:"🕷️", kategori:"find",
+    opdrag:"Find et dyr med flere end fire ben. Tæl dem, hvis I kan.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"ingen-ben", titel:"Slet ingen ben", ikon:"🐌", kategori:"find",
+    opdrag:"Find et dyr helt uden ben.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"paa-stenen", titel:"Livet på stenen", ikon:"🪨", kategori:"find",
+    opdrag:"Kig på en sten eller en mur. Der vokser noget på den — hvad?",
+    varighed:"10 min", udendoers:true },
+
+  { id:"det-vaade", titel:"Det våde sted", ikon:"💧", kategori:"find",
+    opdrag:"Find det vådeste sted, I kan. Hvem bor der?",
+    varighed:"15 min", udendoers:true },
+
+  { id:"skygge-sol", titel:"Skygge og sol", ikon:"🌤️", kategori:"find",
+    opdrag:"Find en plante i solen og en i skyggen. Ser de ens ud?",
+    varighed:"15 min", udendoers:true, aarstid:["forår","sommer"] },
+
+  { id:"doede-trae", titel:"Det døde træ", ikon:"🪵", kategori:"find",
+    opdrag:"Find et dødt eller væltet træ. Hvor mange ting bor der i det?",
+    varighed:"20 min", udendoers:true },
+
+  // ---- SANSER -------------------------------------------------------------
+  { id:"luk-oejnene", titel:"Luk øjnene", ikon:"👂", kategori:"sanser",
+    opdrag:"Stå helt stille med lukkede øjne i et minut. Hvor mange lyde hører I? Find så det, der lavede én af dem.",
+    varighed:"10 min", udendoers:true },
+
+  { id:"hvad-dufter", titel:"Hvad dufter her?", ikon:"👃", kategori:"sanser",
+    opdrag:"Find noget, der dufter. Gnid forsigtigt et blad mellem fingrene.",
+    varighed:"10 min", udendoers:true, aarstid:["forår","sommer"] },
+
+  { id:"blodeste", titel:"Det blødeste", ikon:"🤲", kategori:"sanser",
+    opdrag:"Find det blødeste, I kan røre ved. Og bagefter det mest ru.",
+    varighed:"10 min", udendoers:true },
+
+  // ---- TÆL OG SAMMENLIGN --------------------------------------------------
+  { id:"tael-benene", titel:"Tæl benene", ikon:"🔢", kategori:"tael",
+    opdrag:"Find et dyr og tæl, hvor mange ben det har.",
+    varighed:"10 min", udendoers:true },
+
+  { id:"to-der-ligner", titel:"To der ligner hinanden", ikon:"👯", kategori:"tael",
+    opdrag:"Find to ting, der ligner hinanden — men ikke er helt ens.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"hvor-mange-groenne", titel:"Hvor mange grønne?", ikon:"🟢", kategori:"tael",
+    opdrag:"Find fem forskellige slags grøn. De er ikke ens, når man kigger godt efter.",
+    varighed:"15 min", udendoers:true, aarstid:["forår","sommer"] },
+
+  { id:"samme-plante", titel:"Samme plante, tre steder", ikon:"📍", kategori:"tael",
+    opdrag:"Find den samme slags plante tre forskellige steder. Er den lige stor alle tre steder?",
+    varighed:"20 min", udendoers:true },
+
+  // ---- SPOR ---------------------------------------------------------------
+  { id:"nogen-bor-her", titel:"Nogen bor her", ikon:"🏠", kategori:"spor",
+    opdrag:"Find et spor efter et dyr — et hul, en rede, gnavemærker, fjer.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"hvem-spiste", titel:"Hvem har spist her?", ikon:"🍽️", kategori:"spor",
+    opdrag:"Find et blad med huller i, eller en nød nogen har gnavet i.",
+    varighed:"15 min", udendoers:true, aarstid:["forår","sommer","efterår"] },
+
+  { id:"fodspor", titel:"Fodspor", ikon:"🐾", kategori:"spor",
+    opdrag:"Find et fodspor i mudder, sand eller sne. Hvem gik her?",
+    varighed:"20 min", udendoers:true, aarstid:["efterår","vinter"] },
+
+  { id:"fjer-haar-skal", titel:"Fjer, hår eller skal", ikon:"🪶", kategori:"spor",
+    opdrag:"Find noget, et dyr har efterladt sig.",
+    varighed:"15 min", udendoers:true },
+
+  { id:"rede-eller-bo", titel:"En rede eller et bo", ikon:"🪺", kategori:"spor",
+    opdrag:"Find et sted, hvor nogen har bygget sig et hjem.",
+    varighed:"20 min", udendoers:true },
+
+  { id:"hul-i-jorden", titel:"Hullet i jorden", ikon:"🕳️", kategori:"spor",
+    opdrag:"Find et hul i jorden eller i et træ. Hvem tror I bor der?",
+    varighed:"15 min", udendoers:true },
+
+  // ---- VAND ---------------------------------------------------------------
+  { id:"vandkanten", titel:"Ved vandkanten", ikon:"🏞️", kategori:"vand",
+    opdrag:"Gå hen til vand. Find noget levende lige ved kanten.",
+    varighed:"20 min", udendoers:true },
+
+  { id:"i-vandet", titel:"Noget i vandet", ikon:"🐟", kategori:"vand",
+    opdrag:"Kig ned i vandet og bliv stående. Der sker noget, hvis man venter.",
+    varighed:"20 min", udendoers:true, aarstid:["forår","sommer","efterår"] },
+
+  // ---- ÅRSTIDER -----------------------------------------------------------
+  { id:"foerste-blomst", titel:"Den første blomst", ikon:"🌱", kategori:"find",
+    opdrag:"Find en blomst, der lige er sprunget ud.",
+    varighed:"15 min", udendoers:true, aarstid:["forår"] },
+
+  { id:"knopper", titel:"Knopper på vej", ikon:"🌿", kategori:"find",
+    opdrag:"Find en knop, der er ved at springe ud. Kan I se, hvad der gemmer sig indeni?",
+    varighed:"15 min", udendoers:true, aarstid:["forår"] },
+
+  { id:"insekt-paa-blomst", titel:"Hvem besøger blomsten?", ikon:"🐝", kategori:"find",
+    opdrag:"Find en blomst med et insekt på. Bliv stående og se, hvor længe det bliver.",
+    varighed:"15 min", udendoers:true, aarstid:["forår","sommer"] },
+
+  { id:"svampejagt", titel:"Svampejagten", ikon:"🍄", kategori:"find",
+    opdrag:"Find en svamp. Kig efter i det fugtige, mørke og under træerne. Rør den ikke.",
+    varighed:"20 min", udendoers:true, aarstid:["efterår"] },
+
+  { id:"froe-og-noedder", titel:"Frø og nødder", ikon:"🌰", kategori:"find",
+    opdrag:"Find tre forskellige frø eller nødder. Hvilket træ kom de fra?",
+    varighed:"20 min", udendoers:true, aarstid:["efterår"] },
+
+  { id:"roedeste-blad", titel:"Det rødeste blad", ikon:"🍁", kategori:"find",
+    opdrag:"Find det mest farvestrålende blad, I kan.",
+    varighed:"15 min", udendoers:true, aarstid:["efterår"] },
+
+  { id:"hvem-er-her-vinter", titel:"Hvem er her om vinteren?", ikon:"❄️", kategori:"find",
+    opdrag:"De fleste insekter er væk nu. Find noget, der stadig er her.",
+    varighed:"20 min", udendoers:true, aarstid:["vinter"] },
+
+  { id:"stadig-groent", titel:"Stadig grønt", ikon:"🌲", kategori:"find",
+    opdrag:"Find noget, der stadig er grønt midt om vinteren.",
+    varighed:"15 min", udendoers:true, aarstid:["vinter"] },
+
+  // ---- SAMMEN -------------------------------------------------------------
+  { id:"en-ting-hver", titel:"Én ting hver", ikon:"🤝", kategori:"sammen",
+    opdrag:"Alle finder én ting hver. Mødes bagefter og se, hvem der fandt det mærkeligste.",
+    varighed:"20 min", udendoers:true },
+
+  { id:"byt-fund", titel:"Byt fund", ikon:"🔄", kategori:"sammen",
+    opdrag:"Find noget, og vis det til en anden gruppe. Kan de gætte, hvor I fandt det?",
+    varighed:"20 min", udendoers:true },
+
+  { id:"det-maerkeligste", titel:"Det mærkeligste", ikon:"❓", kategori:"sammen",
+    opdrag:"Find det mest mærkelige, I kan. Noget I ikke aner, hvad er.",
+    varighed:"20 min", udendoers:true },
+
+  { id:"samme-sted-igen", titel:"Samme sted igen", ikon:"🔁", kategori:"sammen",
+    opdrag:"Gå hen til et sted, I har været før. Er der noget nyt nu?",
+    varighed:"20 min", udendoers:true },
 ];
 
-/** Vælger en mission — enten tilfældig eller efter id. */
-export function vaelgMission(id = null) {
-  if (id) return MISSIONER.find((m) => m.id === id) || MISSIONER[0];
-  return MISSIONER[Math.floor(Math.random() * MISSIONER.length)];
+/** Hvilken årstid er det? Bruges til at sortere missioner fra, der ikke passer. */
+export function aarstid(dato = new Date()) {
+  const m = dato.getMonth() + 1;
+  if (m >= 3 && m <= 5) return "forår";
+  if (m >= 6 && m <= 8) return "sommer";
+  if (m >= 9 && m <= 11) return "efterår";
+  return "vinter";
+}
+
+/**
+ * Vælger næste mission.
+ *
+ * To ting gøres her, som ren tilfældighed ikke klarer:
+ *   1. Missioner, der ikke passer til årstiden, sorteres fra. Ingen skal lede
+ *      efter sommerfugle i januar.
+ *   2. Missioner, der allerede har været brugt i dag, springes over — indtil
+ *      hele puljen er brugt, hvorefter der startes forfra.
+ *
+ * @param {Array}  pulje  - missioner at vælge fra (sted + almene)
+ * @param {Array}  brugte - id'er på missioner, der allerede har været brugt
+ * @param {Date}   dato   - kan overskrives til test
+ */
+export function vaelgMission(pulje = MISSIONER, brugte = [], dato = new Date()) {
+  const saeson = aarstid(dato);
+  const iSaeson = (m) => !m.aarstid || m.aarstid.includes(saeson);
+
+  let mulige = pulje.filter((m) => iSaeson(m) && !brugte.includes(m.id));
+  if (!mulige.length) mulige = pulje.filter(iSaeson);   // alle brugt → forfra
+  if (!mulige.length) mulige = pulje;                   // ingen i sæson → tag hvad der er
+
+  return mulige[Math.floor(Math.random() * mulige.length)];
+}
+
+/** Slår en bestemt mission op på id. */
+export function missionMedId(id, pulje = MISSIONER) {
+  return pulje.find((m) => m.id === id) || null;
+}
+
+/** Hvor mange missioner er der reelt til rådighed lige nu? */
+export function antalMissioner(pulje = MISSIONER, dato = new Date()) {
+  const saeson = aarstid(dato);
+  return pulje.filter((m) => !m.aarstid || m.aarstid.includes(saeson)).length;
 }
 
 // ===========================================================================

@@ -377,7 +377,8 @@ import {
   TILSTAND, KLASSETRIN, KOMPETENCEOMRAADER, MISSIONER,
   vaelgMission, byggIdentifikationsPrompt, byggSkoleopgave,
   byggFritidsspoergsmaal, byggSkolefeedback, byggFritidssvar,
-  parseJSON, opdaterSamling, samlingsStatus, naesteOmraade
+  parseJSON, opdaterSamling, samlingsStatus, naesteOmraade,
+  aarstid, antalMissioner
 } from './opgaver.js';
 
 import { alleSteder, hentSted, missionerForSted, stedTilPrompt, vidsteDu }
@@ -401,6 +402,7 @@ const S = {
   art: null,
   opgave: null,
   brugteOmraader: [],
+  brugteMissioner: [],
   samling: [],
 };
 
@@ -510,12 +512,19 @@ function visOmraader(){
 
 function visMission(){
   const pulje = missionerForSted(S.sted, MISSIONER);
-  const m = S.mission = pulje[Math.floor(Math.random() * pulje.length)];
+  const m = S.mission = vaelgMission(pulje, S.brugteMissioner);
+
+  // Missionen noteres som brugt, så den ikke kommer igen med det samme.
+  if(!S.brugteMissioner.includes(m.id)) S.brugteMissioner.push(m.id);
+
+  const ialt = antalMissioner(pulje);
+  const nr   = Math.min(S.brugteMissioner.length, ialt);
+
   $('missionKort').innerHTML = `
     <span class="ikon">${m.ikon}</span>
     <h2>${m.titel}</h2>
     <p>${m.opdrag}</p>
-    <div class="meta">${m.varighed} · udendørs</div>`;
+    <div class="meta">${m.varighed} · udendørs · mission ${nr} af ${ialt}</div>`;
   vis('trin-mission');
 }
 
@@ -710,7 +719,7 @@ $('skiftOpgave').onclick = async () => {
 
 $('startForfra').onclick = () => {
   S.art = null; S.opgave = null; S.omraade = null; S.brugteOmraader = [];
-  S.trin = null; S.sted = null;
+  S.brugteMissioner = []; S.trin = null; S.sted = null;
   visSteder();
 };
 
